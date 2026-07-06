@@ -21,9 +21,9 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        if: hashFiles('backend/backend/pom.xml') != ''
-        run: cd backend/backend && mvn clean install -DskipTests
+        if: hashFiles('backend/pom.xml') != ''
+        run: cd backend && mvn clean install -DskipTests
 
       - name: Run Tests
-        if: hashFiles('backend/backend/pom.xml') != ''
-        run: cd backend/backend && mvn test
+        if: hashFiles('backend/pom.xml') != ''
+        run: cd backend && mvn test
