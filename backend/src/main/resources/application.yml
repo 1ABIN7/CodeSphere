@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: codesphere-backend
+  profiles:
+    active: dev
+  
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+# Application-specific JWT properties
+app:
+  jwt:
+    # 256-bit secret key for HMAC-SHA256 (Base64 encoded)
+    # This is a development placeholder. Prod should override this via env variable.
+    secret: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVzcGhlcmUtZGV2ZWxvcG1lbnQtcGxhdGZvcm0tc2VjdXJpdHktdGVzdGluZw==
+    access-token-expiration-ms: 900000 # 15 minutes
+    refresh-token-expiration-ms: 604800000 # 7 days
