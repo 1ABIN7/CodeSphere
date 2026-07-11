@@ -18,6 +18,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final CustomUserDetailsService userDetailsService;
 
     public void register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -47,20 +48,19 @@ public class AuthService {
         }
 
         // Create an Authentication object for the token provider
+        org.springframework.security.core.userdetails.UserDetails userDetails =
+                userDetailsService.loadUserByUsername(request.getUsernameOrEmail());
+
         org.springframework.security.core.Authentication authentication =
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                        new org.springframework.security.core.userdetails.User(
-                                user.getUsername(),
-                                user.getPassword(),
-                                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority(user.getRole().name()))
-                        ),
+                        userDetails,
                         null,
-                        java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority(user.getRole().name()))
+                        userDetails.getAuthorities()
                 );
 
         // Generate the actual RS256 JWT Token
         String token = jwtTokenProvider.generateToken(authentication);
-        
+
         com.CodeSphere.backend.model.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
         return new AuthResponse(token, refreshToken.getToken(), user.getUsername(), user.getRole().name());
