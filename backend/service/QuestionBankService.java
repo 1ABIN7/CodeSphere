@@ -53,6 +53,8 @@ public class QuestionBankService {
     public Question updateQuestion(Long id, Question questionDetails) {
         Question existingQuestion = getQuestionById(id);
 
+        versionService.createVersionSnapshot(existingQuestion);
+
         existingQuestion.setTitle(questionDetails.getTitle());
         existingQuestion.setContent(questionDetails.getContent());
         existingQuestion.setCategory(questionDetails.getCategory());
