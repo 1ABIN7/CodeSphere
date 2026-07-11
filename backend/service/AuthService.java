@@ -17,6 +17,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     public void register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -59,8 +60,10 @@ public class AuthService {
 
         // Generate the actual RS256 JWT Token
         String token = jwtTokenProvider.generateToken(authentication);
+        
+        com.CodeSphere.backend.model.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-        return new AuthResponse(token, user.getUsername(), user.getRole().name());
+        return new AuthResponse(token, refreshToken.getToken(), user.getUsername(), user.getRole().name());
     }
 
     public void logout() {
