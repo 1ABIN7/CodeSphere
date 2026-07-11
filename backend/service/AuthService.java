@@ -34,7 +34,7 @@ public class AuthService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ROLE_USER)
+                .role(Role.ROLE_CANDIDATE)
                 .emailVerified(false) // Set to false initially
                 .emailVerificationToken(UUID.randomUUID().toString()) // Generate token
                 .build();
