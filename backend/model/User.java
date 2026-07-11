@@ -53,4 +53,11 @@ public class User {
 
     @Column(name = "reset_password_token_expiry")
     private java.time.Instant resetPasswordTokenExpiry;
+
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
+
+    @Column(name = "email_verification_token")
+    private String emailVerificationToken;
+    
 }

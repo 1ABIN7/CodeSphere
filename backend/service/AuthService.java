@@ -35,8 +35,27 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_USER)
+                .emailVerified(false) // Set to false initially
+                .emailVerificationToken(UUID.randomUUID().toString()) // Generate token
                 .build();
 
+        userRepository.save(user);
+
+        // In production, trigger an email service here to send the token link
+        System.out.println("Verification Link: http://localhost:8080/api/auth/verify-email?token=" + user.getEmailVerificationToken());
+    }
+
+    // 2. Add this brand-new method to handle verification processing:
+    public void verifyEmail(String token) {
+        User user = userRepository.findByEmailVerificationToken(token)
+                .orElseThrow(() -> new RuntimeException("Error: Invalid verification token."));
+
+        if (user.isEmailVerified()) {
+            throw new RuntimeException("Error: Email is already verified.");
+        }
+
+        user.setEmailVerified(true);
+        user.setEmailVerificationToken(null); // Clear token once used
         userRepository.save(user);
     }
 
