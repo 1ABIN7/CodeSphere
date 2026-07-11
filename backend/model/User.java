@@ -59,5 +59,9 @@ public class User {
 
     @Column(name = "email_verification_token")
     private String emailVerificationToken;
-    
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
+
 }
