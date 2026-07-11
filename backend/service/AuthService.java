@@ -9,6 +9,8 @@ import com.CodeSphere.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -68,5 +70,40 @@ public class AuthService {
 
     public void logout() {
         // Handled client-side by dropping token, server-side context clear in controller
+    }
+
+    public void processForgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Error: No account found with this email."));
+
+        // Generate a secure random token valid for 15 minutes
+        String token = UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        user.setResetPasswordTokenExpiry(Instant.now().plusSeconds(900)); // 15 mins
+
+        userRepository.save(user);
+
+        // In production, you would trigger an email service here to send the token link.
+        System.out.println("Password Reset Token generated for " + user.getEmail() + " -> " + token);
+    }
+
+    public void processResetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByResetPasswordToken(request.getToken())
+                .orElseThrow(() -> new RuntimeException("Error: Invalid or expired reset token."));
+
+        // Verify expiration window
+        if (user.getResetPasswordTokenExpiry().isBefore(Instant.now())) {
+            user.setResetPasswordToken(null);
+            user.setResetPasswordTokenExpiry(null);
+            userRepository.save(user);
+            throw new RuntimeException("Error: Reset token has expired.");
+        }
+
+        // Encrypt new password and clear out token fields
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+
+        userRepository.save(user);
     }
 }

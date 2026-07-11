@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import com.CodeSphere.backend.dto.ForgotPasswordRequest;
+import com.CodeSphere.backend.dto.ResetPasswordRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,5 +36,17 @@ public class AuthController {
         authService.logout();
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("User logged out successfully!");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.processForgotPassword(request);
+        return ResponseEntity.ok("Password reset token generated successfully.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.processResetPassword(request);
+        return ResponseEntity.ok("Password has been reset successfully.");
     }
 }
