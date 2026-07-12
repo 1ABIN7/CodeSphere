@@ -22,6 +22,7 @@ minio:
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin}
   bucket: codesphere-assets
+  bucket-name: questions-import-vault
 
 logging:
   level:
@@ -29,3 +30,4 @@ logging:
     com.codesphere: DEBUG
     org.springframework.security: INFO
     org.hibernate.SQL: DEBUG
+
