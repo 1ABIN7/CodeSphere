@@ -17,6 +17,12 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 server:
   port: 8080
 
@@ -28,3 +34,31 @@ app:
     secret: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVzcGhlcmUtZGV2ZWxvcG1lbnQtcGxhdGZvcm0tc2VjdXJpdHktdGVzdGluZw==
     access-token-expiration-ms: 900000 # 15 minutes
     refresh-token-expiration-ms: 604800000 # 7 days
+
+# Storage configuration
+storage:
+  active-backend: local
+  max-file-size: 52428800 # 50MB
+  allowed-content-types:
+    - text/plain
+    - text/csv
+    - application/pdf
+    - application/json
+    - application/zip
+    - image/png
+    - image/jpeg
+
+# Judge engine configuration
+judge:
+  default-time-limit: 2000
+  default-memory-limit: 262144
+  max-code-length: 65536
+  thread-pool-core-size: 4
+  thread-pool-max-size: 8
+  queue-capacity: 100
+  supported-languages:
+    - java
+    - python
+    - cpp
+    - c
+    - javascript
