@@ -11,6 +11,9 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+// Windows compatibility: detect OS once at class load time
+
+
 /**
  * Core Judge Engine Service.
  *
@@ -28,6 +31,9 @@ import java.util.concurrent.*;
 @RequiredArgsConstructor
 @Slf4j
 public class JudgeEngineService {
+
+    private static final boolean IS_WINDOWS =
+            System.getProperty("os.name", "").toLowerCase().contains("win");
 
     private final JudgeEngineConfig config;
 
@@ -325,23 +331,28 @@ public class JudgeEngineService {
     }
 
     private List<String> getCompileCommand(String language, Path sourceFile, Path workDir) {
+        // On Windows, MinGW compilers produce .exe binaries
+        String binaryName = IS_WINDOWS ? "solution.exe" : "solution";
         return switch (language.toLowerCase()) {
             case "java" -> List.of("javac", sourceFile.toString());
             case "cpp" -> List.of("g++", "-std=c++17", "-O2", "-o",
-                    workDir.resolve("solution").toString(), sourceFile.toString());
+                    workDir.resolve(binaryName).toString(), sourceFile.toString());
             case "c" -> List.of("gcc", "-std=c11", "-O2", "-o",
-                    workDir.resolve("solution").toString(), sourceFile.toString(), "-lm");
+                    workDir.resolve(binaryName).toString(), sourceFile.toString(), "-lm");
             case "python", "javascript" -> null; // Interpreted
             default -> throw new IllegalArgumentException("Unsupported language: " + language);
         };
     }
 
     private List<String> getRunCommand(String language, Path sourceFile, Path workDir, int memoryLimitKB) {
+        // On Windows: python3 alias doesn't exist, use python; MinGW produces .exe binaries
+        String pythonCmd = IS_WINDOWS ? "python" : "python3";
+        String binaryName = IS_WINDOWS ? "solution.exe" : "solution";
         return switch (language.toLowerCase()) {
             case "java" -> List.of("java", "-Xmx" + (memoryLimitKB / 1024) + "m",
                     "-cp", workDir.toString(), "Main");
-            case "python" -> List.of("python3", sourceFile.toString());
-            case "cpp", "c" -> List.of(workDir.resolve("solution").toString());
+            case "python" -> List.of(pythonCmd, sourceFile.toString());
+            case "cpp", "c" -> List.of(workDir.resolve(binaryName).toString());
             case "javascript" -> List.of("node", sourceFile.toString());
             default -> throw new IllegalArgumentException("Unsupported language: " + language);
         };

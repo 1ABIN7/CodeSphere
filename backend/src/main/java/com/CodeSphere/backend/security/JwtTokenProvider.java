@@ -4,46 +4,35 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
 
 /**
- * JWT Token Provider using RS256 (asymmetric RSA key pair).
+ * JWT Token Provider using HS256 (symmetric key).
  *
- * Keys are generated in-memory at startup. For production, replace with
- * persistent key management (e.g., JKS keystore, AWS KMS, Vault).
+ * Uses a static key so tokens survive backend restarts during development.
  */
 @Component
 public class JwtTokenProvider {
 
-    private final PrivateKey privateKey;
-    private final PublicKey publicKey;
+    // A static secret key string (must be at least 256 bits / 32 characters long for HS256)
+    private static final String SECRET_KEY_STRING = "CodeSphereSecretKeyForDevelopmentOnly1234567890";
+    private final SecretKey secretKey;
+    
     // Token validity: 24 hours
     private final long jwtExpirationInMs = 86400000;
 
-    // Constructor dynamically generates an RSA 2048 keypair for local development stability
     public JwtTokenProvider() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
-            this.privateKey = keyPair.getPrivate();
-            this.publicKey = keyPair.getPublic();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Could not initialize RSA key pair generator", e);
-        }
+        this.secretKey = Keys.hmacShaKeyFor(SECRET_KEY_STRING.getBytes());
     }
 
-    // Generate token using the Private Key
+    // Generate token using the Secret Key
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
         Date now = new Date();
@@ -53,31 +42,30 @@ public class JwtTokenProvider {
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
-                .signWith(privateKey, SignatureAlgorithm.RS256) // Signing with Private Key
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // Extract username from token using the Public Key
+    // Extract username from token
     public String getUsernameFromJWT(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parserBuilder()
-                .setSigningKey(publicKey) // Verifying with Public Key
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
         return claimsResolver.apply(claims);
     }
 
-    // Validate the token signature and expiration against the Public Key
+    // Validate the token signature and expiration
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(authToken);
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException ex) {
-            // In production, log specific exceptions (ExpiredJwtException, MalformedJwtException, etc.)
             System.err.println("JWT Validation Error: " + ex.getMessage());
         }
         return false;
