@@ -135,6 +135,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiErrorResponse> handleRuntime(
             RuntimeException ex, HttpServletRequest request) {
+        ex.printStackTrace(); // ADDED FOR DEBUGGING
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiErrorResponse.builder()
                 .status(500)
                 .error("Internal Server Error")

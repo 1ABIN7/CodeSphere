@@ -73,23 +73,23 @@ public class DataSeeder implements CommandLineRunner {
 
         // Insert admin user
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "admin@demo.com", passwordHash, "Admin", "User"
+            "INSERT INTO users (username, email, password, role, first_name, last_name, organization_id) " +
+            "VALUES (?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+            "admin", "admin@demo.com", passwordHash, "ROLE_SUPER_ADMIN", "Admin", "User"
         );
 
         // Insert evaluator user
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "evaluator@demo.com", passwordHash, "Evaluator", "User"
+            "INSERT INTO users (username, email, password, role, first_name, last_name, organization_id) " +
+            "VALUES (?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+            "evaluator", "evaluator@demo.com", passwordHash, "ROLE_EXAMINER", "Evaluator", "User"
         );
 
         // Insert candidate user
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "candidate@demo.com", passwordHash, "Candidate", "User"
+            "INSERT INTO users (username, email, password, role, first_name, last_name, organization_id) " +
+            "VALUES (?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+            "candidate", "candidate@demo.com", passwordHash, "ROLE_CANDIDATE", "Candidate", "User"
         );
 
         // Assign ROLE_ADMIN to admin user
