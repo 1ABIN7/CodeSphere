@@ -48,7 +48,7 @@ public class CodeAnalysisService {
     private static final Pattern RECURSION = Pattern.compile(
             "(\\w+)\\s*\\([^)]*\\)\\s*\\{[^}]*\\1\\s*\\(", Pattern.DOTALL);
     private static final Pattern HASHMAP_USE = Pattern.compile(
-            "\\b(HashMap|Map|dict|{\\s*}|new Map|unordered_map)\\b");
+            "\\b(HashMap|Map|dict|\\{\\s*\\}|new Map|unordered_map)\\b");
     private static final Pattern SORTING = Pattern.compile(
             "\\b(Arrays\\.sort|Collections\\.sort|sorted|sort|std::sort)\\b");
     private static final Pattern BINARY_SEARCH = Pattern.compile(
