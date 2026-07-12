@@ -27,6 +27,14 @@ storage:
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket: codesphere-assets
 
+# MinIO Configuration for storing problem assets / testcases if needed (legacy/develop compatibility)
+minio:
+  endpoint: http://${MINIO_HOST:localhost}:9000
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket: codesphere-assets
+  bucket-name: questions-import-vault
+
 # Judge engine (dev settings)
 judge:
   temp-dir: ./judge-temp
