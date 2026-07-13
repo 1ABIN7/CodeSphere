@@ -61,9 +61,9 @@ public class DataSeeder implements CommandLineRunner {
 
     /**
      * Seeds demo users:
-     * - admin@demo.com (ROLE_ADMIN)
-     * - evaluator@demo.com (ROLE_USER)
-     * - candidate@demo.com (ROLE_USER)
+     * - admin@demo.com (ROLE_SUPER_ADMIN)
+     * - evaluator@demo.com (ROLE_EXAMINER)
+     * - candidate@demo.com (ROLE_CANDIDATE)
      *
      * Password for all: password123 (BCrypt hashed)
      */
@@ -90,26 +90,6 @@ public class DataSeeder implements CommandLineRunner {
             "INSERT INTO users (username, email, password, role, first_name, last_name, organization_id) " +
             "VALUES (?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
             "candidate", "candidate@demo.com", passwordHash, "ROLE_CANDIDATE", "Candidate", "User"
-        );
-
-        // Assign ROLE_ADMIN to admin user
-        jdbcTemplate.update(
-            "INSERT INTO user_roles (user_id, role_id) " +
-            "VALUES ((SELECT id FROM users WHERE email = 'admin@demo.com'), " +
-            "(SELECT id FROM roles WHERE name = 'ROLE_ADMIN'))"
-        );
-
-        // Assign ROLE_USER to evaluator and candidate
-        jdbcTemplate.update(
-            "INSERT INTO user_roles (user_id, role_id) " +
-            "VALUES ((SELECT id FROM users WHERE email = 'evaluator@demo.com'), " +
-            "(SELECT id FROM roles WHERE name = 'ROLE_USER'))"
-        );
-
-        jdbcTemplate.update(
-            "INSERT INTO user_roles (user_id, role_id) " +
-            "VALUES ((SELECT id FROM users WHERE email = 'candidate@demo.com'), " +
-            "(SELECT id FROM roles WHERE name = 'ROLE_USER'))"
         );
 
         System.out.println("[DataSeeder] Users seeded.");
