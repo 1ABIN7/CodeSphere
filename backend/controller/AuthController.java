@@ -10,6 +10,8 @@ import com.codesphere.backend.service.LoginAttemptService;
 import com.codesphere.backend.service.RateLimiterService;
 import com.codesphere.backend.service.JwtService;
 import com.codesphere.backend.service.TokenDenylistService;
+import com.codesphere.backend.service.AuditLogService;
+import com.codesphere.backend.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,6 +32,8 @@ public class AuthController {
     private final LoginAttemptService loginAttemptService;
     private final JwtService jwtService;
     private final TokenDenylistService tokenDenylistService;
+    private final AuditLogService auditLogService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -73,6 +77,10 @@ public class AuthController {
             // Reset failed counter on successful verification
             loginAttemptService.loginSucceeded(username);
 
+            // [Audit Log] Record successful login activity
+            Long userId = authResponse.getUserId();
+            auditLogService.logAction(userId, "LOGIN", "System Auth", request);
+
             // 4. Issue Secure HTTP-Only Cookie
             Cookie jwtCookie = new Cookie("AUTH_TOKEN", token);
             jwtCookie.setHttpOnly(true);
@@ -99,6 +107,7 @@ public class AuthController {
     public ResponseEntity<String> logoutUser(HttpServletRequest request, HttpServletResponse response) {
         // 1. Extract existing token from cookie
         String token = null;
+        Long userId = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("AUTH_TOKEN".equals(cookie.getName())) {
@@ -108,15 +117,23 @@ public class AuthController {
             }
         }
 
-        // 2. Denylist token globally in Redis
+        // 2. Denylist token globally in Redis & resolve context for audit logs
         if (token != null) {
             try {
+                String username = jwtService.extractUsername(token);
+                userId = userService.getUserIdByUsername(username);
+
                 String tokenId = jwtService.extractTokenId(token);
                 long expiryLeft = jwtService.getRemainingExpiryTimeMs(token);
                 tokenDenylistService.denylistToken(tokenId, expiryLeft);
             } catch (Exception e) {
-                // Ignore parsing errors for malformed tokens
+                // Ignore parsing errors for malformed tokens during logout pipelines
             }
+        }
+
+        // [Audit Log] Record explicit system logout event before destroying authentication context
+        if (userId != null) {
+            auditLogService.logAction(userId, "LOGOUT", "System Auth", request);
         }
 
         // 3. Clear auth context & scrub cookie state
