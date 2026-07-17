@@ -67,3 +67,9 @@ judge:
     - cpp
     - c
     - javascript
+
+# Data Encryption Configuration (Added for AES-256 PII protection)
+# Aligned to the root level so Spring can resolve @Value("${security.encryption.key}")
+security:
+  encryption:
+    key: "c0deSph3reSecUr1tyK3y2026AES256!"
