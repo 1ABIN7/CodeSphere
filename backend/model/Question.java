@@ -65,4 +65,35 @@ public class Question {
 
     public String getRejectionFeedback() { return rejectionFeedback; }
     public void setRejectionFeedback(String rejectionFeedback) { this.rejectionFeedback = rejectionFeedback; }
+
+    @Column(name = "correct_answers")
+    private String correctAnswers; // Store as comma-separated values for MCQ_MULTI (e.g., "A,C") or single letter ("B")
+
+    @Column(name = "points", nullable = false)
+    private Integer points = 0;
+
+    @Column(name = "negative_score", nullable = false)
+    private Integer negativeScore = 0;
+
+    @Column(name = "question_type")
+    private String questionType; // "MCQ_SINGLE" or "MCQ_MULTI"
+
+    @Column(name = "min_word_count")
+    private Integer minWordCount = 0;
+
+    @Column(name = "max_word_count")
+    private Integer maxWordCount = 2000;
+
+    @Column(name = "passage_text", columnDefinition = "TEXT")
+    private String passageText;
+
+    @Column(name = "reading_duration_seconds")
+    private Integer readingDurationSeconds = 0; // Phase 1 restriction window
+
+    @Column(name = "parent_question_id")
+    private Long parentQuestionId; // Links a sub-question back to the main passage question
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_question_id")
+    private List<Question> subQuestions = new ArrayList<>();
 }

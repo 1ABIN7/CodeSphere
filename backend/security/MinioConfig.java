@@ -1,4 +1,4 @@
-package com.codesphere.backend.security;
+package com.codesphere.backend.config;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,20 +8,27 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MinioConfig {
 
-    @Value("${minio.endpoint}")
-    private String url;
+    @Value("${minio.url:http://localhost:9000}")
+    private String minioUrl;
 
-    @Value("${minio.access-key}")
+    @Value("${minio.access-key:minioadmin}")
     private String accessKey;
 
-    @Value("${minio.secret-key}")
+    @Value("${minio.secret-key:minioadmin}")
     private String secretKey;
+
+    @Value("${minio.bucket-name:assessment-files}")
+    private String bucketName;
 
     @Bean
     public MinioClient minioClient() {
         return MinioClient.builder()
-                .endpoint(url)
+                .endpoint(minioUrl)
                 .credentials(accessKey, secretKey)
                 .build();
+    }
+
+    public String getBucketName() {
+        return bucketName;
     }
 }
