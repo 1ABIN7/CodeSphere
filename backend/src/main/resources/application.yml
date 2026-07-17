@@ -40,6 +40,9 @@ app:
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket-name: questions-import-vault
 
+  cors:
+    allowed-origin: "http://localhost:3000"
+
 # Storage configuration
 storage:
   active-backend: local

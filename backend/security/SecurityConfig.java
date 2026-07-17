@@ -1,52 +1,78 @@
-package com.CodeSphere.backend.security;
+package com.codesphere.backend.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtRequestFilter jwtRequestFilter;
+
+    @Value("${app.cors.allowed-origin}")
+    private String allowedOrigin;
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF because we are using stateless JWT tokens
+                // 1. Enable CORS using our custom configuration source
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // 2. Disable CSRF since we are using state-minimized JWTs (optionally secure via SameSite cookies)
                 .csrf(csrf -> csrf.disable())
 
-                // Set session management to stateless
+                // 3. Set session management to stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Configure endpoint routing rules based on your new roles
+                // 4. Configure Endpoint Authorizations
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints open to everyone
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll() // Allow authentication routes
+                        .anyRequest().authenticated()               // Secure all other endpoints
+                )
 
-                        // Role-Based Access Control Restrictions
-                        .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
-                        .requestMatchers("/api/org/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
-                        .requestMatchers("/api/exams/manage/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                        .requestMatchers("/api/courses/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "INSTRUCTOR")
-                        .requestMatchers("/api/candidate/**").hasRole("CANDIDATE")
-
-                        // Any other request must be authenticated
-                        .anyRequest().authenticated()
-                );
+                // 5. Inject our custom JWT and Session Verification Filter
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    /**
+     * Defines strict CORS rules, locking down origins, headers, and methods.
+     */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Strictly restrict to your configured frontend domain
+        configuration.setAllowedOrigins(List.of(allowedOrigin));
+
+        // Explicitly declare allowed REST methods
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // Explicitly declare allowed request headers (avoid wildcard '*' if credentials are true)
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "User-Agent"));
+
+        // Allow the browser to send/receive secure HTTP-Only cookies
+        configuration.setAllowCredentials(true);
+
+        // Cache CORS preflight responses for 1 hour to reduce overhead traffic
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
