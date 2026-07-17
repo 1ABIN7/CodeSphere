@@ -8,6 +8,8 @@ import com.codesphere.backend.dto.ResetPasswordRequest;
 import com.codesphere.backend.service.AuthService;
 import com.codesphere.backend.service.LoginAttemptService;
 import com.codesphere.backend.service.RateLimiterService;
+import com.codesphere.backend.service.JwtService;
+import com.codesphere.backend.service.TokenDenylistService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +28,8 @@ public class AuthController {
     private final AuthService authService;
     private final RateLimiterService rateLimiterService;
     private final LoginAttemptService loginAttemptService;
+    private final JwtService jwtService;
+    private final TokenDenylistService tokenDenylistService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -60,8 +64,11 @@ public class AuthController {
 
         try {
             // 3. Process Authentication
+            String userAgent = request.getHeader("User-Agent");
             AuthResponse authResponse = authService.login(loginRequest);
-            String token = authResponse.getToken();
+
+            // Generate a token bound specifically to the current request's User-Agent
+            String token = jwtService.generateToken(username, userAgent);
 
             // Reset failed counter on successful verification
             loginAttemptService.loginSucceeded(username);
@@ -89,11 +96,33 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logoutUser(HttpServletResponse response) {
+    public ResponseEntity<String> logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        // 1. Extract existing token from cookie
+        String token = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("AUTH_TOKEN".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        // 2. Denylist token globally in Redis
+        if (token != null) {
+            try {
+                String tokenId = jwtService.extractTokenId(token);
+                long expiryLeft = jwtService.getRemainingExpiryTimeMs(token);
+                tokenDenylistService.denylistToken(tokenId, expiryLeft);
+            } catch (Exception e) {
+                // Ignore parsing errors for malformed tokens
+            }
+        }
+
+        // 3. Clear auth context & scrub cookie state
         authService.logout();
         SecurityContextHolder.clearContext();
 
-        // Evict secure cookie from client storage state
         Cookie cookie = new Cookie("AUTH_TOKEN", null);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
