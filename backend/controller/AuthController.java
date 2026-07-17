@@ -6,6 +6,7 @@ import com.codesphere.backend.dto.RegisterRequest;
 import com.codesphere.backend.dto.ForgotPasswordRequest;
 import com.codesphere.backend.dto.ResetPasswordRequest;
 import com.codesphere.backend.service.AuthService;
+import com.codesphere.backend.service.LoginAttemptService;
 import com.codesphere.backend.service.RateLimiterService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final RateLimiterService rateLimiterService;
+    private final LoginAttemptService loginAttemptService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -36,35 +38,54 @@ public class AuthController {
                                               HttpServletRequest request,
                                               HttpServletResponse response) {
 
-        // 1. Extract client IP address (handles reverse proxies like Nginx/Cloudflare if present)
+        String username = loginRequest.getUsername();
+
+        // 1. Evaluate Rate Limiter (IP-based brute-force/DoS defense)
         String ipAddress = request.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty()) {
             ipAddress = request.getRemoteAddr();
         }
-
-        // 2. Evaluate Rate Limit
         if (!rateLimiterService.isAllowed(ipAddress)) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .header("Retry-After", "60")
-                    .body("Too many login attempts. Please try again after 1 minute.");
+                    .body("Too many login attempts from this IP. Please try again after 1 minute.");
         }
 
-        // 3. Process normal authentication logic
-        AuthResponse authResponse = authService.login(loginRequest);
-        String token = authResponse.getToken();
+        // 2. Evaluate Account Lockout (Username-based credential stuffing defense)
+        if (loginAttemptService.isLockedOut(username)) {
+            long waitMinutes = loginAttemptService.getRemainingLockoutMinutes(username);
+            return ResponseEntity.status(HttpStatus.LOCKED)
+                    .body(String.format("This account has been locked out due to multiple failed login attempts. Please try again in %d minutes.", waitMinutes));
+        }
 
-        // 4. Enforce secure, HTTPS-only cookie attributes
-        Cookie jwtCookie = new Cookie("AUTH_TOKEN", token);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(true);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(3600); // 1 hour expiry
-        response.addCookie(jwtCookie);
+        try {
+            // 3. Process Authentication
+            AuthResponse authResponse = authService.login(loginRequest);
+            String token = authResponse.getToken();
 
-        // Standard header modification fallback to ensure cross-browser SameSite support
-        response.addHeader("Set-Cookie", "AUTH_TOKEN=" + token + "; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Strict");
+            // Reset failed counter on successful verification
+            loginAttemptService.loginSucceeded(username);
 
-        return ResponseEntity.ok("Authentication Successful");
+            // 4. Issue Secure HTTP-Only Cookie
+            Cookie jwtCookie = new Cookie("AUTH_TOKEN", token);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setSecure(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(3600); // 1 hour token lifespan
+            response.addCookie(jwtCookie);
+
+            // Enforce explicit SameSite=Strict configuration mapping
+            response.addHeader("Set-Cookie", "AUTH_TOKEN=" + token + "; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Strict");
+
+            return ResponseEntity.ok("Authentication Successful");
+
+        } catch (Exception e) {
+            // Log failed attempt to progress towards lockout thresholds
+            loginAttemptService.loginFailed(username);
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid username or password.");
+        }
     }
 
     @PostMapping("/logout")
@@ -72,7 +93,7 @@ public class AuthController {
         authService.logout();
         SecurityContextHolder.clearContext();
 
-        // Clear out the cookie from the browser on logout
+        // Evict secure cookie from client storage state
         Cookie cookie = new Cookie("AUTH_TOKEN", null);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
