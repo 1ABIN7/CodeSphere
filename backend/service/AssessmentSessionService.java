@@ -1,9 +1,11 @@
 package com.codesphere.backend.service;
 
 import com.codesphere.backend.model.AssessmentAnswer;
+import com.codesphere.backend.model.AssessmentSection;
 import com.codesphere.backend.model.AssessmentSession;
 import com.codesphere.backend.model.Question;
 import com.codesphere.backend.repository.AssessmentAnswerRepository;
+import com.codesphere.backend.repository.AssessmentSectionRepository;
 import com.codesphere.backend.repository.AssessmentSessionRepository;
 import com.codesphere.backend.repository.QuestionBankRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,15 +26,18 @@ public class AssessmentSessionService {
     private final AssessmentAnswerRepository answerRepository;
     private final QuestionBankRepository questionRepository;
     private final McqEvaluationService mcqEvaluationService;
+    private final AssessmentSectionRepository sectionRepository;
 
     public AssessmentSessionService(AssessmentSessionRepository sessionRepository,
                                     AssessmentAnswerRepository answerRepository,
                                     QuestionBankRepository questionRepository,
-                                    McqEvaluationService mcqEvaluationService) {
+                                    McqEvaluationService mcqEvaluationService,
+                                    AssessmentSectionRepository sectionRepository) {
         this.sessionRepository = sessionRepository;
         this.answerRepository = answerRepository;
         this.questionRepository = questionRepository;
         this.mcqEvaluationService = mcqEvaluationService;
+        this.sectionRepository = sectionRepository;
     }
 
     public AssessmentSession startSession(String username, int durationMinutes) {
@@ -42,6 +46,8 @@ public class AssessmentSessionService {
         session.setStartedAt(LocalDateTime.now());
         session.setDurationMinutes(durationMinutes);
         session.setStatus(AssessmentSession.SessionStatus.IN_PROGRESS);
+        session.setCurrentSectionIndex(0);
+        session.setCurrentSectionStartedAt(LocalDateTime.now());
 
         // Snapshot all compiled questions in a randomized sequence order
         List<Long> questionIds = questionRepository.findAll().stream()
@@ -104,6 +110,67 @@ public class AssessmentSessionService {
         return questionRepository.findAllById(sectionIds);
     }
 
+    /**
+     * Mixed Assessment Navigation Core Engine Logic
+     */
+    public List<Question> navigateToSection(Long sessionId, int targetSectionIndex, List<AssessmentSection> allSections, int pageSize) {
+        AssessmentSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+
+        int currentIdx = session.getCurrentSectionIndex();
+
+        // 1. Enforce SEQUENTIAL Validation Guard Check
+        if (targetSectionIndex > currentIdx) {
+            for (int i = currentIdx; i < targetSectionIndex; i++) {
+                AssessmentSection previousSection = allSections.get(i);
+                if (previousSection.getNavigationMode() == AssessmentSection.NavigationMode.SEQUENTIAL
+                        && !session.getCompletedSectionIndexes().contains(i)) {
+                    throw new IllegalStateException("Cannot advance. Section " + i + " must be completed first.");
+                }
+            }
+        }
+
+        // 2. Handle per-section isolated countdown timer transitions
+        AssessmentSection targetSection = allSections.get(targetSectionIndex);
+        LocalDateTime now = LocalDateTime.now();
+
+        if (targetSectionIndex != currentIdx) {
+            // Mark previous section complete in tracking sets
+            session.getCompletedSectionIndexes().add(currentIdx);
+            session.setCurrentSectionIndex(targetSectionIndex);
+
+            if (targetSection.getDurationMinutes() != null) {
+                session.setCurrentSectionStartedAt(now);
+            } else {
+                session.setCurrentSectionStartedAt(null);
+            }
+            sessionRepository.save(session);
+        } else {
+            // Evaluate if existing section individual timer has expired
+            if (session.getCurrentSectionStartedAt() != null && targetSection.getDurationMinutes() != null) {
+                LocalDateTime expirationTime = session.getCurrentSectionStartedAt().plusMinutes(targetSection.getDurationMinutes());
+                if (now.isAfter(expirationTime)) {
+                    session.getCompletedSectionIndexes().add(currentIdx);
+                    if (targetSectionIndex + 1 < allSections.size()) {
+                        return navigateToSection(sessionId, targetSectionIndex + 1, allSections, pageSize);
+                    } else {
+                        submitSession(sessionId);
+                        throw new IllegalStateException("Final section runtime expired. Global exam submitted.");
+                    }
+                }
+            }
+        }
+
+        return getSectionQuestions(sessionId, targetSectionIndex, pageSize);
+    }
+
+    /**
+     * Helper mapping method to load sections for structural validation
+     */
+    public List<AssessmentSection> getAssessmentSectionsForSession(Long sessionId) {
+        return sectionRepository.findAll();
+    }
+
     // Server-side active validation sweeps firing every 10 seconds
     @Scheduled(fixedRate = 10000)
     public void enforceExpirationTimers() {
@@ -139,7 +206,6 @@ public class AssessmentSessionService {
     }
 
     private void triggerEvaluationPipeline(AssessmentSession session) {
-        // Runs the auto-grading pipeline mechanics for the completed attempt
         int mcqScore = mcqEvaluationService.evaluateSessionMcqs(session);
         System.out.println("Auto-graded MCQ total score for session ID " + session.getId() + ": " + mcqScore);
     }

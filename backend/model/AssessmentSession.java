@@ -32,6 +32,18 @@ public class AssessmentSession {
         IN_PROGRESS, SUBMITTED, TIMED_OUT
     }
 
+    @Column(name = "current_section_index")
+    private int currentSectionIndex = 0;
+
+    @Column(name = "current_section_started_at")
+    private LocalDateTime currentSectionStartedAt;
+
+    // Add tracking for completed sections to satisfy SEQUENTIAL mode barriers
+    @ElementCollection
+    @CollectionTable(name = "session_completed_sections", joinColumns = @JoinColumn(name = "session_id"))
+    @Column(name = "section_index")
+    private Set<Integer> completedSectionIndexes = new java.util.HashSet<>();
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -47,4 +59,11 @@ public class AssessmentSession {
     public void setStatus(SessionStatus status) { this.status = status; }
     public List<Long> getQuestionIdsSnapshot() { return questionIdsSnapshot; }
     public void setQuestionIdsSnapshot(List<Long> questionIdsSnapshot) { this.questionIdsSnapshot = questionIdsSnapshot; }
+
+    public int getCurrentSectionIndex() { return currentSectionIndex; }
+    public void setCurrentSectionIndex(int currentSectionIndex) { this.currentSectionIndex = currentSectionIndex; }
+    public LocalDateTime getCurrentSectionStartedAt() { return currentSectionStartedAt; }
+    public void setCurrentSectionStartedAt(LocalDateTime currentSectionStartedAt) { this.currentSectionStartedAt = currentSectionStartedAt; }
+    public Set<Integer> getCompletedSectionIndexes() { return completedSectionIndexes; }
+    public void setCompletedSectionIndexes(Set<Integer> completedSectionIndexes) { this.completedSectionIndexes = completedSectionIndexes; }
 }

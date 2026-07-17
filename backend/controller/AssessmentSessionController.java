@@ -1,6 +1,7 @@
 package com.codesphere.backend.controller;
 
 import com.codesphere.backend.model.AssessmentAnswer;
+import com.codesphere.backend.model.AssessmentSection;
 import com.codesphere.backend.model.AssessmentSession;
 import com.codesphere.backend.model.Question;
 import com.codesphere.backend.service.AssessmentSessionService;
@@ -59,7 +60,22 @@ public class AssessmentSessionController {
         return ResponseEntity.ok(sessionService.submitSession(sessionId));
     }
 
-    // 5. Chunk navigation to fetch questions by section page index
+    // 5. Mixed Assessment Section-based navigation (Enforces FREE/SEQUENTIAL rules and per-section timers)
+    @GetMapping("/{id}/navigate-section/{targetIndex}")
+    public ResponseEntity<?> handleSectionNavigation(
+            @PathVariable("id") Long sessionId,
+            @PathVariable("targetIndex") int targetIndex,
+            @RequestParam(value = "size", defaultValue = "5") int size) {
+        try {
+            List<AssessmentSection> structuralSections = sessionService.getAssessmentSectionsForSession(sessionId);
+            List<Question> sectionQuestions = sessionService.navigateToSection(sessionId, targetIndex, structuralSections, size);
+            return ResponseEntity.ok(sectionQuestions);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 6. Legacy chunk fallback (Gets standard questions layout unconditionally)
     @GetMapping("/{id}/section/{sectionIndex}")
     public ResponseEntity<List<Question>> getSectionQuestions(
             @PathVariable("id") Long sessionId,
@@ -68,7 +84,7 @@ public class AssessmentSessionController {
         return ResponseEntity.ok(sessionService.getSectionQuestions(sessionId, sectionIndex, size));
     }
 
-    // 6. Submit a subjective written assessment answer with rich HTML text validation
+    // 7. Submit a subjective written assessment answer with rich HTML text validation
     @PatchMapping("/{id}/written-answers/{questionId}")
     public ResponseEntity<?> submitWrittenAnswer(
             @PathVariable("id") Long sessionId,
@@ -82,7 +98,7 @@ public class AssessmentSessionController {
         }
     }
 
-    // 7. Handle multipart file uploads (PDF, DOCX, PPTX, ZIP <= 50MB) targeting MinIO & RabbitMQ
+    // 8. Handle multipart file uploads (PDF, DOCX, PPTX, ZIP <= 50MB) targeting MinIO & RabbitMQ
     @PostMapping(value = "/{id}/answers/{questionId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> handleFileUploadAssessment(
             @PathVariable("id") Long sessionId,
