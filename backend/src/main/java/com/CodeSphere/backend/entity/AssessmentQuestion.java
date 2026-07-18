@@ -27,10 +27,10 @@ public class AssessmentQuestion {
     @Column(name = "order_index", nullable = false)
     private Integer orderIndex;
 
-    @Column(name = "max_score", nullable = false)
+    @Column(name = "max_score", nullable = false, columnDefinition = "numeric")
     private Double maxScore;
 
-    @Column(name = "negative_score", nullable = false)
+    @Column(name = "negative_score", nullable = false, columnDefinition = "numeric")
     private Double negativeScore;
 
     @Column(name = "time_limit_override")

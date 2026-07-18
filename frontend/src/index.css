@@ -426,3 +426,109 @@ a { color: inherit; }
 .w-full { width: 100%; }
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ─── Interview Module ─── */
+.category-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;
+}
+.category-card {
+  background: rgba(30, 30, 53, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  position: relative; overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
+}
+.category-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(124, 58, 237, 0.4);
+  background: rgba(30, 30, 53, 0.7);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(124, 58, 237, 0.2);
+}
+.category-accent {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  opacity: 0.5; transition: opacity 0.3s;
+}
+.category-card:hover .category-accent { opacity: 1; }
+.category-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; background: rgba(0,0,0,0.3); margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.05);
+}
+.category-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+.category-desc { font-size: 14px; color: var(--text-secondary); flex-grow: 1; margin-bottom: 24px; line-height: 1.5; }
+.category-action {
+  width: 100%; padding: 10px; border-radius: 10px; border: none;
+  background: rgba(124, 58, 237, 0.1); color: var(--accent-light);
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.category-card:hover .category-action {
+  background: var(--accent); color: white;
+}
+
+/* Interview Session */
+.session-container {
+  display: flex; flex-direction: column; min-height: calc(100vh - 64px);
+  max-width: 900px; margin: 0 auto; padding: 32px 24px; width: 100%;
+}
+.session-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;
+}
+.session-meta { display: flex; gap: 12px; align-items: center; }
+.question-card {
+  background: rgba(22, 22, 40, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.question-text {
+  font-size: 20px; font-weight: 600; line-height: 1.6; margin-bottom: 32px;
+}
+.mcq-option {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px; border: 1px solid var(--border); border-radius: 12px;
+  background: rgba(0,0,0,0.2); cursor: pointer; transition: all 0.2s;
+  margin-bottom: 12px;
+}
+.mcq-option:hover { border-color: var(--text-muted); }
+.mcq-option.selected {
+  border-color: var(--accent);
+  background: rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.15);
+}
+.mcq-option.disabled { opacity: 0.6; pointer-events: none; }
+.mcq-radio {
+  width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer;
+}
+.coding-container {
+  height: 350px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 24px;
+}
+.feedback-box {
+  margin-top: 24px; padding: 20px; border-radius: 12px; border: 1px solid transparent;
+}
+.feedback-box.correct {
+  background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #a7f3d0;
+}
+.feedback-box.incorrect {
+  background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #fecaca;
+}
+.session-actions {
+  display: flex; justify-content: flex-end; margin-top: 32px;
+}
+
+/* Interview Performance */
+.perf-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px;
+}
+.perf-title { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+.perf-subtitle { color: var(--text-secondary); margin-top: 4px; font-size: 15px; }
+.recent-result {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.1), rgba(16, 185, 129, 0.1));
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 16px; padding: 24px; margin-bottom: 48px;
+}

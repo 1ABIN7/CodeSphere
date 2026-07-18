@@ -4,16 +4,16 @@ import { useAuth } from '../context/AuthContext';
 const FEATURES = [
   { icon: '⚡', title: 'AI-Powered Judge', desc: 'Our judge engine analyses your code in real-time — complexity, patterns, quality score, and smart feedback.' },
   { icon: '🧠', title: 'Smart Analysis', desc: 'Get time & space complexity estimates, anti-pattern detection, and personalised optimisation hints.' },
+  { icon: '📝', title: 'Interview Prep', desc: 'Master technical, aptitude, logical, and HR questions with curated mock tests and performance tracking.' },
   { icon: '📂', title: 'File Storage', desc: 'Upload editorial PDFs, test data, and attachments. Local and MinIO S3 backends supported out of the box.' },
   { icon: '🏆', title: '25 Curated Problems', desc: 'From Two Sum to N-Queens — 8 easy, 10 medium, 7 hard problems covering every major pattern.' },
-  { icon: '📊', title: 'Skill Tracking', desc: 'Every accepted submission updates your skill proficiency score across tags and difficulty levels.' },
   { icon: '🔒', title: 'Role-Based Access', desc: 'Multi-tenant platform with Super Admin, Org Admin, Examiner, Instructor, and Candidate roles.' },
 ];
 
 const STATS = [
   { value: '25', label: 'Coding Problems' },
-  { value: '5', label: 'Languages Supported' },
-  { value: '100+', label: 'Test Cases' },
+  { value: '100+', label: 'Interview Questions' },
+  { value: '6', label: 'Interview Categories' },
   { value: '∞', label: 'AI Insights' },
 ];
 
@@ -38,6 +38,9 @@ export default function HomePage() {
         <div className="hero-actions">
           <Link to="/problems" className="btn btn-primary btn-lg">
             🚀 Explore Problems
+          </Link>
+          <Link to="/interview" className="btn btn-secondary btn-lg border border-indigo-500/30 hover:border-indigo-500 bg-indigo-500/10 text-indigo-400">
+            🎯 Interview Prep
           </Link>
           {!isLoggedIn && (
             <Link to="/register" className="btn btn-secondary btn-lg">

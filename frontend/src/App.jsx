@@ -2,9 +2,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import PrivateRoute from './components/PrivateRoute';
 import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
+import InterviewPrepPage from './pages/InterviewPrepPage';
+import InterviewSessionPage from './pages/InterviewSessionPage';
+import InterviewPerformancePage from './pages/InterviewPerformancePage';
 import DashboardPage from './pages/DashboardPage';
 import SubmissionsPage from './pages/SubmissionsPage';
 import LoginPage from './pages/LoginPage';
@@ -19,8 +23,11 @@ export default function App() {
           <main className="main-content">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/problems" element={<ProblemsPage />} />
-              <Route path="/problems/:id" element={<ProblemDetailPage />} />
+              <Route path="/problems" element={<PrivateRoute><ProblemsPage /></PrivateRoute>} />
+              <Route path="/problems/:id" element={<PrivateRoute><ProblemDetailPage /></PrivateRoute>} />
+              <Route path="/interview" element={<PrivateRoute><InterviewPrepPage /></PrivateRoute>} />
+              <Route path="/interview/session/:id" element={<PrivateRoute><InterviewSessionPage /></PrivateRoute>} />
+              <Route path="/interview/performance" element={<PrivateRoute><InterviewPerformancePage /></PrivateRoute>} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/submissions" element={<SubmissionsPage />} />
               <Route path="/login" element={<LoginPage />} />

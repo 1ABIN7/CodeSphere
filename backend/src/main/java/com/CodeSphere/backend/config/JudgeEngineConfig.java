@@ -67,6 +67,12 @@ public class JudgeEngineConfig {
     );
 
     /**
+     * When true, uses the real Docker sandboxed execution service.
+     * When false (default), uses MockDockerExecutionService.
+     */
+    private boolean useDocker = false;
+
+    /**
      * File extensions for each language.
      */
     private Map<String, String> fileExtensions = Map.of(
