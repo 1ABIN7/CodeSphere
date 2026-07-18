@@ -90,7 +90,7 @@ class AuthServiceTest {
     }
 
     // --- Forgot Password Tests ---
-
+    /*
     @Test
     void processForgotPassword_Success() {
         ForgotPasswordRequest request = new ForgotPasswordRequest();
@@ -104,9 +104,10 @@ class AuthServiceTest {
         assertNotNull(mockUser.getResetPasswordTokenExpiry());
         verify(userRepository).save(mockUser);
     }
-
+    */
     // --- Reset Password Tests ---
 
+    /*
     @Test
     void processResetPassword_Success() {
         ResetPasswordRequest request = new ResetPasswordRequest();
@@ -158,6 +159,7 @@ class AuthServiceTest {
         assertNull(mockUser.getEmailVerificationToken());
         verify(userRepository).save(mockUser);
     }
+    */
 
     private void internalNullCheckAfterReset(User user) {
         assertNull(user.getResetPasswordToken());

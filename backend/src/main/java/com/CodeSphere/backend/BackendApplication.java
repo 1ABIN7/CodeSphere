@@ -1,4 +1,4 @@
-package com.codesphere.backend;
+package com.CodeSphere.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

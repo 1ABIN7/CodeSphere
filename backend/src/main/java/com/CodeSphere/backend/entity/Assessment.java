@@ -40,7 +40,7 @@ public class Assessment {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "passing_score")
+    @Column(name = "passing_score", columnDefinition = "numeric")
     private Double passingScore;
 
     @Column(columnDefinition = "TEXT")

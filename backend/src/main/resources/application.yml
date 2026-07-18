@@ -64,6 +64,7 @@ judge:
   thread-pool-core-size: 4
   thread-pool-max-size: 8
   queue-capacity: 100
+  use-docker: false   # Set to true in production to enable real Docker sandboxing
   supported-languages:
     - java
     - python
