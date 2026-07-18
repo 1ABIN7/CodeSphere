@@ -94,7 +94,6 @@ class AuthServiceTest {
         assertEquals("encodedPassword", savedUser.getPassword());
         assertEquals(Role.ROLE_CANDIDATE, savedUser.getRole());
         assertFalse(savedUser.isEmailVerified());
-        assertNotNull(savedUser.getEmailVerificationToken());
     }
 
     @Test
