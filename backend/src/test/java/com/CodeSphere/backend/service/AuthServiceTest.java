@@ -35,6 +35,15 @@ class AuthServiceTest {
     @Mock
     private CustomUserDetailsService userDetailsService;
 
+    @Mock
+    private org.springframework.security.authentication.AuthenticationManager authenticationManager;
+
+    @Mock
+    private com.CodeSphere.backend.security.JwtTokenProvider jwtTokenProvider;
+
+    @Mock
+    private com.CodeSphere.backend.service.RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -66,6 +75,14 @@ class AuthServiceTest {
         when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
         when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(mockUser);
+        
+        org.springframework.security.core.Authentication mockAuth = mock(org.springframework.security.core.Authentication.class);
+        when(authenticationManager.authenticate(any(org.springframework.security.authentication.UsernamePasswordAuthenticationToken.class))).thenReturn(mockAuth);
+        when(jwtTokenProvider.generateToken(mockAuth)).thenReturn("mockJwt");
+        
+        com.CodeSphere.backend.model.RefreshToken mockRefreshToken = new com.CodeSphere.backend.model.RefreshToken();
+        mockRefreshToken.setToken("mockRefreshToken");
+        when(refreshTokenService.createRefreshToken(any(User.class))).thenReturn(mockRefreshToken);
 
         assertDoesNotThrow(() -> authService.register(registerRequest));
 
