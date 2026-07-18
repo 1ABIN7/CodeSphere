@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Results Published</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
+    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+        <h2 style="color: #2a3b5c;">Exam Results Published</h2>
+        <p>Dear <span th:text="${name}">User</span>,</p>
+        <p>Your results for the assessment <strong><span th:text="${examTitle}">Exam Title</span></strong> are now available.</p>
+        <p>Your final score is: <strong><span th:text="${score}">0.0</span></strong></p>
+        <p>Please login to the candidate portal to view your detailed scorecard and feedback breakdown.</p>
+        <p>Best regards,<br>The CodeSphere Team</p>
+    </div>
+</body>
+</html>

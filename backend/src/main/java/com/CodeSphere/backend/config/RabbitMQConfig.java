@@ -15,9 +15,17 @@ public class RabbitMQConfig {
     public static final String EXCHANGE = "judge-exchange";
     public static final String ROUTING_KEY = "judge.routing.key";
 
+    public static final String EVAL_QUEUE = "evaluation-queue";
+    public static final String EVAL_ROUTING_KEY = "evaluation.routing.key";
+
     @Bean
     public Queue queue() {
         return new Queue(QUEUE, true); // durable queue
+    }
+
+    @Bean
+    public Queue evalQueue() {
+        return new Queue(EVAL_QUEUE, true); // durable queue
     }
 
     @Bean
@@ -28,6 +36,11 @@ public class RabbitMQConfig {
     @Bean
     public Binding binding(Queue queue, TopicExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding evalBinding(Queue evalQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(evalQueue).to(exchange).with(EVAL_ROUTING_KEY);
     }
 
     @Bean

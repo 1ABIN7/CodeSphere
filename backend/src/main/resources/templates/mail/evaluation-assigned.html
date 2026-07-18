@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New Answer Evaluation Assigned</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
+    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+        <h2 style="color: #2a3b5c;">New Grading Assignment</h2>
+        <p>Dear <span th:text="${name}">Reviewer</span>,</p>
+        <p>You have been assigned to evaluate candidate subjective answer ID: <strong>#<span th:text="${answerId}">123</span></strong>.</p>
+        <p>Please login to your evaluator console queue to review the candidate's script and submit your scores and criterion-based rubric marks.</p>
+        <p>Best regards,<br>The CodeSphere Team</p>
+    </div>
+</body>
+</html>
