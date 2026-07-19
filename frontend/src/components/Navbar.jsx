@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Bell } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, logout, isLoggedIn } = useAuth();
+  const { user, logout, isLoggedIn, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -12,6 +13,9 @@ export default function Navbar() {
     logout();
     navigate('/');
   };
+
+  const isEvaluator = user?.role === 'ROLE_EXAMINER';
+  const isCandidate = user?.role === 'ROLE_CANDIDATE' || user?.role === 'ROLE_USER';
 
   return (
     <nav className="navbar">
@@ -23,23 +27,48 @@ export default function Navbar() {
 
         <div className="navbar-nav">
           <Link to="/problems" className={`nav-link ${isActive('/problems') ? 'active' : ''}`}>
-            Problems
+            Practice
           </Link>
-          {isLoggedIn && (
-            <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
-              Dashboard
-            </Link>
+          
+          {isLoggedIn && isAdmin && !isEvaluator && (
+            <>
+              <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+                Admin Dashboard
+              </Link>
+              <Link to="/admin/assessments/new" className={`nav-link ${isActive('/admin/assessments/new') ? 'active' : ''}`}>
+                Create Assessment
+              </Link>
+            </>
           )}
-          <Link to="/submissions" className={`nav-link ${isActive('/submissions') ? 'active' : ''}`}>
-            Submissions
-          </Link>
+
+          {isLoggedIn && isEvaluator && (
+            <>
+              <Link to="/evaluator" className={`nav-link ${isActive('/evaluator') ? 'active' : ''}`}>
+                Evaluator Dashboard
+              </Link>
+            </>
+          )}
+
+          {isLoggedIn && (isCandidate || (!isAdmin && !isEvaluator)) && (
+            <>
+              <Link to="/assessments" className={`nav-link ${isActive('/assessments') ? 'active' : ''}`}>
+                My Assessments
+              </Link>
+              <Link to="/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`}>
+                Profile
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="navbar-actions">
           {isLoggedIn ? (
             <>
+              <button className="btn btn-ghost btn-icon" title="Notifications">
+                <Bell size={18} />
+              </button>
               <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                👤 {user?.username}
+                👤 {user?.username || 'User'}
               </span>
               <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
                 Log Out
@@ -47,8 +76,8 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="btn btn-ghost btn-sm">Log In</Link>
-              <Link to="/register" className="btn btn-primary btn-sm">Sign Up</Link>
+              <Link to="/login" className="btn btn-ghost btn-sm">Login</Link>
+              <Link to="/register" className="btn btn-primary btn-sm">Get Started</Link>
             </>
           )}
         </div>

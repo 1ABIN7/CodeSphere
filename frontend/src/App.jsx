@@ -9,32 +9,54 @@ import DashboardPage from './pages/DashboardPage';
 import SubmissionsPage from './pages/SubmissionsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import PublicLayout from './layouts/PublicLayout';
+import CandidateLayout from './layouts/CandidateLayout';
+import AdminLayout from './layouts/AdminLayout';
+import AssessmentLayout from './layouts/AssessmentLayout';
+import QuestionBankPage from './pages/admin/QuestionBankPage';
+import ManageAssessmentsPage from './pages/admin/ManageAssessmentsPage';
+import LiveAssessmentPage from './pages/candidate/LiveAssessmentPage';
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="app">
-          <Navbar />
-          <main className="main-content">
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/problems" element={<ProblemsPage />} />
-              <Route path="/problems/:id" element={<ProblemDetailPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/submissions" element={<SubmissionsPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="*" element={
-                <div className="container" style={{ paddingTop: 80, textAlign: 'center' }}>
-                  <div style={{ fontSize: 80 }}>404</div>
-                  <h2 style={{ fontSize: 24, marginBottom: 12 }}>Page Not Found</h2>
-                  <a href="/" className="btn btn-primary">Go Home</a>
-                </div>
-              } />
+              {/* Public Routes with Navbar */}
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/problems" element={<ProblemsPage />} />
+                <Route path="/problems/:id" element={<ProblemDetailPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="*" element={
+                  <div className="container" style={{ paddingTop: 80, textAlign: 'center' }}>
+                    <div style={{ fontSize: 80 }}>404</div>
+                    <h2 style={{ fontSize: 24, marginBottom: 12 }}>Page Not Found</h2>
+                    <a href="/" className="btn btn-primary">Go Home</a>
+                  </div>
+                } />
+              </Route>
+
+              {/* Candidate Routes with Sidebar */}
+              <Route element={<CandidateLayout />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/submissions" element={<SubmissionsPage />} />
+              </Route>
+
+              {/* Admin Routes with Sidebar */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="dashboard" element={<div>Admin Dashboard</div>} />
+                <Route path="questions" element={<QuestionBankPage />} />
+                <Route path="assessments" element={<ManageAssessmentsPage />} />
+                <Route path="users" element={<div>Manage Users</div>} />
+              </Route>
+
+              {/* Assessment Routes */}
+              <Route path="/assessment" element={<AssessmentLayout />}>
+                <Route path=":id" element={<LiveAssessmentPage />} />
+              </Route>
             </Routes>
-          </main>
-        </div>
 
         <Toaster
           position="bottom-right"

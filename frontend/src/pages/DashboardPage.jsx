@@ -69,8 +69,27 @@ export default function DashboardPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24 }}>
-        {/* Recent Submissions */}
         <div>
+          {/* Upcoming Assessments */}
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700 }}>Upcoming Assessments</h2>
+            </div>
+            <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', borderLeft: '4px solid var(--accent)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ fontWeight: 600 }}>Frontend Developer Hiring - React</div>
+                <span className="badge badge-pending">Tomorrow</span>
+              </div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', gap: '16px' }}>
+                <span>Duration: 60 mins</span>
+                <span>Proctoring: Strict</span>
+              </div>
+              <Link to="/assessment/1" className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
+                Enter Waiting Room
+              </Link>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700 }}>Recent Submissions</h2>
             <Link to="/submissions" className="btn btn-ghost btn-sm">View All →</Link>
