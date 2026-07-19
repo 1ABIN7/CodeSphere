@@ -1,10 +1,10 @@
 spring:
   application:
-    name: codesphere-backend-test
+    name: CodeSphere-backend-test
 
   # Switch to an in-memory database configuration for running tests offline
   datasource:
-    url: jdbc:h2:mem:codesphere_test;MODE=PostgreSQL;DATABASE_TO_UPPER=FALSE
+    url: jdbc:h2:mem:CodeSphere_test;MODE=PostgreSQL;DATABASE_TO_UPPER=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:

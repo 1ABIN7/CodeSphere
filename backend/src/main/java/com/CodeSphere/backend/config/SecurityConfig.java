@@ -1,18 +1,13 @@
-package com.CodeSphere.backend.config;
+package com.CodeSphere.backend.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,90 +16,61 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Consolidated Security Configuration.
- *
- * Merges the two previous SecurityConfig versions into a single canonical bean.
- * Wires the JwtAuthenticationFilter into the filter chain, defines role-based
- * access rules for all API endpoints, and configures CORS for frontend access.
- */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtRequestFilter jwtRequestFilter;
+
+    @Value("${app.cors.allowed-origin}")
+    private String allowedOrigin;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // ---- Public Endpoints ----
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // 1. Enable CORS using our custom configuration source
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // ---- Problem Management (create/update/delete = admin/examiner) ----
-                .requestMatchers(HttpMethod.POST, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.PUT, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.PATCH, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.DELETE, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
+                // 2. Disable CSRF since we are using state-minimized JWTs
+                .csrf(csrf -> csrf.disable())
 
-                // ---- Submissions (authenticated users) ----
-                .requestMatchers("/api/submissions/**").authenticated()
+                // 3. Set session management to stateless
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // ---- Interview Module ----
-                .requestMatchers(HttpMethod.GET, "/api/interview/categories").permitAll()
-                .requestMatchers("/api/interview/**").authenticated()
+                // 4. Configure Endpoint Authorizations
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll() // Allow authentication routes
+                        .anyRequest().authenticated()               // Secure all other endpoints
+                )
 
-                // ---- File Storage (authenticated users) ----
-                .requestMatchers("/api/files/**").authenticated()
-
-                // ---- Admin Endpoints ----
-                .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/api/org/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
-                .requestMatchers("/api/exams/manage/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers("/api/courses/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "INSTRUCTOR")
-                .requestMatchers("/api/candidate/**").hasRole("CANDIDATE")
-
-                // ---- Default: require authentication ----
-                .anyRequest().authenticated()
-            )
-            // Wire JWT filter before Spring's UsernamePasswordAuthenticationFilter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // 5. Inject our custom JWT and Session Verification Filter
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
-
+    /**
+     * Defines strict CORS rules, locking down origins, headers, and methods.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000"
-        ));
+
+        // Strictly restrict to your configured frontend domain
+        configuration.setAllowedOrigins(List.of(allowedOrigin));
+
+        // Explicitly declare allowed REST methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of(
-                "Authorization", "Content-Type", "Cache-Control",
-                "X-Requested-With", "Accept", "Origin"
-        ));
-        configuration.setExposedHeaders(List.of("Authorization"));
+
+        // Explicitly declare allowed request headers (avoid wildcard '*' if credentials are true)
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "User-Agent"));
+
+        // Allow the browser to send/receive secure HTTP-Only cookies
         configuration.setAllowCredentials(true);
+
+        // Cache CORS preflight responses for 1 hour to reduce overhead traffic
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

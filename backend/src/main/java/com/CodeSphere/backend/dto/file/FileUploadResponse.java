@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.OffsetDateTime;
 
 /**
- * Response DTO after a successful file upload.
+ * Response Dto after a successful file upload.
  */
 @Getter
 @Setter

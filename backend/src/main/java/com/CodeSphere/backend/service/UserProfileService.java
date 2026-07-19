@@ -1,0 +1,62 @@
+package com.CodeSphere.backend.service;
+
+import com.CodeSphere.backend.dto.AssessmentRecommendationDto;
+import com.CodeSphere.backend.dto.CertificationDto;
+import com.CodeSphere.backend.dto.ExamHistoryDto;
+import com.CodeSphere.backend.dto.SubmissionHistoryDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class UserProfileService {
+
+    // Inject repositories as needed:
+    // private final SubmissionRepository submissionRepository;
+    // private final ExamSessionRepository examSessionRepository;
+    // private final CertificationRepository certificationRepository;
+    // private final RecommendationEngine recommendationEngine;
+
+    public Page<SubmissionHistoryDto> getSubmissionHistory(Long userId, Pageable pageable) {
+        // TODO: Query your Submission Entity and map it to your Dto
+        return Page.empty();
+    }
+
+    public Page<ExamHistoryDto> getExamHistory(Long userId, Pageable pageable) {
+        // TODO: Query Exam sessions filtering by completed status and map to Dto
+        return Page.empty();
+    }
+
+    public List<CertificationDto> getCertifications(Long userId) {
+        // TODO: Fetch user certificates
+        return Collections.emptyList();
+    }
+
+    /**
+     * Basic recommendation logic:
+     * Analyzes past failed or low-score exams and suggests assessments of similar topics
+     * or next-level difficulty paths.
+     */
+    public List<AssessmentRecommendationDto> getRecommendations(Long userId) {
+        // Basic workflow example:
+        // 1. Fetch user's lowest-scoring categories from ExamHistory
+        // 2. Fetch new/unattempted assessments belonging to those weak categories
+        // 3. Map to Dto array and return
+
+        return List.of(
+                new AssessmentRecommendationDto(
+                        101L,
+                        "Java Streams Advanced Mastery",
+                        "Based on your performance in functional interfaces.",
+                        "HARD"
+                )
+        );
+    }
+}

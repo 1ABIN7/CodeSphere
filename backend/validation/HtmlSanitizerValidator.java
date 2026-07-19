@@ -1,4 +1,4 @@
-package com.codesphere.backend.validation;
+package com.CodeSphere.backend.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

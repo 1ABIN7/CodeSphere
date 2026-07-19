@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 /**
- * Request DTO for submitting code against a problem.
+ * Request Dto for submitting code against a problem.
  */
 @Getter
 @Setter

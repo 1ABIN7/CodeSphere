@@ -71,6 +71,6 @@ public class StorageConfig {
         private String endpoint = "http://localhost:9000";
         private String accessKey = "minioadmin";
         private String secretKey = "minioadmin";
-        private String bucket = "codesphere-assets";
+        private String bucket = "CodeSphere-assets";
     }
 }

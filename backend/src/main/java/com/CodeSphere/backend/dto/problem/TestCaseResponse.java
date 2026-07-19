@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 /**
- * Response DTO for a test case.
+ * Response Dto for a test case.
  * For candidates, only sample test cases expose input/output data.
  */
 @Getter

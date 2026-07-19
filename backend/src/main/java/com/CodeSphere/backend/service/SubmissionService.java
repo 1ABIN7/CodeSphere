@@ -234,7 +234,7 @@ public class SubmissionService {
                                               List<SubmissionResult> results,
                                               List<TestCase> testCases,
                                               JudgeResultResponse analysis) {
-        // Build test case result DTOs
+        // Build test case result Dtos
         Map<Long, TestCase> tcMap = testCases.stream()
                 .collect(Collectors.toMap(TestCase::getId, tc -> tc));
 

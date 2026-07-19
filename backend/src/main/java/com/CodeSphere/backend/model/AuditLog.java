@@ -1,19 +1,20 @@
 package com.CodeSphere.backend.model;
 
+import com.CodeSphere.backend.security.AesEncryptor;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 
 /**
- * Audit log entity for admin activity tracking.
+ * Audit log entity for system and administrative security activity tracking.
  */
 @Entity
 @Table(name = "audit_logs")
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 public class AuditLog {
 
     @Id
@@ -30,8 +31,9 @@ public class AuditLog {
     private String resource;
 
     @Column(nullable = false)
-    private Instant timestamp;
+    private LocalDateTime timestamp;
 
+    @Convert(converter = AesEncryptor.class)
     @Column(name = "ip_address")
     private String ipAddress;
 }

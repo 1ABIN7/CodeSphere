@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 /**
- * Request DTO for creating or updating a test case.
+ * Request Dto for creating or updating a test case.
  */
 @Getter
 @Setter

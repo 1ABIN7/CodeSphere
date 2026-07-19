@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Request DTO for creating or updating a coding problem.
+ * Request Dto for creating or updating a coding problem.
  */
 @Getter
 @Setter

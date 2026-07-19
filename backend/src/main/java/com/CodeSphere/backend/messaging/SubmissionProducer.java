@@ -1,25 +1,37 @@
 package com.CodeSphere.backend.messaging;
 
 import com.CodeSphere.backend.config.RabbitMQConfig;
+import com.CodeSphere.backend.dto.SubmissionDto;
 import com.CodeSphere.backend.dto.JudgeRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class SubmissionProducer {
 
-    private final RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-    public void pushToQueue(JudgeRequest request) {
-        log.info("Pushing submission/run request {} to judge-queue", request.getSubmissionId());
+    /**
+     * Sends standard submission data to the evaluation queue.
+     */
+    public void sendSubmissionMessage(SubmissionDto submissionDto) {
         rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.ROUTING_KEY,
-                request
+                RabbitMQConfig.EXCHANGE_EVALUATION,
+                RabbitMQConfig.ROUTING_KEY_EVALUATION,
+                submissionDto
+        );
+    }
+
+    /**
+     * Alias method required by ProblemSubmissionController to push evaluation tasks.
+     */
+    public void pushToQueue(JudgeRequest judgeRequest) {
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE_EVALUATION,
+                RabbitMQConfig.ROUTING_KEY_EVALUATION,
+                judgeRequest
         );
     }
 }

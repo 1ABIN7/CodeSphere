@@ -10,7 +10,7 @@
     <groupId>com.CodeSphere</groupId>
     <artifactId>backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>codesphere-backend</name>
+    <name>CodeSphere-backend</name>
     <description>CodeSphere Backend Services</description>
 
     <properties>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
-            <version>8.5.10</version>
+            <version>8.5.12</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -95,8 +95,8 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <optional>true</optional>
+            <version>1.18.30</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
