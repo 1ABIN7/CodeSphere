@@ -17,13 +17,16 @@ import org.springframework.stereotype.Component;
  * To run: make sure spring.profiles.active=dev in application-dev.yml
  */
 @Component
-@Profile("dev") // Only runs in development — never in production
+@Profile("dev")
 public class DataSeeder implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
+    // 1. Inject the PasswordEncoder bean
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public DataSeeder(JdbcTemplate jdbcTemplate) {
+    public DataSeeder(JdbcTemplate jdbcTemplate, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.jdbcTemplate = jdbcTemplate;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -69,28 +72,25 @@ public class DataSeeder implements CommandLineRunner {
      * Password for all: password123 (BCrypt hashed)
      */
     private void seedUsers() {
-        // BCrypt hash of "password123"
-        String passwordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+        // 2. Dynamically encode the raw password using the app's encoder
+        String passwordHash = passwordEncoder.encode("password123");
 
-        // Insert admin user
         jdbcTemplate.update(
-            "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "admin", "admin@demo.com", passwordHash, passwordHash, "ROLE_SUPER_ADMIN", "Admin", "User"
+                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+                "admin", "admin@demo.com", passwordHash, passwordHash, "ROLE_SUPER_ADMIN", "Admin", "User"
         );
 
-        // Insert evaluator user
         jdbcTemplate.update(
-            "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "evaluator", "evaluator@demo.com", passwordHash, passwordHash, "ROLE_EXAMINER", "Evaluator", "User"
+                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+                "evaluator", "evaluator@demo.com", passwordHash, passwordHash, "ROLE_EXAMINER", "Evaluator", "User"
         );
 
-        // Insert candidate user
         jdbcTemplate.update(
-            "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "candidate", "candidate@demo.com", passwordHash, passwordHash, "ROLE_CANDIDATE", "Candidate", "User"
+                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+                "candidate", "candidate@demo.com", passwordHash, passwordHash, "ROLE_CANDIDATE", "Candidate", "User"
         );
 
         System.out.println("[DataSeeder] Users seeded.");
