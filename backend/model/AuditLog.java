@@ -3,8 +3,7 @@ package com.CodeSphere.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
-import com.codesphere.backend.security.AesEncryptor;
-import jakarta.persistence.*;
+import com.CodeSphere.backend.util.AesEncryptor;
 import java.time.LocalDateTime;
 
 

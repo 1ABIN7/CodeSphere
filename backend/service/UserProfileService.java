@@ -1,9 +1,9 @@
 package com.codesphere.backend.service;
 
-import com.codesphere.backend.dto.AssessmentRecommendationDTO;
-import com.codesphere.backend.dto.CertificationDTO;
-import com.codesphere.backend.dto.ExamHistoryDTO;
-import com.codesphere.backend.dto.SubmissionHistoryDTO;
+import com.CodeSphere.backend.dto.AssessmentRecommendationDTO;
+import com.CodeSphere.backend.dto.CertificationDTO;
+import com.CodeSphere.backend.dto.submission.ExamHistoryDTO;
+import com.CodeSphere.backend.dto.submission.SubmissionHistoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

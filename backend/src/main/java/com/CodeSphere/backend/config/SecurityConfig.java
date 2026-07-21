@@ -1,6 +1,7 @@
-package com.CodeSphere.backend.config;
+package com.CodeSphere.backend.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,13 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Consolidated Security Configuration.
- *
- * Merges the two previous SecurityConfig versions into a single canonical bean.
- * Wires the JwtAuthenticationFilter into the filter chain, defines role-based
- * access rules for all API endpoints, and configures CORS for frontend access.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -36,46 +30,48 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Value("${app.cors.allowed-origin:http://localhost:5173}")
+    private String allowedOrigin;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // ---- Public Endpoints ----
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // ---- Public Endpoints ----
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                // ---- Problem Management (create/update/delete = admin/examiner) ----
-                .requestMatchers(HttpMethod.POST, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.PUT, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.PATCH, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.DELETE, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
+                        // ---- Problem Management (create/update/delete = admin/examiner) ----
+                        .requestMatchers(HttpMethod.POST, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers(HttpMethod.PUT, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
 
-                // ---- Submissions (authenticated users) ----
-                .requestMatchers("/api/submissions/**").authenticated()
+                        // ---- Submissions ----
+                        .requestMatchers("/api/submissions/**").authenticated()
 
-                // ---- Interview Module ----
-                .requestMatchers(HttpMethod.GET, "/api/interview/categories").permitAll()
-                .requestMatchers("/api/interview/**").authenticated()
+                        // ---- Interview Module ----
+                        .requestMatchers(HttpMethod.GET, "/api/interview/categories").permitAll()
+                        .requestMatchers("/api/interview/**").authenticated()
 
-                // ---- File Storage (authenticated users) ----
-                .requestMatchers("/api/files/**").authenticated()
+                        // ---- File Storage ----
+                        .requestMatchers("/api/files/**").authenticated()
 
-                // ---- Admin Endpoints ----
-                .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/api/org/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
-                .requestMatchers("/api/exams/manage/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers("/api/courses/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "INSTRUCTOR")
-                .requestMatchers("/api/candidate/**").hasRole("CANDIDATE")
+                        // ---- Admin & Role Endpoints ----
+                        .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/api/org/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
+                        .requestMatchers("/api/exams/manage/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers("/api/courses/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "INSTRUCTOR")
+                        .requestMatchers("/api/candidate/**").hasRole("CANDIDATE")
 
-                // ---- Default: require authentication ----
-                .anyRequest().authenticated()
-            )
-            // Wire JWT filter before Spring's UsernamePasswordAuthenticationFilter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                        // ---- Default ----
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -94,10 +90,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        // Allows both local dev URLs and property-based origin
         configuration.setAllowedOrigins(List.of(
+                allowedOrigin,
                 "http://localhost:5173",
                 "http://localhost:3000"
         ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of(
                 "Authorization", "Content-Type", "Cache-Control",

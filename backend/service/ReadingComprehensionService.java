@@ -1,8 +1,7 @@
 package com.codesphere.backend.service;
 
-import com.codesphere.backend.model.AssessmentAnswer;
 import com.codesphere.backend.model.AssessmentSession;
-import com.codesphere.backend.model.ComprehensionViewDto;
+import com.CodeSphere.backend.dto.ComprehensionViewDto;
 import com.codesphere.backend.model.Question;
 import com.codesphere.backend.repository.AssessmentSessionRepository;
 import com.codesphere.backend.repository.QuestionBankRepository;

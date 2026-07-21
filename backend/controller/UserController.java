@@ -1,7 +1,7 @@
 package com.codesphere.backend.controller;
 
 import com.codesphere.backend.model.ProfileDto;
-import com.codesphere.backend.model.UserDashboardDto;
+import com.CodeSphere.backend.dto.UserDashboardDto;
 import com.codesphere.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

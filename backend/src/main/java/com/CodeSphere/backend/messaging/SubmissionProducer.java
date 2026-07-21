@@ -17,8 +17,8 @@ public class SubmissionProducer {
     public void pushToQueue(JudgeRequest request) {
         log.info("Pushing submission/run request {} to judge-queue", request.getSubmissionId());
         rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.ROUTING_KEY,
+                RabbitMQConfig.EXCHANGE_JUDGE,
+                RabbitMQConfig.ROUTING_KEY_JUDGE,
                 request
         );
     }

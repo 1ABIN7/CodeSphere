@@ -5,31 +5,27 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Function;
 
-/**
- * JWT Token Provider using HS256 (symmetric key).
- *
- * Uses a static key so tokens survive backend restarts during development.
- */
 @Component
 public class JwtTokenProvider {
 
-    // A static secret key string (must be at least 256 bits / 32 characters long for HS256)
-    private static final String SECRET_KEY_STRING = "CodeSphereSecretKeyForDevelopmentOnly1234567890";
     private final SecretKey secretKey;
-    
-    // Token validity: 24 hours
-    private final long jwtExpirationInMs = 86400000;
+    private final long jwtExpirationInMs;
 
-    public JwtTokenProvider() {
-        this.secretKey = Keys.hmacShaKeyFor(SECRET_KEY_STRING.getBytes());
+    public JwtTokenProvider(
+            @Value("${app.jwt.secret:CodeSphereSecretKeyForDevelopmentOnly1234567890}") String secret,
+            @Value("${app.jwt.expiration-ms:86400000}") long jwtExpirationInMs) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.jwtExpirationInMs = jwtExpirationInMs;
     }
 
     // Generate token using the Secret Key
@@ -40,7 +36,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
-                .setIssuedAt(new Date())
+                .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();

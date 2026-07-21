@@ -2,7 +2,7 @@ package com.codesphere.backend.service;
 
 import com.codesphere.backend.model.User;
 import com.codesphere.backend.model.ProfileDto;
-import com.codesphere.backend.model.UserDashboardDto;
+import com.CodeSphere.backend.dto.UserDashboardDto;
 import com.codesphere.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

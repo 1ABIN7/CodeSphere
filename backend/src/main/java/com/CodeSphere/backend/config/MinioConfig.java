@@ -1,4 +1,4 @@
-package com.codesphere.backend.config;
+package com.CodeSphere.backend.config;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;

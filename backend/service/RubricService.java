@@ -4,7 +4,7 @@ import com.codesphere.backend.model.Question;
 import com.codesphere.backend.model.Rubric;
 import com.codesphere.backend.model.RubricCriterion;
 import com.codesphere.backend.repository.QuestionBankRepository;
-import com.codesphere.backend.repository.RubricRepository;
+import com.CodeSphere.backend.repository.RubricRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;

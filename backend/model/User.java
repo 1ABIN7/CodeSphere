@@ -5,8 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDateTime;
-import com.codesphere.backend.security.AesEncryptor;
-import jakarta.persistence.*;
+import com.CodeSphere.backend.util.AesEncryptor;
 
 @Entity
 @Table(name = "users")

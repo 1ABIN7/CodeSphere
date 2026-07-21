@@ -1,4 +1,4 @@
-package com.codesphere.backend.repository.specification;
+package com.CodeSphere.backend.repository.specification;
 
 import com.codesphere.backend.model.Question;
 import jakarta.persistence.criteria.Join;

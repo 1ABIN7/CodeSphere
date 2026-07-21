@@ -1,6 +1,6 @@
-package com.codesphere.backend.repository;
+package com.CodeSphere.backend.repository;
 
-import com.codesphere.backend.model.AssessmentAnswer;
+import com.CodeSphere.backend.model.AssessmentAnswer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

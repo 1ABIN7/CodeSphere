@@ -1,6 +1,6 @@
 package com.codesphere.backend.controller;
 
-import com.codesphere.backend.model.ComprehensionViewDto;
+import com.CodeSphere.backend.dto.ComprehensionViewDto;
 import com.codesphere.backend.service.ReadingComprehensionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

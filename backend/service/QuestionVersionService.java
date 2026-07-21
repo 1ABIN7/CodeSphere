@@ -3,7 +3,7 @@ package com.codesphere.backend.service;
 import com.codesphere.backend.model.Question;
 import com.codesphere.backend.model.QuestionVersion;
 import com.codesphere.backend.repository.QuestionBankRepository;
-import com.codesphere.backend.repository.QuestionVersionRepository;
+import com.CodeSphere.backend.repository.QuestionVersionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

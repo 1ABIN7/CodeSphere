@@ -4,7 +4,7 @@ import com.codesphere.backend.model.AssessmentAnswer;
 import com.codesphere.backend.model.AssessmentSection;
 import com.codesphere.backend.model.AssessmentSession;
 import com.codesphere.backend.model.Question;
-import com.codesphere.backend.repository.AssessmentAnswerRepository;
+import com.CodeSphere.backend.repository.AssessmentAnswerRepository;
 import com.codesphere.backend.repository.AssessmentSectionRepository;
 import com.codesphere.backend.repository.AssessmentSessionRepository;
 import com.codesphere.backend.repository.QuestionBankRepository;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

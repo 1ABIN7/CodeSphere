@@ -1,4 +1,4 @@
-package com.codesphere.backend.model;
+package com.CodeSphere.backend.dto;
 
 import java.util.List;
 

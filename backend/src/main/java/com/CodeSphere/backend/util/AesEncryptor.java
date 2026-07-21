@@ -1,4 +1,4 @@
-package com.codesphere.backend.security;
+package com.CodeSphere.backend.util;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

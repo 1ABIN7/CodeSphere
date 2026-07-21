@@ -1,4 +1,4 @@
-package com.codesphere.backend.dto;
+package com.CodeSphere.backend.dto;
 
 import com.codesphere.backend.validation.SanitizedHtml;
 import jakarta.validation.constraints.NotBlank;

@@ -3,7 +3,7 @@ package com.codesphere.backend.service;
 import com.codesphere.backend.config.RabbitMQConfig;
 import com.codesphere.backend.model.AssessmentAnswer;
 import com.codesphere.backend.model.Question;
-import com.codesphere.backend.repository.AssessmentAnswerRepository;
+import com.CodeSphere.backend.repository.AssessmentAnswerRepository;
 import com.codesphere.backend.repository.QuestionBankRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;

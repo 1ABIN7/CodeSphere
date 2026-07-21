@@ -1,9 +1,9 @@
 package com.codesphere.backend.service;
 
-import com.codesphere.backend.config.MinioConfig;
+import com.CodeSphere.backend.config.MinioConfig;
 import com.codesphere.backend.config.RabbitMQConfig;
 import com.codesphere.backend.model.AssessmentAnswer;
-import com.codesphere.backend.repository.AssessmentAnswerRepository;
+import com.CodeSphere.backend.repository.AssessmentAnswerRepository;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.PutObjectArgs;

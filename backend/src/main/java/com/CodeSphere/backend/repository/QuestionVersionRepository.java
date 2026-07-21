@@ -1,4 +1,4 @@
-package com.codesphere.backend.repository;
+package com.CodeSphere.backend.repository;
 
 import com.codesphere.backend.model.QuestionVersion;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -14,7 +14,7 @@ import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomerDetailService implements UserDetailsService {
 
     private final UserRepository userRepository;
 

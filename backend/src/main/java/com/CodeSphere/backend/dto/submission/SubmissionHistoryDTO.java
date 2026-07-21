@@ -1,4 +1,4 @@
-package com.codesphere.backend.dto;
+package com.CodeSphere.backend.dto.submission;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.codesphere.backend.repository;
+package com.CodeSphere.backend.repository;
 
 import com.codesphere.backend.model.Question;
 import org.springframework.stereotype.Repository;

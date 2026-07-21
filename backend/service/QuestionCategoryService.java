@@ -1,7 +1,7 @@
 package com.codesphere.backend.service;
 
 import com.codesphere.backend.model.QuestionCategory;
-import com.codesphere.backend.repository.QuestionCategoryRepository;
+import com.CodeSphere.backend.repository.QuestionCategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

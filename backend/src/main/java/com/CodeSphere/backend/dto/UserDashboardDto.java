@@ -1,6 +1,5 @@
-package com.codesphere.backend.model;
+package com.CodeSphere.backend.dto;
 
-import java.util.List;
 import java.util.Map;
 
 public class UserDashboardDto {
