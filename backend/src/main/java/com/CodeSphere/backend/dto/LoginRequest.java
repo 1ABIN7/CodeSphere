@@ -15,4 +15,11 @@ public class LoginRequest {
 
     @NotBlank(message = "Password is required")
     private String password;
+
+    /**
+     * Alias getter to satisfy controllers/services expecting getUsername()
+     */
+    public String getUsername() {
+        return usernameOrEmail;
+    }
 }

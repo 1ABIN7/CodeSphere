@@ -33,7 +33,7 @@ public class OpenApiConfig {
         // Project contact info
         Contact contact = new Contact();
         contact.setName("CodeSphere Team");
-        contact.setEmail("team@codesphere.com");
+        contact.setEmail("team@CodeSphere.com");
 
         // API metadata — title, version, description
         Info info = new Info()

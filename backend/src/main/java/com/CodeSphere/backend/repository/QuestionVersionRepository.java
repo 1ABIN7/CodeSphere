@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.repository;
 
-import com.codesphere.backend.model.QuestionVersion;
+import com.CodeSphere.backend.model.QuestionVersion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

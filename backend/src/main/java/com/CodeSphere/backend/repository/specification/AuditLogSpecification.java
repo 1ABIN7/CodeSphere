@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.repository.specification;
 
-import com.codesphere.backend.model.AuditLog;
+import com.CodeSphere.backend.model.AuditLog;
 import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDateTime;
 

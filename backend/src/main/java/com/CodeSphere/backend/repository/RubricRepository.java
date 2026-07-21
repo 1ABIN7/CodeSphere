@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.repository;
 
-import com.codesphere.backend.model.Rubric;
+import com.CodeSphere.backend.model.Rubric;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

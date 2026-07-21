@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.repository.specification;
 
-import com.codesphere.backend.model.Question;
+import com.CodeSphere.backend.model.Question;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;

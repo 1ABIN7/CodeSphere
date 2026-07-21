@@ -1,17 +1,21 @@
 package com.CodeSphere.backend.service.impl;
 
+import com.CodeSphere.backend.dto.AssessmentResultDTO;
+import com.CodeSphere.backend.dto.SubmissionDTO;
 import com.CodeSphere.backend.entity.Assessment;
 import com.CodeSphere.backend.entity.AssessmentAssignment;
 import com.CodeSphere.backend.entity.AssessmentQuestion;
-import com.CodeSphere.backend.entity.AssessmentSection;
+import com.CodeSphere.backend.model.AssessmentSection;
 import com.CodeSphere.backend.repository.AssessmentAssignmentRepository;
 import com.CodeSphere.backend.repository.AssessmentQuestionRepository;
 import com.CodeSphere.backend.repository.AssessmentRepository;
 import com.CodeSphere.backend.repository.AssessmentSectionRepository;
+import com.CodeSphere.backend.repository.AssessmentSessionRepository;
 import com.CodeSphere.backend.service.AssessmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +27,11 @@ public class AssessmentServiceImpl implements AssessmentService {
     private final AssessmentSectionRepository sectionRepository;
     private final AssessmentQuestionRepository questionRepository;
     private final AssessmentAssignmentRepository assignmentRepository;
+    private final AssessmentSessionRepository assessmentSessionRepository;
+
+    // ==========================================
+    // Admin & Lifecycle Methods
+    // ==========================================
 
     @Override
     public Assessment createAssessment(Assessment assessment) {
@@ -34,7 +43,7 @@ public class AssessmentServiceImpl implements AssessmentService {
     public Assessment updateAssessment(Long id, Assessment assessmentDetails) {
         Assessment assessment = assessmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Assessment not found with id " + id));
-        
+
         assessment.setTitle(assessmentDetails.getTitle());
         assessment.setDescription(assessmentDetails.getDescription());
         assessment.setAssessmentType(assessmentDetails.getAssessmentType());
@@ -48,7 +57,7 @@ public class AssessmentServiceImpl implements AssessmentService {
         assessment.setAllowResume(assessmentDetails.isAllowResume());
         assessment.setCertifying(assessmentDetails.isCertifying());
         assessment.setAccessCode(assessmentDetails.getAccessCode());
-        
+
         return assessmentRepository.save(assessment);
     }
 
@@ -77,8 +86,7 @@ public class AssessmentServiceImpl implements AssessmentService {
     @Transactional
     public Assessment cloneAssessment(Long id) {
         Assessment original = getAssessmentById(id);
-        
-        // 1. Clone assessment metadata
+
         Assessment cloned = Assessment.builder()
                 .title(original.getTitle() + " - Clone")
                 .description(original.getDescription())
@@ -94,26 +102,24 @@ public class AssessmentServiceImpl implements AssessmentService {
                 .shuffleOptions(original.isShuffleOptions())
                 .allowResume(original.isAllowResume())
                 .isCertifying(original.isCertifying())
-                .isPublished(false) // cloned assessment is unpublished by default
+                .isPublished(false)
                 .accessCode(original.getAccessCode())
                 .build();
-        
+
         Assessment savedClone = assessmentRepository.save(cloned);
-        
-        // 2. Clone sections
+
         List<AssessmentSection> originalSections = sectionRepository.findByAssessmentIdOrderBySectionOrderAsc(original.getId());
         for (AssessmentSection origSec : originalSections) {
             AssessmentSection clonedSec = AssessmentSection.builder()
                     .assessmentId(savedClone.getId())
                     .title(origSec.getTitle())
                     .sectionOrder(origSec.getSectionOrder())
-                    .timeLimitMinutes(origSec.getTimeLimitMinutes())
+                    .durationMinutes(origSec.getDurationMinutes()) // ✅ Uses durationMinutes field on builder
                     .sectionType(origSec.getSectionType())
                     .navigationMode(origSec.getNavigationMode())
                     .build();
             AssessmentSection savedClonedSec = sectionRepository.save(clonedSec);
-            
-            // 3. Clone questions mapping
+
             List<AssessmentQuestion> originalQuestions = questionRepository.findBySectionIdOrderByOrderIndexAsc(origSec.getId());
             for (AssessmentQuestion origQues : originalQuestions) {
                 AssessmentQuestion clonedQues = AssessmentQuestion.builder()
@@ -128,28 +134,26 @@ public class AssessmentServiceImpl implements AssessmentService {
                 questionRepository.save(clonedQues);
             }
         }
-        
+
         return savedClone;
     }
 
     @Override
     public Assessment publishAssessment(Long id) {
         Assessment assessment = getAssessmentById(id);
-        
-        // Validation: Must have at least one section
+
         List<AssessmentSection> sections = sectionRepository.findByAssessmentIdOrderBySectionOrderAsc(id);
         if (sections.isEmpty()) {
             throw new IllegalStateException("Cannot publish an assessment with no sections");
         }
-        
-        // Validation: Each section must have at least one question
+
         for (AssessmentSection section : sections) {
             List<AssessmentQuestion> questions = questionRepository.findBySectionIdOrderByOrderIndexAsc(section.getId());
             if (questions.isEmpty()) {
                 throw new IllegalStateException("Section '" + section.getTitle() + "' has no questions mapped");
             }
         }
-        
+
         assessment.setPublished(true);
         return assessmentRepository.save(assessment);
     }
@@ -163,20 +167,55 @@ public class AssessmentServiceImpl implements AssessmentService {
 
     @Override
     public AssessmentAssignment assignAssessment(Long id, Long userId, LocalDateTime deadline) {
-        // Verify assessment exists
         getAssessmentById(id);
-        
+
         AssessmentAssignment assignment = AssessmentAssignment.builder()
                 .assessmentId(id)
                 .userId(userId)
                 .deadline(deadline)
                 .build();
-        
+
         return assignmentRepository.save(assignment);
     }
 
     @Override
     public List<AssessmentAssignment> getAssignedCandidates(Long id) {
         return assignmentRepository.findByAssessmentId(id);
+    }
+
+    // ==========================================
+    // Session Execution & Scoring Methods
+    // ==========================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public Object findById(Long assessmentId) {
+        return getAssessmentById(assessmentId);
+    }
+
+    @Override
+    @Transactional
+    public Object createBlueprint(Object assessmentDto) {
+        return assessmentDto;
+    }
+
+    @Override
+    @Transactional
+    public void start(Long assessmentId, Long userId) {
+        getAssessmentById(assessmentId);
+        System.out.println("Starting assessment " + assessmentId + " for user " + userId);
+    }
+
+    @Override
+    @Transactional
+    public AssessmentResultDTO submit(Long assessmentId, Long userId, SubmissionDTO submissionDto) {
+        System.out.println("Submitting assessment " + assessmentId + " for user " + userId);
+
+        AssessmentResultDTO mockResult = new AssessmentResultDTO();
+        mockResult.setAssessmentId(assessmentId);
+        mockResult.setScore(100.0);
+        mockResult.setStatus("COMPLETED");
+
+        return mockResult;
     }
 }

@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.service;
 
-import com.CodeSphere.backend.entity.AssessmentSection;
+import com.CodeSphere.backend.model.AssessmentSection;
 import java.util.List;
 
 public interface AssessmentSectionService {

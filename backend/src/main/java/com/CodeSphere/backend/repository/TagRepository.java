@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.repository;
 
-import com.codesphere.backend.model.Question;
+import com.CodeSphere.backend.model.Question;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Map;

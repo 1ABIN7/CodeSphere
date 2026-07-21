@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.dto;
 
-import com.codesphere.backend.validation.SanitizedHtml;
+import com.CodeSphere.backend.validation.SanitizedHtml;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;

@@ -1,6 +1,7 @@
 package com.CodeSphere.backend.dto;
 
 import java.util.List;
+import com.CodeSphere.backend.model.Question;
 
 public class ComprehensionViewDto {
     private Long passageQuestionId;

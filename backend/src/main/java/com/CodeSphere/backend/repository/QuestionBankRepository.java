@@ -15,9 +15,9 @@ public interface QuestionBankRepository extends JpaRepository<Question, Long>, J
 }
 
 /*
-package com.codesphere.backend.repository;
+package com.CodeSphere.backend.repository;
 
-import com.codesphere.backend.model.Question;
+import com.CodeSphere.backend.model.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

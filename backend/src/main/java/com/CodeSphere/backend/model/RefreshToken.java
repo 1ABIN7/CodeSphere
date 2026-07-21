@@ -1,5 +1,6 @@
 package com.CodeSphere.backend.model;
 
+import com.CodeSphere.backend.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -9,7 +10,8 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "refresh_tokens")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,8 +21,8 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
     @Column(nullable = false, unique = true)

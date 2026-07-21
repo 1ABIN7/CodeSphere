@@ -54,13 +54,13 @@ class AuthServiceTest {
     void setUp() {
         registerRequest = new RegisterRequest();
         registerRequest.setUsername("testuser");
-        registerRequest.setEmail("test@codesphere.com");
+        registerRequest.setEmail("test@CodeSphere.com");
         registerRequest.setPassword("rawPassword");
 
         mockUser = User.builder()
                 .id(1L)
                 .username("testuser")
-                .email("test@codesphere.com")
+                .email("test@CodeSphere.com")
                 .password("encodedPassword")
                 .role(Role.ROLE_CANDIDATE)
                 .emailVerified(false)
@@ -110,7 +110,7 @@ class AuthServiceTest {
     @Test
     void processForgotPassword_Success() {
         ForgotPasswordRequest request = new ForgotPasswordRequest();
-        request.setEmail("test@codesphere.com");
+        request.setEmail("test@CodeSphere.com");
 
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(mockUser));
 

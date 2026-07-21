@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.repository;
 
-import com.codesphere.backend.model.QuestionCategory;
+import com.CodeSphere.backend.model.QuestionCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
