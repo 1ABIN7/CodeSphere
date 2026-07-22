@@ -17,13 +17,16 @@ import org.springframework.stereotype.Component;
  * To run: make sure spring.profiles.active=dev in application-dev.yml
  */
 @Component
-@Profile("dev") // Only runs in development — never in production
+@Profile("dev")
 public class DataSeeder implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
+    // 1. Inject the PasswordEncoder bean
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public DataSeeder(JdbcTemplate jdbcTemplate) {
+    public DataSeeder(JdbcTemplate jdbcTemplate, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.jdbcTemplate = jdbcTemplate;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -42,6 +45,7 @@ public class DataSeeder implements CommandLineRunner {
         seedOrganization();
         seedUsers();
         seedQuestions();
+        seedInterviewQuestions();
         seedAssessment();
         seedProblems();
 
@@ -70,33 +74,70 @@ public class DataSeeder implements CommandLineRunner {
     private void seedUsers() {
         // BCrypt hash of "password123"
         String passwordHash = "$2a$10$UAxBjG5mSnUrTOTh71MuvOVqC2oTUhIDtn96g9FzVMg4UPPfnm.w6";
+        // 2. Dynamically encode the raw password using the app's encoder
+        String passwordHash = passwordEncoder.encode("password123");
 
-        // Insert admin user
         jdbcTemplate.update(
-            "INSERT INTO users (username, email, password, role, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "admin", "admin@demo.com", passwordHash, "ROLE_SUPER_ADMIN", "Admin", "User"
+                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+                "admin", "admin@demo.com", passwordHash, passwordHash, "ROLE_SUPER_ADMIN", "Admin", "User"
         );
 
-        // Insert evaluator user
         jdbcTemplate.update(
-            "INSERT INTO users (username, email, password, role, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "evaluator", "evaluator@demo.com", passwordHash, "ROLE_EXAMINER", "Evaluator", "User"
+                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+                "evaluator", "evaluator@demo.com", passwordHash, passwordHash, "ROLE_EXAMINER", "Evaluator", "User"
         );
 
-        // Insert candidate user
         jdbcTemplate.update(
-            "INSERT INTO users (username, email, password, role, first_name, last_name, organization_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "candidate", "candidate@demo.com", passwordHash, "ROLE_CANDIDATE", "Candidate", "User"
+                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+                "candidate", "candidate@demo.com", passwordHash, passwordHash, "ROLE_CANDIDATE", "Candidate", "User"
         );
 
         System.out.println("[DataSeeder] Users seeded.");
     }
 
     /**
-     * Seeds 5 sample MCQ questions into the question bank
+     * Seeds sample interview prep questions across categories.
+     */
+    private void seedInterviewQuestions() {
+        System.out.println("[DataSeeder] Seeding interview prep questions...");
+        
+        // 1. Get Category IDs
+        Long techId = jdbcTemplate.queryForObject("SELECT id FROM interview_categories WHERE name = 'TECHNICAL'", Long.class);
+        Long aptId = jdbcTemplate.queryForObject("SELECT id FROM interview_categories WHERE name = 'APTITUDE'", Long.class);
+        Long logId = jdbcTemplate.queryForObject("SELECT id FROM interview_categories WHERE name = 'LOGICAL'", Long.class);
+        Long gramId = jdbcTemplate.queryForObject("SELECT id FROM interview_categories WHERE name = 'GRAMMAR'", Long.class);
+        Long hrId = jdbcTemplate.queryForObject("SELECT id FROM interview_categories WHERE name = 'BEHAVIORAL'", Long.class);
+
+        // Technical
+        jdbcTemplate.update("INSERT INTO interview_questions (category_id, question_type, difficulty, topic, question_text, options, correct_answer, explanation) VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)",
+            techId, "MCQ", "MEDIUM", "Java OOP", "What is polymorphism?", "[{\"id\": \"A\", \"text\": \"Hiding implementation details\"}, {\"id\": \"B\", \"text\": \"Multiple inheritance\"}, {\"id\": \"C\", \"text\": \"Ability of an object to take on many forms\"}, {\"id\": \"D\", \"text\": \"Data binding\"}]", "C", "Polymorphism allows objects of different classes to be treated as objects of a common superclass.");
+        jdbcTemplate.update("INSERT INTO interview_questions (category_id, question_type, difficulty, topic, question_text, options, correct_answer, explanation) VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)",
+            techId, "TRUE_FALSE", "EASY", "SQL", "INNER JOIN returns all rows from both tables even if there is no match.", "[{\"id\": \"A\", \"text\": \"True\"}, {\"id\": \"B\", \"text\": \"False\"}]", "B", "INNER JOIN returns only rows that have matching values in both tables. FULL OUTER JOIN returns all rows.");
+            
+        // Aptitude
+        jdbcTemplate.update("INSERT INTO interview_questions (category_id, question_type, difficulty, topic, question_text, options, correct_answer, explanation) VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)",
+            aptId, "MCQ", "MEDIUM", "Time & Work", "If A can do a work in 10 days and B can do it in 15 days, how long will they take working together?", "[{\"id\": \"A\", \"text\": \"5 days\"}, {\"id\": \"B\", \"text\": \"6 days\"}, {\"id\": \"C\", \"text\": \"8 days\"}, {\"id\": \"D\", \"text\": \"12.5 days\"}]", "B", "A's 1 day work = 1/10. B's = 1/15. Together = 1/10 + 1/15 = 3/30 + 2/30 = 5/30 = 1/6. So, 6 days.");
+
+        // Logical
+        jdbcTemplate.update("INSERT INTO interview_questions (category_id, question_type, difficulty, topic, question_text, options, correct_answer, explanation) VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)",
+            logId, "MCQ", "HARD", "Syllogism", "Statements: Some cats are dogs. All dogs are birds. Conclusion: Some cats are birds.", "[{\"id\": \"A\", \"text\": \"True\"}, {\"id\": \"B\", \"text\": \"False\"}]", "A", "Since some cats overlap with dogs, and all dogs are inside birds, the overlapping cats must also be birds.");
+
+        // Grammar
+        jdbcTemplate.update("INSERT INTO interview_questions (category_id, question_type, difficulty, topic, question_text, correct_answer, explanation) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            gramId, "FILL_BLANK", "EASY", "Prepositions", "He is good ___ playing the piano.", "at", "The correct preposition for a skill or ability is 'at' (e.g., good at, bad at).");
+
+        // Behavioral
+        jdbcTemplate.update("INSERT INTO interview_questions (category_id, question_type, difficulty, topic, question_text, correct_answer, explanation) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            hrId, "SHORT_ANSWER", "MEDIUM", "Conflict Resolution", "Describe a time you disagreed with a team member and how you resolved it.", "Open answer", "Looking for STAR method (Situation, Task, Action, Result) focusing on communication and compromise.");
+
+        System.out.println("[DataSeeder] Interview prep questions seeded.");
+    }
+    
+    /**
+     * Seeds 5 sample MCQ questions into the old question bank
      */
     private void seedQuestions() {
         // Question 1

@@ -87,8 +87,9 @@ public class SubmissionController {
     }
 
     private Long getUserId(Authentication authentication) {
-        // Extract user ID from the authentication principal
-        // In production, this would come from the JWT claims
-        return authentication != null ? 1L : null; // Placeholder
+        if (authentication != null && authentication.getPrincipal() instanceof com.CodeSphere.backend.security.CustomUserDetails) {
+            return ((com.CodeSphere.backend.security.CustomUserDetails) authentication.getPrincipal()).getId();
+        }
+        return null;
     }
 }

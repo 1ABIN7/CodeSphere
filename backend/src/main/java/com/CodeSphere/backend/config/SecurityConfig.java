@@ -59,6 +59,10 @@ public class SecurityConfig {
                 // ---- Submissions (authenticated users) ----
                 .requestMatchers("/api/submissions/**").authenticated()
 
+                // ---- Interview Module ----
+                .requestMatchers(HttpMethod.GET, "/api/interview/categories").permitAll()
+                .requestMatchers("/api/interview/**").authenticated()
+
                 // ---- File Storage (authenticated users) ----
                 .requestMatchers("/api/files/**").authenticated()
 

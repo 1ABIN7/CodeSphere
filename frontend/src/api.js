@@ -99,6 +99,24 @@ export const authExtendedAPI = {
   // TODO: backend endpoint pending — see AuthController
   verifyEmail: (token) => api.get(`/auth/verify-email?token=${token}`),
   // TODO: backend endpoint pending — see AuthController
+// ─── Interview Prep ───
+export const interviewAPI = {
+  getCategories: () => api.get('/interview/categories'),
+  startSession: (data) => api.post('/interview/sessions', data),
+  getNextQuestion: (sessionId) => api.get(`/interview/sessions/${sessionId}/next`),
+  submitAnswer: (sessionId, questionId, data) => api.post(`/interview/sessions/${sessionId}/answers?questionId=${questionId}`, data),
+  completeSession: (sessionId) => api.post(`/interview/sessions/${sessionId}/complete`),
+  getSessionResult: (sessionId) => api.get(`/interview/sessions/${sessionId}/result`),
+  getPerformanceSummary: () => api.get('/interview/performance'),
+};
+
+// ─── Proctoring ───
+export const proctoringAPI = {
+  recordEvent: (sessionId, data) => api.post(`/proctoring/sessions/${sessionId}/events`, data),
+  uploadSnapshot: (sessionId, formData, eventType = 'WEBCAM_SNAPSHOT') => api.post(`/proctoring/sessions/${sessionId}/snapshot?eventType=${eventType}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  getConfig: (assessmentId) => api.get(`/proctoring/assessments/${assessmentId}/config`),
 };
 
 export default api;

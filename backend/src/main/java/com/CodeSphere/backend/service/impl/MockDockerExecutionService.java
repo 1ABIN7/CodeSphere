@@ -2,11 +2,17 @@ package com.CodeSphere.backend.service.impl;
 
 import com.CodeSphere.backend.dto.DockerExecutionResult;
 import com.CodeSphere.backend.service.DockerExecutionService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
+/**
+ * Mock Docker execution service used when judge.use-docker=false (dev / CI).
+ * Returns randomized verdicts without actually running code in containers.
+ */
 @Service
+@ConditionalOnProperty(name = "judge.use-docker", havingValue = "false", matchIfMissing = true)
 public class MockDockerExecutionService implements DockerExecutionService {
 
     private final Random random = new Random();

@@ -11,6 +11,8 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.transaction.annotation.Transactional; // Ensure this is imported
+
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -19,8 +21,9 @@ public class RefreshTokenService {
     private final long refreshTokenDurationMs = 604800000; // 7 days
 
     @Transactional
+    @Transactional // ◄ Add this annotation here!
     public RefreshToken createRefreshToken(User user) {
-        // Remove any existing token first
+        // This will now execute safely inside a transaction context
         refreshTokenRepository.deleteByUser(user);
 
         RefreshToken token = RefreshToken.builder()

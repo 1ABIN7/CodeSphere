@@ -51,6 +51,9 @@ app:
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket-name: questions-import-vault
 
+  cors:
+    allowed-origin: "http://localhost:3000"
+
 # Storage configuration
 storage:
   active-backend: local
@@ -72,9 +75,16 @@ judge:
   thread-pool-core-size: 4
   thread-pool-max-size: 8
   queue-capacity: 100
+  use-docker: false   # Set to true in production to enable real Docker sandboxing
   supported-languages:
     - java
     - python
     - cpp
     - c
     - javascript
+
+# Data Encryption Configuration (Added for AES-256 PII protection)
+# Aligned to the root level so Spring can resolve @Value("${security.encryption.key}")
+security:
+  encryption:
+    key: "c0deSph3reSecUr1tyK3y2026AES256!"

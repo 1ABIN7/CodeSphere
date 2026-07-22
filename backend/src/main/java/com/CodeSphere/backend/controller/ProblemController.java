@@ -134,9 +134,10 @@ public class ProblemController {
     // ---- Helpers ----
 
     private Long getUserId(Authentication authentication) {
-        // In a full implementation, extract from the JWT/UserDetails
-        // For now, return null for unauthenticated access
-        return authentication != null ? 1L : null; // Placeholder
+        if (authentication != null && authentication.getPrincipal() instanceof com.CodeSphere.backend.security.CustomUserDetails) {
+            return ((com.CodeSphere.backend.security.CustomUserDetails) authentication.getPrincipal()).getId();
+        }
+        return null;
     }
 
     private boolean isAdminOrExaminer(Authentication authentication) {

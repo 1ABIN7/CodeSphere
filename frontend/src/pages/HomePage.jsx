@@ -27,6 +27,20 @@ const STATS = [
   { icon: <Code2 size={24} className="text-accent" />, title: '8+ Languages', desc: 'Java, Python, C++, and more' },
   { icon: <Box size={24} className="text-accent" />, title: 'Docker-Sandboxed', desc: 'Secure code execution' },
   { icon: <ShieldCheck size={24} className="text-accent" />, title: 'Real-time Proctoring', desc: 'Tab-switch & behavior tracking' },
+const FEATURES = [
+  { icon: '⚡', title: 'AI-Powered Judge', desc: 'Our judge engine analyses your code in real-time — complexity, patterns, quality score, and smart feedback.' },
+  { icon: '🧠', title: 'Smart Analysis', desc: 'Get time & space complexity estimates, anti-pattern detection, and personalised optimisation hints.' },
+  { icon: '📝', title: 'Interview Prep', desc: 'Master technical, aptitude, logical, and HR questions with curated mock tests and performance tracking.' },
+  { icon: '📂', title: 'File Storage', desc: 'Upload editorial PDFs, test data, and attachments. Local and MinIO S3 backends supported out of the box.' },
+  { icon: '🏆', title: '25 Curated Problems', desc: 'From Two Sum to N-Queens — 8 easy, 10 medium, 7 hard problems covering every major pattern.' },
+  { icon: '🔒', title: 'Role-Based Access', desc: 'Multi-tenant platform with Super Admin, Org Admin, Examiner, Instructor, and Candidate roles.' },
+];
+
+const STATS = [
+  { value: '25', label: 'Coding Problems' },
+  { value: '100+', label: 'Interview Questions' },
+  { value: '6', label: 'Interview Categories' },
+  { value: '∞', label: 'AI Insights' },
 ];
 
 export default function HomePage() {
@@ -95,6 +109,35 @@ export default function HomePage() {
           >
             <img src={heroImg} alt="CodeSphere Interface" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </motion.div>
+      <section className="hero">
+        <div className="hero-badge">
+          ✨ Production-Ready Coding Platform
+        </div>
+        <h1 className="hero-title">
+          Code Smarter with<br />
+          <span className="hero-gradient">AI-Powered Judging</span>
+        </h1>
+        <p className="hero-subtitle">
+          Practice with 25 curated problems, get instant AI feedback on your code quality,
+          time complexity, and submit in 5 languages.
+        </p>
+        <div className="hero-actions">
+          <Link to="/problems" className="btn btn-primary btn-lg">
+            🚀 Explore Problems
+          </Link>
+          <Link to="/interview" className="btn btn-secondary btn-lg border border-indigo-500/30 hover:border-indigo-500 bg-indigo-500/10 text-indigo-400">
+            🎯 Interview Prep
+          </Link>
+          {!isLoggedIn && (
+            <Link to="/register" className="btn btn-secondary btn-lg">
+              Get Started Free
+            </Link>
+          )}
+          {isLoggedIn && (
+            <Link to="/dashboard" className="btn btn-secondary btn-lg">
+              📊 My Dashboard
+            </Link>
+          )}
         </div>
       </section>
 

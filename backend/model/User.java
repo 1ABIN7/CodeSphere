@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDateTime;
+import com.codesphere.backend.security.AesEncryptor;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -63,5 +65,24 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private Organization organization;
+
+    @Entity
+    @Table(name = "users")
+    public class User {
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        private String username;
+
+        @Convert(converter = AesEncryptor.class)
+        @Column(name = "email", nullable = false, unique = true)
+        private String email;
+
+        // Getters, Setters, other fields...
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+    }
 
 }

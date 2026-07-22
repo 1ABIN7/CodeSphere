@@ -111,6 +111,9 @@ public class FileController {
     }
 
     private Long getUserId(Authentication authentication) {
-        return authentication != null ? 1L : null; // Placeholder
+        if (authentication != null && authentication.getPrincipal() instanceof com.CodeSphere.backend.security.CustomUserDetails) {
+            return ((com.CodeSphere.backend.security.CustomUserDetails) authentication.getPrincipal()).getId();
+        }
+        return null;
     }
 }
