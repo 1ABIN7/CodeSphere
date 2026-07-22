@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { submissionsAPI, problemsAPI } from '../api';
+import { submissionsAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 
 const SKILL_COLORS = ['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -41,7 +40,7 @@ export default function DashboardPage() {
       }
     };
     fetchData();
-  }, [isLoggedIn]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const acceptRate = stats.total > 0 ? ((stats.accepted / stats.total) * 100).toFixed(1) : '0.0';
 

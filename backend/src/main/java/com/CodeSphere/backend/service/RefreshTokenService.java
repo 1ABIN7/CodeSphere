@@ -18,6 +18,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final long refreshTokenDurationMs = 604800000; // 7 days
 
+    @Transactional
     public RefreshToken createRefreshToken(User user) {
         // Remove any existing token first
         refreshTokenRepository.deleteByUser(user);

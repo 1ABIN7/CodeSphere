@@ -1,9 +1,17 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Bell } from 'lucide-react';
+import {
+  Bell,
+  LayoutDashboard,
+  ClipboardCheck,
+  BarChart3,
+  Shield,
+  User,
+  BookOpen,
+} from 'lucide-react';
 
 export default function Navbar() {
-  const { user, logout, isLoggedIn, isAdmin } = useAuth();
+  const { user, logout, isLoggedIn } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -14,8 +22,12 @@ export default function Navbar() {
     navigate('/');
   };
 
-  const isEvaluator = user?.role === 'ROLE_EXAMINER';
-  const isCandidate = user?.role === 'ROLE_CANDIDATE' || user?.role === 'ROLE_USER';
+  const role = user?.role;
+  const isSuperAdmin = role === 'ROLE_SUPER_ADMIN';
+  const isOrgAdmin = role === 'ROLE_ORG_ADMIN';
+  const isInstructor = role === 'ROLE_INSTRUCTOR';
+  const isEvaluator = role === 'ROLE_EXAMINER';
+  const isCandidate = role === 'ROLE_CANDIDATE' || role === 'ROLE_USER';
 
   return (
     <nav className="navbar">
@@ -26,36 +38,66 @@ export default function Navbar() {
         </Link>
 
         <div className="navbar-nav">
-          <Link to="/problems" className={`nav-link ${isActive('/problems') ? 'active' : ''}`}>
-            Practice
-          </Link>
-          
-          {isLoggedIn && isAdmin && !isEvaluator && (
+          {/* Logged out: show Practice */}
+          {!isLoggedIn && (
+            <Link to="/problems" className={`nav-link ${isActive('/problems') ? 'active' : ''}`}>
+              <BookOpen size={14} /> Practice
+            </Link>
+          )}
+
+          {/* Candidate */}
+          {isLoggedIn && isCandidate && (
             <>
-              <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
-                Admin Dashboard
+              <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
+                <LayoutDashboard size={14} /> Dashboard
               </Link>
-              <Link to="/admin/assessments/new" className={`nav-link ${isActive('/admin/assessments/new') ? 'active' : ''}`}>
-                Create Assessment
+              <Link to="/assessments" className={`nav-link ${isActive('/assessments') ? 'active' : ''}`}>
+                <ClipboardCheck size={14} /> Assessments
+              </Link>
+              <Link to="/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`}>
+                <User size={14} /> Profile
               </Link>
             </>
           )}
 
+          {/* Examiner / Evaluator */}
           {isLoggedIn && isEvaluator && (
             <>
               <Link to="/evaluator" className={`nav-link ${isActive('/evaluator') ? 'active' : ''}`}>
-                Evaluator Dashboard
+                <BarChart3 size={14} /> Evaluator
+              </Link>
+              <Link to="/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`}>
+                <User size={14} /> Profile
               </Link>
             </>
           )}
 
-          {isLoggedIn && (isCandidate || (!isAdmin && !isEvaluator)) && (
+          {/* Admin (super, org) */}
+          {isLoggedIn && (isSuperAdmin || isOrgAdmin) && (
             <>
+              <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+                <Shield size={14} /> Admin
+              </Link>
               <Link to="/assessments" className={`nav-link ${isActive('/assessments') ? 'active' : ''}`}>
-                My Assessments
+                <ClipboardCheck size={14} /> Assessments
               </Link>
               <Link to="/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`}>
-                Profile
+                <User size={14} /> Profile
+              </Link>
+            </>
+          )}
+
+          {/* Instructor */}
+          {isLoggedIn && isInstructor && (
+            <>
+              <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+                <Shield size={14} /> Dashboard
+              </Link>
+              <Link to="/assessments" className={`nav-link ${isActive('/assessments') ? 'active' : ''}`}>
+                <ClipboardCheck size={14} /> Assessments
+              </Link>
+              <Link to="/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`}>
+                <User size={14} /> Profile
               </Link>
             </>
           )}
@@ -64,11 +106,12 @@ export default function Navbar() {
         <div className="navbar-actions">
           {isLoggedIn ? (
             <>
+              {/* TODO: wire up notification count from backend */}
               <button className="btn btn-ghost btn-icon" title="Notifications">
                 <Bell size={18} />
               </button>
               <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                👤 {user?.username || 'User'}
+                {user?.username || 'User'}
               </span>
               <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
                 Log Out

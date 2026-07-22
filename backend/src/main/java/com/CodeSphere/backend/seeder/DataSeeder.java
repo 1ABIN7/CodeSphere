@@ -69,7 +69,7 @@ public class DataSeeder implements CommandLineRunner {
      */
     private void seedUsers() {
         // BCrypt hash of "password123"
-        String passwordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+        String passwordHash = "$2a$10$UAxBjG5mSnUrTOTh71MuvOVqC2oTUhIDtn96g9FzVMg4UPPfnm.w6";
 
         // Insert admin user
         jdbcTemplate.update(

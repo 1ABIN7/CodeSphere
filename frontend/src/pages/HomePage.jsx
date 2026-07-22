@@ -30,7 +30,7 @@ const STATS = [
 ];
 
 export default function HomePage() {
-  const { isLoggedIn, user, isAdmin } = useAuth();
+  const { isLoggedIn, isAdmin } = useAuth();
 
   return (
     <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

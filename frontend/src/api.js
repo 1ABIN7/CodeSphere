@@ -51,6 +51,35 @@ export const submissionsAPI = {
   getForProblem: (problemId, params) => api.get(`/submissions/problem/${problemId}`, { params }),
 };
 
+// ─── Assessments ───
+export const assessmentsAPI = {
+  getMyAssessments: (params) => api.get('/assessments/mine', { params }),
+  getAllAssessments: () => api.get('/api/v1/assessments'),
+  getById: (id) => api.get(`/assessments/${id}`),
+  create: (data) => api.post('/api/v1/assessments', data),
+  update: (id, data) => api.put(`/api/v1/assessments/${id}`, data),
+  deleteAssessment: (id) => api.delete(`/api/v1/assessments/${id}`),
+  cloneAssessment: (id) => api.post(`/api/v1/assessments/${id}/clone`),
+  publishAssessment: (id) => api.put(`/api/v1/assessments/${id}/publish`),
+  unpublishAssessment: (id) => api.put(`/api/v1/assessments/${id}/unpublish`),
+  startSession: (assessmentId) => api.post(`/assessments/${assessmentId}/session/start`),
+  getSession: (assessmentId) => api.get(`/assessments/${assessmentId}/session`),
+  saveAnswer: (assessmentId, questionId, data) =>
+    api.post(`/assessments/${assessmentId}/session/answers`, { questionId, ...data }),
+  autosaveAll: (assessmentId, answers) =>
+    api.put(`/assessments/${assessmentId}/session/answers`, { answers }),
+  submit: (assessmentId) => api.post(`/assessments/${assessmentId}/session/submit`),
+  getResult: (assessmentId) => api.get(`/assessments/${assessmentId}/result`),
+  // TODO: backend endpoint pending — see AssessmentController
+  uploadFile: (assessmentId, questionId, formData) =>
+    api.post(`/assessments/${assessmentId}/questions/${questionId}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  // TODO: backend endpoint pending — see AssessmentController
+  runCode: (assessmentId, questionId, data) =>
+    api.post(`/assessments/${assessmentId}/questions/${questionId}/run`, data),
+};
+
 // ─── Files ───
 export const filesAPI = {
   upload: (formData) => api.post('/files/upload', formData, {
@@ -60,6 +89,16 @@ export const filesAPI = {
   getMetadata: (id) => api.get(`/files/${id}/metadata`),
   delete: (id) => api.delete(`/files/${id}`),
   listByEntity: (entityType, entityId) => api.get(`/files/entity/${entityType}/${entityId}`),
+};
+
+// ─── Auth (extended) ───
+export const authExtendedAPI = {
+  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  // TODO: backend endpoint pending — see AuthController
+  resetPassword: (data) => api.post('/auth/reset-password', data),
+  // TODO: backend endpoint pending — see AuthController
+  verifyEmail: (token) => api.get(`/auth/verify-email?token=${token}`),
+  // TODO: backend endpoint pending — see AuthController
 };
 
 export default api;
