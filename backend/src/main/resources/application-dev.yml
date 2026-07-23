@@ -16,26 +16,19 @@ spring:
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
 
-# Storage configuration (dev profile uses local filesystem)
 storage:
   active-backend: local
   local:
     root-path: ./storage/uploads
-  minio:
-    endpoint: http://${MINIO_HOST:127.0.0.1}:9000
-    access-key: ${MINIO_ACCESS_KEY:minioadmin}
-    secret-key: ${MINIO_SECRET_KEY:minioadmin}
-    bucket: CodeSphere-assets
 
-# MinIO Configuration for storing problem assets / testcases if needed (legacy/develop compatibility)
+# MinIO Profile Overrides
 minio:
   endpoint: http://${MINIO_HOST:127.0.0.1}:9000
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin}
-  bucket: CodeSphere-assets
-  bucket-name: questions-import-vault
+  bucket:
+    name: questions-import-vault
 
-# Judge engine (dev settings)
 judge:
   temp-dir: ./judge-temp
 
