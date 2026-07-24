@@ -48,6 +48,7 @@ public class AuthController {
                                    HttpServletResponse response) {
 
         String username = loginRequest.getUsername();
+        System.out.println("DEBUG: Incoming login request for username: " + username);
 
         // 1. Evaluate Rate Limiter (IP-based brute-force/DoS defense)
         String ipAddress = request.getHeader("X-Forwarded-For");
@@ -55,6 +56,7 @@ public class AuthController {
             ipAddress = request.getRemoteAddr();
         }
         if (!rateLimiterService.isAllowed(ipAddress)) {
+            System.out.println("DEBUG: Rate limit exceeded for IP: " + ipAddress);
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .header("Retry-After", "60")
                     .body("Too many login attempts from this IP. Please try again after 1 minute.");
@@ -63,6 +65,7 @@ public class AuthController {
         // 2. Evaluate Account Lockout (Username-based credential stuffing defense)
         if (loginAttemptService.isLockedOut(username)) {
             long waitMinutes = loginAttemptService.getRemainingLockoutMinutes(username);
+            System.out.println("DEBUG: Account locked out for user: " + username);
             return ResponseEntity.status(HttpStatus.LOCKED)
                     .body(String.format("Account locked due to multiple failed attempts. Try again in %d minutes.", waitMinutes));
         }
@@ -78,14 +81,19 @@ public class AuthController {
             // Audit Log
             auditLogService.logAction(authResponse.getUserId(), "LOGIN", "System Auth", request);
 
-            // 4. Set Secure SameSite=Strict HTTP-Only Cookie
-            response.addHeader("Set-Cookie", "AUTH_TOKEN=" + token + "; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Strict");
+            // 4. Set HTTP Cookie
+            // Note: Removed 'Secure' and changed to 'SameSite=Lax' for local HTTP development (localhost)
+            response.addHeader("Set-Cookie", "AUTH_TOKEN=" + token + "; Path=/; Max-Age=3600; HttpOnly; SameSite=Lax");
 
+            System.out.println("DEBUG: Login successful for user: " + username);
             return ResponseEntity.ok(authResponse);
 
         } catch (Exception e) {
+            System.err.println("❌ ERROR DURING LOGIN PROCESS:");
+            e.printStackTrace(); // Prints exact error & line number in your console
+
             loginAttemptService.loginFailed(username);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password. Error: " + e.getMessage());
         }
     }
 
@@ -131,7 +139,7 @@ public class AuthController {
         SecurityContextHolder.clearContext();
 
         // Expire cookie
-        response.addHeader("Set-Cookie", "AUTH_TOKEN=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict");
+        response.addHeader("Set-Cookie", "AUTH_TOKEN=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax");
 
         return ResponseEntity.ok("User logged out successfully!");
     }

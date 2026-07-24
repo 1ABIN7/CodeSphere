@@ -33,6 +33,9 @@ public class AuditLog {
     @Column(nullable = false)
     private String resource;
 
+    @Column(name = "resource_type", nullable = false)
+    private String resourceType;
+
     @Column(nullable = false)
     private Instant timestamp;
 
@@ -44,6 +47,9 @@ public class AuditLog {
     public void prePersist() {
         if (this.timestamp == null) {
             this.timestamp = Instant.now();
+        }
+        if (this.resourceType == null) {
+            this.resourceType = "SYSTEM"; // Fallback default if not specified
         }
     }
 }

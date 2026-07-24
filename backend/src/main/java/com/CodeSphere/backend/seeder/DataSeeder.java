@@ -1,99 +1,133 @@
 package com.CodeSphere.backend.seeder;
 
+import com.CodeSphere.backend.model.Organization;
+import com.CodeSphere.backend.model.Role;
+import com.CodeSphere.backend.model.User;
+import com.CodeSphere.backend.repository.OrganizationRepository;
+import com.CodeSphere.backend.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-/**
- * DataSeeder — Seeds initial demo data into the database
- *
- * Runs automatically on application startup in 'dev' profile only.
- * Seeds: organization, users, roles, question bank, assessments,
- *        and 25 curated coding problems with test cases.
- *
- * P5 responsibility: maintain and update seed data as schema evolves
- *
- * To run: make sure spring.profiles.active=dev in application-dev.yml
- */
+import java.util.List;
+
 @Component
 @Profile("dev")
 public class DataSeeder implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
-    // 1. Inject the PasswordEncoder bean
-    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
 
-    public DataSeeder(JdbcTemplate jdbcTemplate, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
+    public DataSeeder(JdbcTemplate jdbcTemplate,
+                      PasswordEncoder passwordEncoder,
+                      UserRepository userRepository,
+                      OrganizationRepository organizationRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        // Skip seeding if data already exists
-        Integer userCount = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM users", Integer.class);
 
+        // ⚠️ TEMPORARY: Force wipe old unencrypted user data on startup
+        //jdbcTemplate.execute("TRUNCATE TABLE users CASCADE;");
+
+        // 1. Check if user data exists
+        Integer userCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM users", Integer.class);
+
+        // 2. If data exists, verify if the admin user exists and reset if needed
         if (userCount != null && userCount > 0) {
-            System.out.println("[DataSeeder] Data already exists — skipping seed.");
-            return;
+            List<String> adminPasswords = jdbcTemplate.queryForList(
+                    "SELECT password FROM users WHERE username = 'admin'", String.class);
+
+            if (!adminPasswords.isEmpty()) {
+                String existingHash = adminPasswords.get(0);
+                if (existingHash != null && !existingHash.startsWith("$2a$")) {
+                    System.out.println("[DataSeeder] Unhashed legacy passwords detected! Clearing users table...");
+                    jdbcTemplate.execute("TRUNCATE TABLE users CASCADE;");
+                } else {
+                    System.out.println("[DataSeeder] Valid user data already exists — skipping seed.");
+                    return;
+                }
+            } else {
+                System.out.println("[DataSeeder] Admin user missing. Resetting users table...");
+                jdbcTemplate.execute("TRUNCATE TABLE users CASCADE;");
+            }
         }
 
         System.out.println("[DataSeeder] Seeding demo data...");
 
-        seedOrganization();
-        seedUsers();
-        seedQuestions();
-        seedInterviewQuestions();
-        seedAssessment();
-        seedProblems();
+        Organization demoOrg = seedOrganization();
+        seedUsers(demoOrg);
 
         System.out.println("[DataSeeder] Seeding complete!");
     }
 
     /**
-     * Seeds a demo organization
+     * Seeds or retrieves a demo organization via JPA
      */
-    private void seedOrganization() {
-        jdbcTemplate.update(
-            "INSERT INTO organizations (name) VALUES (?) ON CONFLICT DO NOTHING",
-            "Demo Corp"
-        );
-        System.out.println("[DataSeeder] Organization seeded.");
+    private Organization seedOrganization() {
+        return organizationRepository.findByName("Demo Corp")
+                .orElseGet(() -> {
+                    Organization org = Organization.builder()
+                            .name("Demo Corp")
+                            .build();
+                    Organization saved = organizationRepository.save(org);
+                    System.out.println("[DataSeeder] Organization seeded.");
+                    return saved;
+                });
     }
 
     /**
-     * Seeds demo users:
-     * - admin@demo.com (ROLE_SUPER_ADMIN)
-     * - evaluator@demo.com (ROLE_EXAMINER)
-     * - candidate@demo.com (ROLE_CANDIDATE)
-     *
-     * Password for all: password123 (BCrypt hashed)
+     * Seeds demo users using UserRepository to trigger JPA converters (AES encryption on email)
      */
-    private void seedUsers() {
-        // 2. Dynamically encode the raw password using the app's encoder
+    private void seedUsers(Organization org) {
         String passwordHash = passwordEncoder.encode("password123");
 
-        jdbcTemplate.update(
-                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-                "admin", "admin@demo.com", passwordHash, passwordHash, "ROLE_SUPER_ADMIN", "Admin", "User"
-        );
+        if (userRepository.findByUsername("admin").isEmpty()) {
+            User admin = User.builder()
+                    .username("admin")
+                    .email("admin@demo.com") // Encrypted automatically by JPA AesEncryptor
+                    .password(passwordHash)
+                    .role(Role.ROLE_SUPER_ADMIN)
+                    .fullName("Admin User")
+                    .organization(org)
+                    .build();
+            userRepository.save(admin);
+        }
 
-        jdbcTemplate.update(
-                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-                "evaluator", "evaluator@demo.com", passwordHash, passwordHash, "ROLE_EXAMINER", "Evaluator", "User"
-        );
+        if (userRepository.findByUsername("evaluator").isEmpty()) {
+            User evaluator = User.builder()
+                    .username("evaluator")
+                    .email("evaluator@demo.com")
+                    .password(passwordHash)
+                    .role(Role.ROLE_EXAMINER)
+                    .fullName("Evaluator User")
+                    .organization(org)
+                    .build();
+            userRepository.save(evaluator);
+        }
 
-        jdbcTemplate.update(
-                "INSERT INTO users (username, email, password, password_hash, role, first_name, last_name, organization_id) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, (SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-                "candidate", "candidate@demo.com", passwordHash, passwordHash, "ROLE_CANDIDATE", "Candidate", "User"
-        );
+        if (userRepository.findByUsername("candidate").isEmpty()) {
+            User candidate = User.builder()
+                    .username("candidate")
+                    .email("candidate@demo.com")
+                    .password(passwordHash)
+                    .role(Role.ROLE_CANDIDATE)
+                    .fullName("Candidate User")
+                    .organization(org)
+                    .build();
+            userRepository.save(candidate);
+        }
 
-        System.out.println("[DataSeeder] Users seeded.");
+        System.out.println("[DataSeeder] Users seeded successfully with BCrypt hashes and encrypted emails.");
     }
 
     /**

@@ -35,6 +35,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 .userId(userId)
                 .action(action)
                 .resource(resource)
+                .resourceType("AUTH") // Fills required DB column
                 .timestamp(Instant.now())
                 .ipAddress(ipAddress)
                 .build();

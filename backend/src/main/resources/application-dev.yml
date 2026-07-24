@@ -5,6 +5,13 @@ spring:
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
+  flyway:
+    clean-disabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
   data:
     redis:
       host: ${REDIS_HOST:127.0.0.1}
