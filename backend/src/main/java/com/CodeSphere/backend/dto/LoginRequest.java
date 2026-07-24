@@ -1,7 +1,7 @@
 package com.CodeSphere.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -12,7 +12,7 @@ import lombok.*;
 @Builder
 public class LoginRequest {
 
-    @JsonProperty("username")
+    @JsonAlias({"username", "email", "usernameOrEmail"})
     @NotBlank(message = "Username or email is required")
     private String usernameOrEmail;
 
