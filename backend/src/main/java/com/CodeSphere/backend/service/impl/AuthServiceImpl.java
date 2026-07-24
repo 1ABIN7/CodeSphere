@@ -12,12 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -55,7 +57,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         user = userRepository.save(user);
 
-        // System log simulation for email verification link
         System.out.println("Verification Link: http://localhost:8080/api/auth/verify-email?token=" + user.getEmailVerificationToken());
 
         Authentication auth = authenticationManager.authenticate(
@@ -123,8 +124,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = refreshToken.getUser();
+
+        // Pass the actual role authorities so the role isn't lost during JWT generation
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
+
         Authentication auth = new UsernamePasswordAuthenticationToken(
-                user.getUsername(), null, java.util.Collections.emptyList());
+                user.getUsername(), null, authorities);
         String newJwt = jwtTokenProvider.generateToken(auth);
 
         return AuthResponse.builder()
