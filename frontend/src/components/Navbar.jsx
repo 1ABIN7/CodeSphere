@@ -30,6 +30,11 @@ export default function Navbar() {
               Dashboard
             </Link>
           )}
+          {isLoggedIn && (
+            <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+              Admin
+            </Link>
+          )}
           <Link to="/submissions" className={`nav-link ${isActive('/submissions') ? 'active' : ''}`}>
             Submissions
           </Link>
