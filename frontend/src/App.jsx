@@ -10,9 +10,14 @@ import InterviewPrepPage from './pages/InterviewPrepPage';
 import InterviewSessionPage from './pages/InterviewSessionPage';
 import InterviewPerformancePage from './pages/InterviewPerformancePage';
 import DashboardPage from './pages/DashboardPage';
+import AssessmentDashboard from './pages/AssessmentDashboard';
+import AssessmentPage from './pages/AssessmentPage';
+import AssessmentResultPage from './pages/AssessmentResultPage';
+import AdminDashboard from './pages/AdminDashboard';
 import SubmissionsPage from './pages/SubmissionsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import AdminRoute from './components/AdminRoute';
 
 export default function App() {
   return (
@@ -29,6 +34,10 @@ export default function App() {
               <Route path="/interview/session/:id" element={<PrivateRoute><InterviewSessionPage /></PrivateRoute>} />
               <Route path="/interview/performance" element={<PrivateRoute><InterviewPerformancePage /></PrivateRoute>} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/assessments" element={<PrivateRoute><AssessmentDashboard /></PrivateRoute>} />
+              <Route path="/assessments/:id/session" element={<PrivateRoute><AssessmentPage /></PrivateRoute>} />
+              <Route path="/assessments/:id/result" element={<PrivateRoute><AssessmentResultPage /></PrivateRoute>} />
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/submissions" element={<SubmissionsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
