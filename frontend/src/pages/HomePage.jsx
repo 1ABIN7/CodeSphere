@@ -1,45 +1,63 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
+import heroImg from '../assets/hero.png';
+import { Code, ListCheck, FileEdit, BookOpen, Upload, Layers, Settings, Users, CheckCircle, Trophy } from 'lucide-react';
+import './LandingPageStyles.css';
 
-const FEATURES = [
-  { icon: '⚡', title: 'AI-Powered Judge', desc: 'Our judge engine analyses your code in real-time — complexity, patterns, quality score, and smart feedback.' },
-  { icon: '🧠', title: 'Smart Analysis', desc: 'Get time & space complexity estimates, anti-pattern detection, and personalised optimisation hints.' },
-  { icon: '📝', title: 'Interview Prep', desc: 'Master technical, aptitude, logical, and HR questions with curated mock tests and performance tracking.' },
-  { icon: '📂', title: 'File Storage', desc: 'Upload editorial PDFs, test data, and attachments. Local and MinIO S3 backends supported out of the box.' },
-  { icon: '🏆', title: '25 Curated Problems', desc: 'From Two Sum to N-Queens — 8 easy, 10 medium, 7 hard problems covering every major pattern.' },
-  { icon: '🔒', title: 'Role-Based Access', desc: 'Multi-tenant platform with Super Admin, Org Admin, Examiner, Instructor, and Candidate roles.' },
+// Motion variants respecting prefers-reduced-motion
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const heroVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.6 } },
+};
+
+const assessmentTypes = [
+  { icon: <Code size={24} />, title: 'Coding', desc: 'Write code, run test cases, get instant feedback.' },
+  { icon: <ListCheck size={24} />, title: 'MCQ', desc: 'Multiple‑choice questions with instant scoring.' },
+  { icon: <FileEdit size={24} />, title: 'Written', desc: 'Subjective answers evaluated by AI & reviewers.' },
+  { icon: <BookOpen size={24} />, title: 'Reading Comprehension', desc: 'Passages with questions to assess understanding.' },
+  { icon: <Upload size={24} />, title: 'File Upload', desc: 'Submit PDFs, images, or code archives for evaluation.' },
+  { icon: <Layers size={24} />, title: 'Mixed/Sectioned', desc: 'Combine any of the above in one exam.' },
 ];
 
-const STATS = [
-  { value: '25', label: 'Coding Problems' },
-  { value: '100+', label: 'Interview Questions' },
-  { value: '6', label: 'Interview Categories' },
-  { value: '∞', label: 'AI Insights' },
+const howItWorks = [
+  { icon: <Settings size={24} />, step: '1', title: 'Create Assessment', desc: 'Admin defines sections, questions, and time limits.' },
+  { icon: <Users size={24} />, step: '2', title: 'Assign to Candidates', desc: 'Candidates receive a unique link or are auto‑assigned.' },
+  { icon: <CheckCircle size={24} />, step: '3', title: 'Take Exam', desc: 'Candidates answer, code, and upload files in a secure UI.' },
+  { icon: <Trophy size={24} />, step: '4', title: 'Get Results', desc: 'Automatic grading + manual review, certificates issued.' },
 ];
 
 export default function HomePage() {
   const { isLoggedIn } = useAuth();
+  // Stats derived from backend config (5 languages supported)
+  const stats = [
+    { value: '5', label: 'Languages Supported' },
+    { value: '6', label: 'Assessment Types' },
+    { value: 'Docker‑Sandboxed', label: 'Secure Execution' },
+  ];
 
   return (
-    <div className="fade-in">
+    <motion.div className="fade-in" initial="hidden" animate="visible" variants={fadeUp}>
       {/* ── Hero ── */}
       <section className="hero">
-        <div className="hero-badge">
-          ✨ Production-Ready Coding Platform
-        </div>
+        <div className="hero-badge">✨ Production‑Ready Coding Platform</div>
         <h1 className="hero-title">
           Code Smarter with<br />
-          <span className="hero-gradient">AI-Powered Judging</span>
+          <span className="hero-gradient">AI‑Powered Judging</span>
         </h1>
         <p className="hero-subtitle">
-          Practice with 25 curated problems, get instant AI feedback on your code quality,
-          time complexity, and submit in 5 languages.
+          The all‑in‑one assessment suite for coding tests, MCQs, written exams, and more.
         </p>
         <div className="hero-actions">
           <Link to="/problems" className="btn btn-primary btn-lg">
             🚀 Explore Problems
           </Link>
-          <Link to="/interview" className="btn btn-secondary btn-lg border border-indigo-500/30 hover:border-indigo-500 bg-indigo-500/10 text-indigo-400">
+          <Link to="/interview" className="btn btn-secondary btn-lg">
             🎯 Interview Prep
           </Link>
           {!isLoggedIn && (
@@ -53,9 +71,9 @@ export default function HomePage() {
             </Link>
           )}
         </div>
-
+        <img src={heroImg} alt="CodeSphere hero" className="hero-image" />
         <div className="hero-stats">
-          {STATS.map(s => (
+          {stats.map((s) => (
             <div key={s.label} className="stat-item">
               <div className="stat-value">{s.value}</div>
               <div className="stat-label">{s.label}</div>
@@ -64,44 +82,80 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Features ── */}
-      <section style={{ padding: '80px 0', background: 'var(--bg-secondary)' }}>
+      {/* ── Assessment Types ── */}
+      <section className="section">
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <h2 style={{ fontSize: '36px', fontWeight: 800, letterSpacing: '-1px', marginBottom: '12px' }}>
-              Everything you need to <span className="text-accent">level up</span>
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto' }}>
-              A corporate-grade platform for coding practice, technical interviews, and skill assessment.
-            </p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-            {FEATURES.map(f => (
-              <div key={f.title} className="card slide-up" style={{ padding: '28px' }}>
-                <div style={{ fontSize: '32px', marginBottom: '14px' }}>{f.icon}</div>
-                <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '8px' }}>{f.title}</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.7' }}>{f.desc}</p>
-              </div>
+          <h2 className="section-title">Assessment Types</h2>
+          <div className="assessment-grid">
+            {assessmentTypes.map((a) => (
+              <motion.div className="card" key={a.title} variants={fadeUp} whileHover={{ y: -4 }}>
+                <div className="card-header">
+                  {a.icon}
+                  <h3 className="card-title">{a.title}</h3>
+                </div>
+                <p>{a.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section style={{ padding: '80px 0', textAlign: 'center' }}>
+      {/* ── How It Works ── */}
+      <section className="section bg-alt">
         <div className="container">
-          <h2 style={{ fontSize: '32px', fontWeight: 800, marginBottom: '16px', letterSpacing: '-1px' }}>
-            Ready to start coding?
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
-            Browse 25 problems or sign up to track your progress.
-          </p>
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
-            <Link to="/problems" className="btn btn-primary btn-lg">Browse Problems</Link>
-            {!isLoggedIn && <Link to="/register" className="btn btn-secondary btn-lg">Create Account</Link>}
+          <h2 className="section-title">How It Works</h2>
+          <div className="how-it-works-grid">
+            {howItWorks.map((h) => (
+              <motion.div className="card" key={h.step} variants={fadeUp}>
+                <div className="step-number">{h.step}</div>
+                {h.icon}
+                <h3 className="card-title">{h.title}</h3>
+                <p>{h.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
-    </div>
+
+      {/* ── Practice Hub Teaser ── */}
+      <section className="section">
+        <div className="container center-text">
+          <h2 className="section-title">Practice Hub</h2>
+          <p className="section-subtitle">
+            Sharpen your skills with a curated set of coding problems and interview prep resources.
+          </p>
+          <Link to="/problems" className="btn btn-primary btn-lg">
+            Browse Practice Problems
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Trust / Stats Strip ── */}
+      <section className="section dark-strip">
+        <div className="container flex-center">
+          {stats.map((s) => (
+            <div key={s.label} className="stat-item">
+              <div className="stat-value">{s.value}</div>
+              <div className="stat-label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="footer">
+        <div className="container flex-between">
+          <div className="footer-brand">
+            <div className="brand-icon">⚡</div>
+            <span>CodeSphere</span>
+          </div>
+          <div className="footer-links">
+            <Link to="/login" className="footer-link">Login</Link>
+            <Link to="/register" className="footer-link">Register</Link>
+            <Link to="/problems" className="footer-link">Practice</Link>
+          </div>
+        </div>
+      </footer>
+    </motion.div>
   );
 }
