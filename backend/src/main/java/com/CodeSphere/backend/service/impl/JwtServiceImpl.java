@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class JwtServiceImpl implements JwtService {
 
@@ -51,15 +53,24 @@ public class JwtServiceImpl implements JwtService {
 
             // 1. Verify basic expiration
             if (claims.getExpiration().before(new Date())) {
+                log.warn("Token validation failed: Token is expired");
                 return false;
             }
 
-            // 2. Enforce User-Agent Binding
+            // 2. User-Agent Binding check (Only enforce if 'uas' claim exists in token)
             String tokenUas = claims.get("uas", String.class);
-            String currentUas = hashUserAgent(actualUserAgent);
-            return currentUas.equals(tokenUas);
+            if (tokenUas != null) {
+                String currentUas = hashUserAgent(actualUserAgent);
+                if (!currentUas.equals(tokenUas)) {
+                    log.warn("Token validation failed: User-Agent signature mismatch");
+                    return false;
+                }
+            }
+
+            return true;
 
         } catch (Exception e) {
+            log.error("Token validation error: {}", e.getMessage());
             return false;
         }
     }

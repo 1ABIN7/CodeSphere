@@ -1,5 +1,7 @@
-package com.CodeSphere.backend.security;
+package com.CodeSphere.backend.config;
 
+import com.CodeSphere.backend.security.CustomUserDetailsService;
+import com.CodeSphere.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -47,14 +49,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
+                        // ---- Problem Submissions (Placed BEFORE general problem management) ----
+                        .requestMatchers(HttpMethod.POST, "/api/problems/*/submit").authenticated()
+
                         // ---- Problem Management (create/update/delete = admin/examiner) ----
                         .requestMatchers(HttpMethod.POST, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
                         .requestMatchers(HttpMethod.PUT, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
                         .requestMatchers(HttpMethod.PATCH, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
                         .requestMatchers(HttpMethod.DELETE, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
 
-                        // ---- Submissions ----
-                        .requestMatchers("/api/submissions/**").authenticated()
+                        // ---- Submissions (Matches both /api/submissions AND /api/submissions/*) ----
+                        .requestMatchers("/api/submissions", "/api/submissions/**").authenticated()
 
                         // ---- Interview Module ----
                         .requestMatchers(HttpMethod.GET, "/api/interview/categories").permitAll()

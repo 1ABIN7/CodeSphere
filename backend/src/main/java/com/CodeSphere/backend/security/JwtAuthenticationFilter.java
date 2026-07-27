@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -43,10 +45,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(token)) {
             try {
-                String tokenId = jwtService.extractTokenId(token);
+                String tokenId = null;
+                try {
+                    tokenId = jwtService.extractTokenId(token);
+                } catch (Exception e) {
+                    log.warn("Could not extract jti (Token ID) from token: {}", e.getMessage());
+                }
 
-                // 1. Verify token is not denylisted and valid for the client
-                if (!denylistService.isDenylisted(tokenId) && jwtService.isTokenValid(token, userAgent)) {
+                // Check denylist only if a valid tokenId (jti) exists in the token
+                boolean isDenylisted = StringUtils.hasText(tokenId) && denylistService.isDenylisted(tokenId);
+
+                // 1. Verify token is not denylisted and is valid
+                if (!isDenylisted && jwtService.isTokenValid(token, userAgent)) {
                     String username = jwtService.extractUsername(token);
 
                     // 2. Load UserDetails to retain roles & authorities
@@ -61,10 +71,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("Successfully authenticated user: {}", username);
                 } else {
+                    log.warn("Token validation failed. Is Denylisted: {}", isDenylisted);
                     SecurityContextHolder.clearContext();
                 }
             } catch (Exception e) {
+                log.error("Authentication failed during JWT processing: {}", e.getMessage(), e);
                 SecurityContextHolder.clearContext();
             }
         }
