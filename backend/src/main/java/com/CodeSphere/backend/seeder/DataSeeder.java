@@ -35,9 +35,6 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // ⚠️ TEMPORARY: Force wipe old unencrypted user data on startup
-        //jdbcTemplate.execute("TRUNCATE TABLE users CASCADE;");
-
         // 1. Check if user data exists
         Integer userCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM users", Integer.class);
@@ -53,8 +50,7 @@ public class DataSeeder implements CommandLineRunner {
                     System.out.println("[DataSeeder] Unhashed legacy passwords detected! Clearing users table...");
                     jdbcTemplate.execute("TRUNCATE TABLE users CASCADE;");
                 } else {
-                    System.out.println("[DataSeeder] Valid user data already exists — skipping seed.");
-                    return;
+                    System.out.println("[DataSeeder] Valid user data already exists — checking problems...");
                 }
             } else {
                 System.out.println("[DataSeeder] Admin user missing. Resetting users table...");
@@ -64,8 +60,22 @@ public class DataSeeder implements CommandLineRunner {
 
         System.out.println("[DataSeeder] Seeding demo data...");
 
+        // Seed core entities
         Organization demoOrg = seedOrganization();
         seedUsers(demoOrg);
+
+        // Seed non-coding question banks and assessments
+        seedInterviewQuestions();
+        seedQuestions();
+        seedAssessment();
+
+        // Check if coding problems exist; if not, seed them
+        Integer problemCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM problems", Integer.class);
+
+        if (problemCount == null || problemCount == 0) {
+            seedProblems();
+        }
 
         System.out.println("[DataSeeder] Seeding complete!");
     }
@@ -243,19 +253,22 @@ public class DataSeeder implements CommandLineRunner {
     /**
      * Seeds a sample MCQ assessment
      */
+    /**
+     * Seeds a sample MCQ assessment
+     */
     private void seedAssessment() {
         jdbcTemplate.update(
-            "INSERT INTO assessments (title, description, assessment_type, duration_minutes, " +
-            "passing_score, is_published, created_by, organization_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, " +
-            "(SELECT id FROM users WHERE email = 'admin@demo.com'), " +
-            "(SELECT id FROM organizations WHERE name = 'Demo Corp'))",
-            "Demo MCQ Assessment",
-            "A sample MCQ assessment for testing purposes",
-            "MCQ",
-            30,
-            60.0,
-            true
+                "INSERT INTO assessments (title, description, assessment_type, duration_minutes, " +
+                        "passing_score, is_published, created_by, organization_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, " +
+                        "(SELECT id FROM users WHERE username = 'admin'), " +
+                        "(SELECT id FROM organizations WHERE name = 'Demo Corp'))",
+                "Demo MCQ Assessment",
+                "A sample MCQ assessment for testing purposes",
+                "MCQ",
+                30,
+                60.0,
+                true
         );
 
         System.out.println("[DataSeeder] Assessment seeded.");
@@ -270,7 +283,7 @@ public class DataSeeder implements CommandLineRunner {
      */
     private void seedProblems() {
         Long adminId = jdbcTemplate.queryForObject(
-            "SELECT id FROM users WHERE email = 'admin@demo.com'", Long.class);
+                "SELECT id FROM users WHERE username = 'admin'", Long.class);
 
         // ---- EASY PROBLEMS (1-8) ----
         seedTwoSum(adminId);
