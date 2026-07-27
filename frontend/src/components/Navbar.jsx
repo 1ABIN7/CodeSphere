@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function Navbar() {
-  const { user, logout, isLoggedIn } = useAuth();
+
+  const { user, logout, isLoggedIn, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ export default function Navbar() {
               Dashboard
             </Link>
           )}
-          {isLoggedIn && (
+          {isLoggedIn && isAdmin && (
             <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
               Admin
             </Link>

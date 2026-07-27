@@ -51,6 +51,22 @@ export const submissionsAPI = {
   getForProblem: (problemId, params) => api.get(`/submissions/problem/${problemId}`, { params }),
 };
 
+// ─── Users ───
+export const usersAPI = {
+  getMyProfile: () => api.get('/users/me/profile'),
+  updateProfile: (data) => api.put('/users/me/profile', data),
+};
+
+// ─── Exams ───
+export const examsAPI = {
+  getMyExams: () => api.get('/users/me/exams'),
+};
+
+// ─── Certifications ───
+export const certificationsAPI = {
+  getMyCertifications: () => api.get('/users/me/certifications'),
+};
+
 // ─── Files ───
 export const filesAPI = {
   upload: (formData) => api.post('/files/upload', formData, {
