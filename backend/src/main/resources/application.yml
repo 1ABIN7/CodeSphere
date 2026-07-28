@@ -25,9 +25,7 @@ spring:
 server:
   port: 8080
 
-# Spring Actuator — health/info/metrics for ops & demo purposes.
-# Only health, info, and metrics are exposed; everything else stays off by
-# default (Actuator's full endpoint set can leak sensitive config otherwise).
+# Spring Actuator
 management:
   endpoints:
     web:
@@ -56,13 +54,13 @@ app:
     access-token-expiration-ms: 900000 # 15 minutes
     refresh-token-expiration-ms: 604800000 # 7 days
 
-# Root-level MinIO configuration
+# MinIO Configuration
 minio:
   endpoint: http://${MINIO_HOST:localhost}:9000
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin}
   bucket:
-    name: questions-import-vault
+    name: ${MINIO_BUCKET_NAME:questions-import-vault}
 
 cors:
   allowed-origin: "http://localhost:3000"

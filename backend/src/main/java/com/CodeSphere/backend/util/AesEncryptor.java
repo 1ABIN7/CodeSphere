@@ -9,6 +9,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Base64;
 
 @Converter
@@ -20,14 +22,32 @@ public class AesEncryptor implements AttributeConverter<String, String> {
     private final SecretKeySpec keySpec;
     private final byte[] iv;
 
-    // Inject a 32-character (256-bit) secret key from application properties
-    public AesEncryptor(@Value("${security.encryption.key:my-super-secret-key-32-chars-long!}") String secretKey) {
-        if (secretKey == null || secretKey.length() != 32) {
-            throw new IllegalArgumentException("Encryption key must be exactly 32 characters long for AES-256.");
+    /**
+     * Default no-args constructor required by JPA AttributeConverter instantiation.
+     */
+    public AesEncryptor() {
+        this("my-super-secret-key-32-chars!");
+    }
+
+    /**
+     * Constructor for Spring dependency injection and custom key setup.
+     */
+    public AesEncryptor(@Value("${security.encryption.key:my-super-secret-key-32-chars!}") String secretKey) {
+        if (secretKey == null || secretKey.trim().isEmpty()) {
+            throw new IllegalArgumentException("Encryption key must be provided.");
         }
-        this.keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "AES");
-        // We use a fixed 16-byte initialization vector (IV) derived from the key for simplicity in database search lookups
-        this.iv = secretKey.substring(0, 16).getBytes(StandardCharsets.UTF_8);
+        try {
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
+            byte[] digest = sha.digest(secretKey.getBytes(StandardCharsets.UTF_8));
+
+            // Derive 256-bit AES key from digest
+            this.keySpec = new SecretKeySpec(digest, "AES");
+
+            // Derive 128-bit (16-byte) IV from the first 16 bytes of digest
+            this.iv = Arrays.copyOfRange(digest, 0, 16);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to initialize AesEncryptor", e);
+        }
     }
 
     @Override
