@@ -62,6 +62,11 @@ export const adminAPI = {
   getDashboard: (params) => api.get('/v1/admin/dashboard', { params }),
 };
 
+export const questionBankAPI = {
+  list: (params) => api.get('/v1/questions', { params }),
+  create: (data) => api.post('/v1/questions', data),
+};
+
 // ─── Exams ───
 export const examsAPI = {
   getMyExams: () => api.get('/users/me/exams'),

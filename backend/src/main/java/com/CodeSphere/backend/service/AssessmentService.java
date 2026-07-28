@@ -4,6 +4,7 @@ import com.CodeSphere.backend.dto.AssessmentResultDTO;
 import com.CodeSphere.backend.dto.SubmissionDTO;
 import com.CodeSphere.backend.entity.Assessment;
 import com.CodeSphere.backend.entity.AssessmentAssignment;
+import com.CodeSphere.backend.model.AssessmentSession;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,6 @@ public interface AssessmentService {
     // --- Your Active Execution & Session Methods (Merged) ---
     Object findById(Long assessmentId);
     Object createBlueprint(Object assessmentDto);
-    void start(Long assessmentId, Long userId);
+    AssessmentSession start(Long assessmentId, Long userId);
     AssessmentResultDTO submit(Long assessmentId, Long userId, SubmissionDTO submissionDto);
 }

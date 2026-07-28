@@ -4,6 +4,7 @@ import com.CodeSphere.backend.dto.AssessmentResultDTO;
 import com.CodeSphere.backend.dto.SubmissionDTO;
 import com.CodeSphere.backend.service.AssessmentService;
 import com.CodeSphere.backend.service.AuditLogService;
+import com.CodeSphere.backend.model.AssessmentSession;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,10 @@ public class AssessmentSessionController {
      * Initiates a live assessment session for the authenticated user and logs the critical action.
      */
     @PostMapping("/{assessmentId}/start")
-    public ResponseEntity<Void> startAssessmentSession(@PathVariable Long assessmentId, HttpServletRequest request) {
+    public ResponseEntity<AssessmentSession> startAssessmentSession(@PathVariable Long assessmentId, HttpServletRequest request) {
         Long userId = getCurrentUserId();
 
-        assessmentService.start(assessmentId, userId);
+        AssessmentSession session = assessmentService.start(assessmentId, userId);
 
         // [Audit Log] Log live user attempt initialization
         auditLogService.logAction(
@@ -36,7 +37,7 @@ public class AssessmentSessionController {
                 request
         );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(session);
     }
 
     /**

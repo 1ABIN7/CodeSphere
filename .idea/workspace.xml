@@ -4,14 +4,37 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="" />
+    <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AdminController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/QuestionBankController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/QuestionBankController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/AssessmentAnswer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/AssessmentAnswer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentAnswerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentAnswerRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentSessionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentSessionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/util/AesEncryptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/util/AesEncryptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/admin/EvaluatorDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/admin/EvaluatorDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/admin/QuestionBankPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/admin/QuestionBankPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/admin/ReportsDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/admin/ReportsDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="386" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -44,23 +67,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0354103801208913E-4" />
-      <entry key="MS500" value="0.26914868956179827" />
-      <entry key="S2" value="1.209391894852662" />
-      <entry key="S5" value="1.6352657496465453" />
-      <entry key="S10" value="1.8084218800938914" />
-      <entry key="S30" value="1.9339763357591029" />
-      <entry key="S60" value="1.966709949180496" />
-      <entry key="M2" value="1.9836027872762585" />
-      <entry key="M5" value="2.381363014621062" />
-      <entry key="M10" value="8.11142668208484" />
-      <entry key="M15" value="20.41886922283473" />
-      <entry key="M30" value="69.16425866174683" />
-      <entry key="H1" value="160.4197406338352" />
-      <entry key="H2" value="310.2023573377172" />
-      <entry key="H4" value="503.4859963847052" />
-      <entry key="D1" value="905.1030139972344" />
-      <entry key="W1" value="1035.0713564719422" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="1.7998467852522877E-163" />
+      <entry key="S30" value="1.047881050170782E-53" />
+      <entry key="S60" value="2.978561696877851E-26" />
+      <entry key="M2" value="1.5972461924346725E-12" />
+      <entry key="M5" value="2.773495586669176E-4" />
+      <entry key="M10" value="0.15547605847454435" />
+      <entry key="M15" value="1.2861396176236064" />
+      <entry key="M30" value="10.991284093239313" />
+      <entry key="H1" value="36.58062013365634" />
+      <entry key="H2" value="96.37264324365249" />
+      <entry key="H4" value="249.60222098923765" />
+      <entry key="D1" value="879.108209023019" />
+      <entry key="W1" value="1154.0656031671592" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="1.0" />
@@ -69,36 +92,36 @@
       <entry key="S5" value="1.0" />
       <entry key="S10" value="1.0" />
       <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.000000000060907" />
-      <entry key="M2" value="1.0000109171606293" />
-      <entry key="M5" value="1.0163537736887978" />
-      <entry key="M10" value="1.2140690433794545" />
-      <entry key="M15" value="1.5373728520962273" />
-      <entry key="M30" value="2.445175599788741" />
-      <entry key="H1" value="3.6578871532853805" />
-      <entry key="H2" value="5.289817542826856" />
-      <entry key="H4" value="8.051848529135146" />
-      <entry key="D1" value="20.68315241454672" />
-      <entry key="W1" value="26.74996805077186" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.000000395736462" />
+      <entry key="M10" value="1.0006290758797183" />
+      <entry key="M15" value="1.00734179663199" />
+      <entry key="M30" value="1.0858311170759392" />
+      <entry key="H1" value="1.3210674912634481" />
+      <entry key="H2" value="2.006720261380593" />
+      <entry key="H4" value="4.124580480524633" />
+      <entry key="D1" value="18.84170933815274" />
+      <entry key="W1" value="27.979920576141758" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="5.874594703217469E-4" />
-      <entry key="MS500" value="0.48439622249613945" />
-      <entry key="S2" value="1.889697558380835" />
-      <entry key="S5" value="2.492359821241663" />
-      <entry key="S10" value="2.7341957624639517" />
-      <entry key="S30" value="2.9085908142325603" />
-      <entry key="S60" value="2.9539349887303876" />
-      <entry key="M2" value="2.9772054680923676" />
-      <entry key="M5" value="3.395107201607587" />
-      <entry key="M10" value="9.323915104813482" />
-      <entry key="M15" value="21.954844263747837" />
-      <entry key="M30" value="71.60812309156375" />
-      <entry key="H1" value="164.0763719087946" />
-      <entry key="H2" value="315.4910131342754" />
-      <entry key="H4" value="511.5368436192953" />
-      <entry key="D1" value="925.7857438646871" />
-      <entry key="W1" value="1061.821247543335" />
+      <entry key="MS100" value="2.4960389970635385E-5" />
+      <entry key="MS500" value="0.12007435799418459" />
+      <entry key="S2" value="0.5886573463506624" />
+      <entry key="S5" value="0.8089934908998928" />
+      <entry key="S10" value="0.8994406544624791" />
+      <entry key="S30" value="0.965289327533299" />
+      <entry key="S60" value="0.9824913880199149" />
+      <entry key="M2" value="0.9912070359027326" />
+      <entry key="M5" value="0.9967512280131502" />
+      <entry key="M10" value="1.1543372652133765" />
+      <entry key="M15" value="2.2922866841864065" />
+      <entry key="M30" value="12.076445796671225" />
+      <entry key="H1" value="37.901256104140415" />
+      <entry key="H2" value="98.37899612569856" />
+      <entry key="H4" value="253.72634902367022" />
+      <entry key="D1" value="897.9495428695711" />
+      <entry key="W1" value="1182.0454444814393" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -115,43 +138,45 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.BackendApplication.executor": "Run",
-    "Docker.docker-compose.yml: Compose Deployment.executor": "Run",
-    "Maven.backend [clean].executor": "Run",
-    "Maven.backend [package].executor": "Run",
-    "Maven.backend [test].executor": "Run",
-    "Maven.backend [validate].executor": "Run",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Spring Boot.BackendApplication.executor": "Run",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "diff.base",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.docker-compose.yml: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [package].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [test].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [validate].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/ProblemSubmissionNotworkingonbackend&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;diff.base&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql",
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;,
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service" />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
@@ -6,24 +6,32 @@ import {
   CheckCircle2,
   ChevronRight,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { adminAPI } from '../../api';
 
 // TODO: backend endpoint pending — see ReportController
-const MOCK_REPORTS = {
+const EMPTY_REPORTS = {
   summary: {
-    averageScore: 72.4,
-    completionRate: 85.2,
-    passRate: 63.8,
+    averageScore: 0,
+    completionRate: 0,
+    passRate: 0,
   },
-  assessments: [
-    { id: 1, title: 'Frontend Developer Hiring - React', candidates: 45, avgScore: 78.5, passRate: 71.1, completionRate: 93.3 },
-    { id: 2, title: 'Java Backend Core Concepts', candidates: 120, avgScore: 65.2, passRate: 55.0, completionRate: 88.3 },
-    { id: 3, title: 'Data Structures Midterm', candidates: 80, avgScore: 74.0, passRate: 62.5, completionRate: 91.0 },
-  ],
+  assessments: [],
 };
 
 export default function ReportsDashboard() {
   const [selectedId, setSelectedId] = useState(null);
-  const { summary, assessments } = MOCK_REPORTS;
+  const [reports, setReports] = useState(EMPTY_REPORTS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    adminAPI.getAssessmentReports()
+      .then((response) => setReports(response.data))
+      .catch(() => toast.error('Unable to load assessment reports.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const { summary, assessments } = reports;
 
   const selected = assessments.find((a) => a.id === selectedId);
 
@@ -37,12 +45,7 @@ export default function ReportsDashboard() {
     <div className="fade-in">
       <div className="page-header">
         <h1 className="page-title" style={{ fontSize: 24 }}>Reports</h1>
-        <p className="page-subtitle">
-          Assessment performance analytics
-          <span style={{ marginLeft: 8, color: 'var(--yellow)', fontSize: 12 }}>
-            // TODO: backend endpoint pending — see ReportController
-          </span>
-        </p>
+        <p className="page-subtitle">Assessment performance analytics</p>
       </div>
 
       <div className="dashboard-grid" style={{ marginBottom: 32 }}>
@@ -66,7 +69,7 @@ export default function ReportsDashboard() {
           <span className="card-title">Assessment Results</span>
         </div>
 
-        {selected ? (
+        {loading ? <div style={{ padding: 24, color: 'var(--text-secondary)' }}>Loading reports…</div> : selected ? (
           <div>
             <button
               className="btn btn-ghost btn-sm"
@@ -86,7 +89,7 @@ export default function ReportsDashboard() {
                 }}
               >
                 <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--accent-light)' }}>
-                  {selected.avgScore}%
+                  {selected.averageScore}%
                 </div>
                 <div className="label" style={{ marginTop: 4 }}>Average Score</div>
               </div>
@@ -162,7 +165,7 @@ export default function ReportsDashboard() {
                     <td style={{ fontWeight: 600 }}>{a.title}</td>
                     <td>{a.candidates}</td>
                     <td>
-                      <span style={{ color: 'var(--accent-light)', fontWeight: 600 }}>{a.avgScore}%</span>
+                      <span style={{ color: 'var(--accent-light)', fontWeight: 600 }}>{a.averageScore}%</span>
                     </td>
                     <td>
                       <span style={{ color: a.passRate >= 60 ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>

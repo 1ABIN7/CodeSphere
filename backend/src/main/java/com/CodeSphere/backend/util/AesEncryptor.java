@@ -9,8 +9,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Arrays;
 import java.util.Base64;
 
 @Converter
@@ -23,31 +21,16 @@ public class AesEncryptor implements AttributeConverter<String, String> {
     private final byte[] iv;
 
     /**
-     * Default no-args constructor required by JPA AttributeConverter instantiation.
+     * Uses the configured 32-byte AES key. Existing encrypted user data was
+     * written with this exact key and IV derivation, so changing either makes
+     * persisted values unreadable.
      */
-    public AesEncryptor() {
-        this("my-super-secret-key-32-chars!");
-    }
-
-    /**
-     * Constructor for Spring dependency injection and custom key setup.
-     */
-    public AesEncryptor(@Value("${security.encryption.key:my-super-secret-key-32-chars!}") String secretKey) {
-        if (secretKey == null || secretKey.trim().isEmpty()) {
-            throw new IllegalArgumentException("Encryption key must be provided.");
+    public AesEncryptor(@Value("${security.encryption.key}") String secretKey) {
+        if (secretKey == null || secretKey.length() != 32) {
+            throw new IllegalArgumentException("Encryption key must be exactly 32 characters long for AES-256.");
         }
-        try {
-            MessageDigest sha = MessageDigest.getInstance("SHA-256");
-            byte[] digest = sha.digest(secretKey.getBytes(StandardCharsets.UTF_8));
-
-            // Derive 256-bit AES key from digest
-            this.keySpec = new SecretKeySpec(digest, "AES");
-
-            // Derive 128-bit (16-byte) IV from the first 16 bytes of digest
-            this.iv = Arrays.copyOfRange(digest, 0, 16);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to initialize AesEncryptor", e);
-        }
+        this.keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "AES");
+        this.iv = secretKey.substring(0, 16).getBytes(StandardCharsets.UTF_8);
     }
 
     @Override

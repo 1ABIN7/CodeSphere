@@ -5,6 +5,7 @@ import com.CodeSphere.backend.service.QuestionService; // Adjust package based o
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class QuestionBankController {
 
     // CREATE: POST /api/v1/questions
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER')")
     public ResponseEntity<Question> createQuestion(@Valid @RequestBody Question question) {
         Question createdQuestion = questionService.createQuestion(question);
         return new ResponseEntity<>(createdQuestion, HttpStatus.CREATED);
@@ -51,6 +53,7 @@ public class QuestionBankController {
 
     // UPDATE: PUT /api/v1/questions/{id}
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER')")
     public ResponseEntity<Question> updateQuestion(
             @PathVariable Long id,
             @Valid @RequestBody Question questionDetails) {
@@ -60,6 +63,7 @@ public class QuestionBankController {
 
     // DELETE: DELETE /api/v1/questions/{id}
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER')")
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
         questionService.deleteQuestion(id);
         return ResponseEntity.noContent().build();

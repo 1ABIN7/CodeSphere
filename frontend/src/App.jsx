@@ -16,6 +16,7 @@ import AssessmentResultPage from './pages/AssessmentResultPage';
 import AdminDashboard from './pages/AdminDashboard';
 import SubmissionsPage from './pages/SubmissionsPage';
 import LoginPage from './pages/LoginPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminRoute from './components/AdminRoute';
 
@@ -40,6 +41,7 @@ export default function App() {
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/submissions" element={<SubmissionsPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="*" element={
                 <div className="container" style={{ paddingTop: 80, textAlign: 'center' }}>

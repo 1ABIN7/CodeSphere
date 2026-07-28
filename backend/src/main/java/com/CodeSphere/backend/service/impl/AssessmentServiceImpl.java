@@ -6,11 +6,17 @@ import com.CodeSphere.backend.entity.Assessment;
 import com.CodeSphere.backend.entity.AssessmentAssignment;
 import com.CodeSphere.backend.entity.AssessmentQuestion;
 import com.CodeSphere.backend.model.AssessmentSection;
+import com.CodeSphere.backend.model.AssessmentSession;
+import com.CodeSphere.backend.model.AssessmentAnswer;
+import com.CodeSphere.backend.model.User;
 import com.CodeSphere.backend.repository.AssessmentAssignmentRepository;
 import com.CodeSphere.backend.repository.AssessmentQuestionRepository;
 import com.CodeSphere.backend.repository.AssessmentRepository;
 import com.CodeSphere.backend.repository.AssessmentSectionRepository;
 import com.CodeSphere.backend.repository.AssessmentSessionRepository;
+import com.CodeSphere.backend.repository.UserRepository;
+import com.CodeSphere.backend.repository.AssessmentAnswerRepository;
+import com.CodeSphere.backend.service.McqEvaluationService;
 import com.CodeSphere.backend.service.AssessmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +35,9 @@ public class AssessmentServiceImpl implements AssessmentService {
     private final AssessmentQuestionRepository questionRepository;
     private final AssessmentAssignmentRepository assignmentRepository;
     private final AssessmentSessionRepository assessmentSessionRepository;
+    private final UserRepository userRepository;
+    private final AssessmentAnswerRepository answerRepository;
+    private final McqEvaluationService mcqEvaluationService;
 
     // ==========================================
     // Admin & Lifecycle Methods
@@ -201,21 +211,96 @@ public class AssessmentServiceImpl implements AssessmentService {
 
     @Override
     @Transactional
-    public void start(Long assessmentId, Long userId) {
-        getAssessmentById(assessmentId);
-        System.out.println("Starting assessment " + assessmentId + " for user " + userId);
+    public AssessmentSession start(Long assessmentId, Long userId) {
+        Assessment assessment = getAssessmentById(assessmentId);
+        if (!assessment.isPublished()) {
+            throw new IllegalStateException("This assessment is not published");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (assessment.getStartTime() != null && now.isBefore(assessment.getStartTime())) {
+            throw new IllegalStateException("This assessment has not opened yet");
+        }
+        if (assessment.getEndTime() != null && now.isAfter(assessment.getEndTime())) {
+            throw new IllegalStateException("This assessment is no longer available");
+        }
+
+        List<AssessmentAssignment> assignments = assignmentRepository.findByAssessmentId(assessmentId);
+        if (!assignments.isEmpty() && assignments.stream().noneMatch(assignment -> assignment.getUserId().equals(userId))) {
+            throw new IllegalStateException("You are not assigned to this assessment");
+        }
+        assignments.stream().filter(assignment -> assignment.getUserId().equals(userId) && assignment.getDeadline() != null && now.isAfter(assignment.getDeadline()))
+                .findFirst().ifPresent(assignment -> { throw new IllegalStateException("The assessment deadline has passed"); });
+
+        AssessmentSession existing = assessmentSessionRepository.findByAssessmentIdAndCandidateIdAndStatus(
+                assessmentId, userId, AssessmentSession.SessionStatus.IN_PROGRESS).orElse(null);
+        if (existing != null) {
+            if (!assessment.isAllowResume()) {
+                throw new IllegalStateException("This assessment does not allow resuming an existing attempt");
+            }
+            return existing;
+        }
+
+        List<Long> questionIds = questionRepository.findByAssessmentId(assessmentId).stream()
+                .sorted((left, right) -> Integer.compare(left.getOrderIndex(), right.getOrderIndex()))
+                .map(AssessmentQuestion::getQuestionBankId).toList();
+        if (questionIds.isEmpty()) {
+            throw new IllegalStateException("This assessment has no questions");
+        }
+        if (assessment.isShuffleQuestions()) {
+            questionIds = new java.util.ArrayList<>(questionIds);
+            Collections.shuffle(questionIds);
+        }
+        User candidate = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
+        AssessmentSession session = AssessmentSession.builder()
+                .assessmentId(assessmentId)
+                .candidate(candidate)
+                .durationMinutes(assessment.getDurationMinutes())
+                .status(AssessmentSession.SessionStatus.IN_PROGRESS)
+                .questionIdsSnapshot(questionIds)
+                .build();
+        return assessmentSessionRepository.save(session);
     }
 
     @Override
     @Transactional
     public AssessmentResultDTO submit(Long assessmentId, Long userId, SubmissionDTO submissionDto) {
-        System.out.println("Submitting assessment " + assessmentId + " for user " + userId);
+        AssessmentSession session = assessmentSessionRepository
+                .findByAssessmentIdAndCandidateIdAndStatus(assessmentId, userId, AssessmentSession.SessionStatus.IN_PROGRESS)
+                .orElseThrow(() -> new IllegalStateException("No active assessment session found"));
 
-        AssessmentResultDTO mockResult = new AssessmentResultDTO();
-        mockResult.setAssessmentId(assessmentId);
-        mockResult.setScore(100.0);
-        mockResult.setStatus("COMPLETED");
+        // A final answer may be sent with submit; all earlier answers are already
+        // persisted through the autosave endpoint.
+        if (submissionDto != null && submissionDto.getQuestionId() != null && submissionDto.getAnswerText() != null) {
+            if (!session.getQuestionIdsSnapshot().contains(submissionDto.getQuestionId())) {
+                throw new IllegalArgumentException("Question does not belong to this assessment session");
+            }
+            AssessmentAnswer answer = answerRepository.findBySessionIdAndQuestionId(session.getId(), submissionDto.getQuestionId())
+                    .orElseGet(AssessmentAnswer::new);
+            answer.setSessionId(session.getId());
+            answer.setQuestionId(submissionDto.getQuestionId());
+            answer.setSelectedAnswer(submissionDto.getAnswerText());
+            answer.setUpdatedAt(LocalDateTime.now());
+            answerRepository.save(answer);
+        }
 
-        return mockResult;
+        session.setStatus(AssessmentSession.SessionStatus.SUBMITTED);
+        session.setSubmittedAt(java.time.OffsetDateTime.now());
+        AssessmentSession savedSession = assessmentSessionRepository.save(session);
+
+        double score = mcqEvaluationService.evaluateSessionMcqs(savedSession);
+        double totalScore = questionRepository.findByAssessmentId(assessmentId).stream()
+                .map(AssessmentQuestion::getMaxScore)
+                .filter(java.util.Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
+                .sum();
+        return AssessmentResultDTO.builder()
+                .sessionId(savedSession.getId())
+                .userId(userId)
+                .assessmentId(assessmentId)
+                .score(score)
+                .totalScore(totalScore)
+                .status("SUBMITTED")
+                .build();
     }
 }

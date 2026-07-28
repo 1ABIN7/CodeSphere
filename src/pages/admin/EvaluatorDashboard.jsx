@@ -1,47 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Send, ClipboardCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// TODO: backend endpoint pending — see EvaluationController
-const MOCK_EVALUATIONS = [
-  {
-    id: 1,
-    candidateName: 'Alice Johnson',
-    assessmentTitle: 'Frontend Developer Hiring - React',
-    questionType: 'SUBJECTIVE',
-    submittedAt: '2026-07-18T14:30:00Z',
-    questionText: 'Explain the concept of virtual DOM and its benefits in React.',
-    answer: 'Virtual DOM is a lightweight representation of the real DOM...',
-    rubricScores: { clarity: 0, accuracy: 0, completeness: 0 },
-  },
-  {
-    id: 2,
-    candidateName: 'Bob Smith',
-    assessmentTitle: 'Frontend Developer Hiring - React',
-    questionType: 'CODING',
-    submittedAt: '2026-07-18T15:10:00Z',
-    questionText: 'Implement a function to flatten a nested array.',
-    answer: 'function flatten(arr) { return arr.flat(Infinity); }',
-    rubricScores: { correctness: 0, efficiency: 0, readability: 0 },
-  },
-  {
-    id: 3,
-    candidateName: 'Carol White',
-    assessmentTitle: 'Java Backend Core Concepts',
-    questionType: 'WRITTEN',
-    submittedAt: '2026-07-17T09:45:00Z',
-    questionText: 'Describe the difference between HashMap and ConcurrentHashMap.',
-    answer: 'HashMap is not thread-safe while ConcurrentHashMap is...',
-    rubricScores: { technicalAccuracy: 0, depth: 0 },
-  },
-];
+import { evaluationAPI } from '../../api';
 
 export default function EvaluatorDashboard() {
-  const [items, setItems] = useState(MOCK_EVALUATIONS);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [feedbacks, setFeedbacks] = useState({});
   const [scores, setScores] = useState({});
+
+  useEffect(() => {
+    evaluationAPI.getPending()
+      .then((response) => setItems(response.data.map((item) => ({ ...item, id: item.answerId, questionText: item.questionTitle, answer: item.answerText, rubricScores: { score: item.maxScore ?? 100 } }))))
+      .catch(() => toast.error('Unable to load pending evaluations.'))
+      .finally(() => setLoading(false));
+  }, []);
 
   function toggleExpand(id) {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -58,11 +33,14 @@ export default function EvaluatorDashboard() {
     }));
   }
 
-  // TODO: backend endpoint pending — see EvaluationController
   async function submitEvaluation(item) {
     try {
-      // TODO: call real endpoint once EvaluationController is implemented
-      await new Promise((r) => setTimeout(r, 500));
+      const score = scores[item.id]?.score;
+      if (score === undefined || score === '') {
+        toast.error('Enter a score before submitting.');
+        return;
+      }
+      await evaluationAPI.submit(item.answerId, { score: Number(score), feedback: feedbacks[item.id] ?? '' });
       toast.success(`Evaluation submitted for ${item.candidateName}`);
       setItems((prev) => prev.filter((e) => e.id !== item.id));
       setExpandedId(null);
@@ -77,15 +55,10 @@ export default function EvaluatorDashboard() {
     <div className="fade-in">
       <div className="page-header">
         <h1 className="page-title" style={{ fontSize: 24 }}>Evaluations</h1>
-        <p className="page-subtitle">
-          Pending submissions awaiting manual review
-          <span style={{ marginLeft: 8, color: 'var(--yellow)', fontSize: 12 }}>
-            // TODO: backend endpoint pending — see EvaluationController
-          </span>
-        </p>
+        <p className="page-subtitle">Pending written and file submissions awaiting manual review</p>
       </div>
 
-      {items.length === 0 ? (
+      {loading ? <div className="empty-state"><div className="empty-subtitle">Loading pending evaluations…</div></div> : items.length === 0 ? (
         <div className="empty-state">
           <ClipboardCheck size={48} style={{ opacity: 0.4, marginBottom: 16 }} />
           <div className="empty-title">All caught up</div>
@@ -115,11 +88,11 @@ export default function EvaluatorDashboard() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <div style={{ fontWeight: 600, fontSize: 14 }}>{item.candidateName}</div>
                     <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                      {item.assessmentTitle}
+                      {item.questionText}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', gap: 8 }}>
                       <span className="badge badge-default">{item.questionType}</span>
-                      <span>{new Date(item.submittedAt).toLocaleDateString()}</span>
+                      <span>Session #{item.sessionId}</span>
                     </div>
                   </div>
                   {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -153,7 +126,7 @@ export default function EvaluatorDashboard() {
                               whiteSpace: 'pre-wrap',
                             }}
                           >
-                            {item.answer}
+                            {item.answer || (item.fileUrl ? `Uploaded file: ${item.fileUrl}` : 'No text answer supplied.')}
                           </div>
                         </div>
 
@@ -169,10 +142,10 @@ export default function EvaluatorDashboard() {
                                   className="input"
                                   type="number"
                                   min={0}
-                                  max={10}
+                                  max={item.rubricScores[key]}
                                   value={scores[item.id]?.[key] ?? ''}
                                   onChange={(e) => setScore(item.id, key, e.target.value)}
-                                  placeholder="0-10"
+                                  placeholder={`0-${item.rubricScores[key]}`}
                                 />
                               </div>
                             ))}

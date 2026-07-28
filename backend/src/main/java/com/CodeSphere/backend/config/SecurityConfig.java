@@ -2,6 +2,7 @@ package com.CodeSphere.backend.config;
 
 import com.CodeSphere.backend.security.CustomUserDetailsService;
 import com.CodeSphere.backend.security.JwtAuthenticationFilter;
+import com.CodeSphere.backend.security.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final OAuth2AuthenticationSuccessHandler oauth2SuccessHandler;
 
     @Value("${app.cors.allowed-origin:http://localhost:5173}")
     private String allowedOrigin;
@@ -42,10 +44,11 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         // ---- Public Endpoints ----
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
@@ -79,6 +82,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .oauth2Login(oauth -> oauth.successHandler(oauth2SuccessHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

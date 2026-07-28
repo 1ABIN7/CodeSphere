@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AssessmentSessionRepository extends JpaRepository<AssessmentSession, Long> {
@@ -15,4 +16,9 @@ public interface AssessmentSessionRepository extends JpaRepository<AssessmentSes
     List<AssessmentSession> findByStatus(AssessmentSession.SessionStatus status);
 
     long countByStatus(AssessmentSession.SessionStatus status);
+
+    Optional<AssessmentSession> findByAssessmentIdAndCandidateIdAndStatus(
+            Long assessmentId, Long candidateId, AssessmentSession.SessionStatus status);
+
+    List<AssessmentSession> findByAssessmentId(Long assessmentId);
 }
