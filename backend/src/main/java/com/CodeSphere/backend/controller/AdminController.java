@@ -11,6 +11,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.CodeSphere.backend.service.ScoreService;
+import com.CodeSphere.backend.dto.admin.AdminDashboardResponse;
+import com.CodeSphere.backend.model.AssessmentSession;
+import com.CodeSphere.backend.model.Problem;
+import com.CodeSphere.backend.model.Submission;
+import com.CodeSphere.backend.model.SubmissionStatus;
+import com.CodeSphere.backend.model.User;
+import com.CodeSphere.backend.repository.AssessmentRepository;
+import com.CodeSphere.backend.repository.AssessmentSessionRepository;
+import com.CodeSphere.backend.repository.ProblemRepository;
+import com.CodeSphere.backend.repository.SubmissionRepository;
+import com.CodeSphere.backend.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -20,6 +36,54 @@ public class AdminController {
     private final UserService userService;
     private final ScoreService scoreService;
     private final AuditLogService auditLogService;
+    private final AssessmentRepository assessmentRepository;
+    private final AssessmentSessionRepository assessmentSessionRepository;
+    private final ProblemRepository problemRepository;
+    private final SubmissionRepository submissionRepository;
+    private final UserRepository userRepository;
+
+    /**
+     * Returns real system-wide metrics and the latest candidate submissions for
+     * administrators. Individual submission source code is intentionally not
+     * included in this lightweight overview.
+     */
+    @GetMapping("/dashboard")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER')")
+    public ResponseEntity<AdminDashboardResponse> getDashboard(
+            @RequestParam(defaultValue = "6") int activityLimit) {
+        int limit = Math.min(Math.max(activityLimit, 1), 25);
+        var recentSubmissions = submissionRepository.findAll(
+                PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"))).getContent();
+
+        Map<Long, String> problemTitles = problemRepository.findAllById(
+                        recentSubmissions.stream().map(Submission::getProblemId).toList())
+                .stream()
+                .collect(Collectors.toMap(Problem::getId, Problem::getTitle));
+        Map<Long, String> candidateNames = userRepository.findAllById(
+                        recentSubmissions.stream().map(Submission::getUserId).toList())
+                .stream()
+                .collect(Collectors.toMap(User::getId, User::getUsername));
+
+        var activity = recentSubmissions.stream()
+                .map(submission -> AdminDashboardResponse.RecentActivity.builder()
+                        .id(submission.getId())
+                        .problemTitle(problemTitles.getOrDefault(submission.getProblemId(),
+                                "Problem #" + submission.getProblemId()))
+                        .candidateName(candidateNames.getOrDefault(submission.getUserId(), "Unknown candidate"))
+                        .language(submission.getLanguage())
+                        .status(submission.getStatus().name())
+                        .createdAt(submission.getCreatedAt())
+                        .build())
+                .toList();
+
+        return ResponseEntity.ok(AdminDashboardResponse.builder()
+                .totalAssessments(assessmentRepository.count())
+                .pendingReviews(submissionRepository.countByStatus(SubmissionStatus.PENDING))
+                .activeSessions(assessmentSessionRepository.countByStatus(AssessmentSession.SessionStatus.IN_PROGRESS))
+                .publishedQuestions(problemRepository.countByIsPublishedTrue())
+                .recentActivity(activity)
+                .build());
+    }
 
     /**
      * Manually overrides a submission score and logs the action for security oversight.

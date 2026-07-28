@@ -13,4 +13,6 @@ public interface AssessmentSessionRepository extends JpaRepository<AssessmentSes
      * Retrieves all assessment sessions matching a given status.
      */
     List<AssessmentSession> findByStatus(AssessmentSession.SessionStatus status);
+
+    long countByStatus(AssessmentSession.SessionStatus status);
 }

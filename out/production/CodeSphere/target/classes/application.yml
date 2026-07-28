@@ -3,6 +3,7 @@ spring:
     name: CodeSphere-backend
   profiles:
     active: dev
+  
   jpa:
     open-in-view: false
     hibernate:
@@ -25,47 +26,22 @@ spring:
 server:
   port: 8080
 
-# Spring Actuator — health/info/metrics for ops & demo purposes.
-# Only health, info, and metrics are exposed; everything else stays off by
-# default (Actuator's full endpoint set can leak sensitive config otherwise).
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
-      probes:
-        enabled: true
-  info:
-    env:
-      enabled: true
-
-info:
-  app:
-    name: CodeSphere
-    description: Coding assessment & interview prep platform
-  team:
-    p5-devops: Abin
-
 # Application-specific properties
 app:
   jwt:
+    # 256-bit secret key for HMAC-SHA256 (Base64 encoded)
+    # This is a development placeholder. Prod should override this via env variable.
     secret: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVzcGhlcmUtZGV2ZWxvcG1lbnQtcGxhdGZvcm0tc2VjdXJpdHktdGVzdGluZw==
     access-token-expiration-ms: 900000 # 15 minutes
     refresh-token-expiration-ms: 604800000 # 7 days
+  minio:
+    endpoint: http://${MINIO_HOST:localhost}:9000
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    bucket-name: questions-import-vault
 
-# Root-level MinIO configuration
-minio:
-  endpoint: http://${MINIO_HOST:localhost}:9000
-  access-key: ${MINIO_ACCESS_KEY:minioadmin}
-  secret-key: ${MINIO_SECRET_KEY:minioadmin}
-  bucket:
-    name: questions-import-vault
-
-cors:
-  allowed-origin: "http://localhost:3000"
+  cors:
+    allowed-origin: "http://localhost:3000"
 
 # Storage configuration
 storage:
@@ -88,7 +64,7 @@ judge:
   thread-pool-core-size: 4
   thread-pool-max-size: 8
   queue-capacity: 100
-  use-docker: false
+  use-docker: false   # Set to true in production to enable real Docker sandboxing
   supported-languages:
     - java
     - python
@@ -96,7 +72,8 @@ judge:
     - c
     - javascript
 
-# Security Encryption
+# Data Encryption Configuration (Added for AES-256 PII protection)
+# Aligned to the root level so Spring can resolve @Value("${security.encryption.key}")
 security:
   encryption:
     key: "c0deSph3reSecUr1tyK3y2026AES256!"
