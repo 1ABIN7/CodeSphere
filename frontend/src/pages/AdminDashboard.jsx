@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { assessmentAPI, problemsAPI, submissionsAPI } from '../api';
+import { adminAPI, assessmentAPI, problemsAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -26,30 +26,30 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [assessmentRes, problemsRes, submissionsRes] = await Promise.allSettled([
+        const [dashboardRes, assessmentRes, problemsRes] = await Promise.allSettled([
+          adminAPI.getDashboard({ activityLimit: 6 }),
           assessmentAPI.list(),
           problemsAPI.list({ page: 0, size: 8 }),
-          submissionsAPI.getMySubmissions({ page: 0, size: 8 }),
         ]);
 
         if (!isMounted) return;
 
         const assessmentItems = assessmentRes.status === 'fulfilled' ? (assessmentRes.value?.data?.content || assessmentRes.value?.data || []) : [];
         const problemItems = problemsRes.status === 'fulfilled' ? (problemsRes.value?.data?.content || problemsRes.value?.data || []) : [];
-        const submissionItems = submissionsRes.status === 'fulfilled' ? (submissionsRes.value?.data?.content || submissionsRes.value?.data || []) : [];
+        const dashboard = dashboardRes.status === 'fulfilled' ? dashboardRes.value?.data : null;
 
         const nextStats = {
-          totalAssessments: Array.isArray(assessmentItems) ? assessmentItems.length : 'Unavailable',
-          pendingReviews: 'Pending review endpoint not exposed yet',
-          activeSessions: 'Session metrics are not exposed yet',
-          publishedQuestions: Array.isArray(problemItems) ? problemItems.length : 'Unavailable',
+          totalAssessments: dashboard?.totalAssessments ?? 'Unavailable',
+          pendingReviews: dashboard?.pendingReviews ?? 'Unavailable',
+          activeSessions: dashboard?.activeSessions ?? 'Unavailable',
+          publishedQuestions: dashboard?.publishedQuestions ?? 'Unavailable',
         };
 
         setStats(nextStats);
         setAssessments(Array.isArray(assessmentItems) ? assessmentItems.slice(0, 5) : []);
         setQuestions(Array.isArray(problemItems) ? problemItems.slice(0, 5) : []);
-        setActivity(Array.isArray(submissionItems) ? submissionItems.slice(0, 6) : []);
-      } catch (err) {
+        setActivity(Array.isArray(dashboard?.recentActivity) ? dashboard.recentActivity : []);
+      } catch {
         if (!isMounted) return;
         toast.error('Unable to load admin overview right now.');
         setStats(EMPTY_STATE);
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
           <div className="card-header">
             <div>
               <div className="card-title">Recent activity</div>
-              <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>Latest submissions visible to the signed-in user.</div>
+              <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>Latest submissions across all candidates.</div>
             </div>
           </div>
 
@@ -155,7 +155,9 @@ export default function AdminDashboard() {
                 <div key={entry.id} className="choice-option" style={{ justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontWeight: 700 }}>{entry.problemTitle || `Submission #${entry.id}`}</div>
-                    <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>{entry.status || 'Pending'}</div>
+                    <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>
+                      {entry.candidateName || 'Unknown candidate'} · {entry.status || 'Pending'}
+                    </div>
                   </div>
                   <span className="badge badge-default">{entry.language || 'n/a'}</span>
                 </div>

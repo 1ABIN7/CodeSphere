@@ -57,6 +57,11 @@ export const usersAPI = {
   updateProfile: (data) => api.put('/users/me/profile', data),
 };
 
+// ─── Administration ───
+export const adminAPI = {
+  getDashboard: (params) => api.get('/v1/admin/dashboard', { params }),
+};
+
 // ─── Exams ───
 export const examsAPI = {
   getMyExams: () => api.get('/users/me/exams'),

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="386" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="develop" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar:///Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home/lib/src.zip!/java.base/java/util/concurrent/locks/AbstractQueuedSynchronizer.java" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0354103801208913E-4" />
+      <entry key="MS500" value="0.26914868956179827" />
+      <entry key="S2" value="1.209391894852662" />
+      <entry key="S5" value="1.6352657496465453" />
+      <entry key="S10" value="1.8084218800938914" />
+      <entry key="S30" value="1.9339763357591029" />
+      <entry key="S60" value="1.966709949180496" />
+      <entry key="M2" value="1.9836027872762585" />
+      <entry key="M5" value="2.381363014621062" />
+      <entry key="M10" value="8.11142668208484" />
+      <entry key="M15" value="20.41886922283473" />
+      <entry key="M30" value="69.16425866174683" />
+      <entry key="H1" value="160.4197406338352" />
+      <entry key="H2" value="310.2023573377172" />
+      <entry key="H4" value="503.4859963847052" />
+      <entry key="D1" value="905.1030139972344" />
+      <entry key="W1" value="1035.0713564719422" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.000000000060907" />
+      <entry key="M2" value="1.0000109171606293" />
+      <entry key="M5" value="1.0163537736887978" />
+      <entry key="M10" value="1.2140690433794545" />
+      <entry key="M15" value="1.5373728520962273" />
+      <entry key="M30" value="2.445175599788741" />
+      <entry key="H1" value="3.6578871532853805" />
+      <entry key="H2" value="5.289817542826856" />
+      <entry key="H4" value="8.051848529135146" />
+      <entry key="D1" value="20.68315241454672" />
+      <entry key="W1" value="26.74996805077186" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="5.874594703217469E-4" />
+      <entry key="MS500" value="0.48439622249613945" />
+      <entry key="S2" value="1.889697558380835" />
+      <entry key="S5" value="2.492359821241663" />
+      <entry key="S10" value="2.7341957624639517" />
+      <entry key="S30" value="2.9085908142325603" />
+      <entry key="S60" value="2.9539349887303876" />
+      <entry key="M2" value="2.9772054680923676" />
+      <entry key="M5" value="3.395107201607587" />
+      <entry key="M10" value="9.323915104813482" />
+      <entry key="M15" value="21.954844263747837" />
+      <entry key="M30" value="71.60812309156375" />
+      <entry key="H1" value="164.0763719087946" />
+      <entry key="H2" value="315.4910131342754" />
+      <entry key="H4" value="511.5368436192953" />
+      <entry key="D1" value="925.7857438646871" />
+      <entry key="W1" value="1061.821247543335" />
+    </decayedShown>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="3Ggbepwwn2x7IVYxGEcQrTiEGdA" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.BackendApplication.executor": "Run",
+    "Docker.docker-compose.yml: Compose Deployment.executor": "Run",
+    "Maven.backend [clean].executor": "Run",
+    "Maven.backend [package].executor": "Run",
+    "Maven.backend [test].executor": "Run",
+    "Maven.backend [validate].executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "diff.base",
+    "to.speed.mode.migration.done": "true",
+    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql",
+      "mysql"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service" />
+      <recent name="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model" />
+      <recent name="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository" />
+      <recent name="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller" />
+      <recent name="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.CodeSphere.backend.service" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="docker-compose.yml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="sourceFilePath" value="docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Docker.docker-compose.yml: Compose Deployment" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.24374.151" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.24374.151" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="" />
+      <created>1784396257895</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1784396257895</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

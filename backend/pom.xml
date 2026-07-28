@@ -10,7 +10,7 @@
     <groupId>com.CodeSphere</groupId>
     <artifactId>backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>codesphere-backend</name>
+    <name>CodeSphere-backend</name>
     <description>CodeSphere Backend Services</description>
 
     <properties>

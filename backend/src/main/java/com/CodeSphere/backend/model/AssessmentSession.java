@@ -3,11 +3,11 @@ package com.CodeSphere.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-/**
- * Represents a user's session for taking an assessment.
- */
 @Entity
 @Table(name = "assessment_sessions")
 @Getter
@@ -21,7 +21,6 @@ public class AssessmentSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // In a real system this would map to an Assessment entity, but we'll just use ID for now to satisfy the ProctoringService
     @Column(name = "assessment_id")
     private Long assessmentId;
 
@@ -29,22 +28,52 @@ public class AssessmentSession {
     @JoinColumn(name = "user_id", nullable = false)
     private User candidate;
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    @Column(name = "violation_count")
-    private Integer violationCount = 0;
-    
-    @Column(name = "is_flagged")
-    @Builder.Default
-    private boolean isFlagged = false;
-    
-    @Column(name = "flag_reason", columnDefinition = "TEXT")
-    private String flagReason;
+    private SessionStatus status = SessionStatus.IN_PROGRESS;
 
     @Builder.Default
     @Column(name = "started_at", nullable = false, updatable = false)
     private OffsetDateTime startedAt = OffsetDateTime.now();
-    
+
     @Column(name = "submitted_at")
     private OffsetDateTime submittedAt;
 
+    private int durationMinutes;
+
+    // --- Section & Question Tracking ---
+    @ElementCollection
+    @CollectionTable(name = "session_question_snapshots", joinColumns = @JoinColumn(name = "session_id"))
+    @Column(name = "question_id")
+    @Builder.Default
+    private List<Long> questionIdsSnapshot = new ArrayList<>();
+
+    @Builder.Default
+    @Column(name = "current_section_index")
+    private int currentSectionIndex = 0;
+
+    @Column(name = "current_section_started_at")
+    private OffsetDateTime currentSectionStartedAt;
+
+    @ElementCollection
+    @CollectionTable(name = "session_completed_sections", joinColumns = @JoinColumn(name = "session_id"))
+    @Column(name = "section_index")
+    @Builder.Default
+    private Set<Integer> completedSectionIndexes = new HashSet<>();
+
+    // --- Proctoring & Anti-Cheat Fields ---
+    @Builder.Default
+    @Column(name = "violation_count")
+    private Integer violationCount = 0;
+
+    @Builder.Default
+    @Column(name = "is_flagged")
+    private boolean isFlagged = false;
+
+    @Column(name = "flag_reason", columnDefinition = "TEXT")
+    private String flagReason;
+
+    public enum SessionStatus {
+        IN_PROGRESS, SUBMITTED, TIMED_OUT
+    }
 }

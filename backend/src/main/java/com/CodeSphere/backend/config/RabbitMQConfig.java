@@ -11,25 +11,55 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String QUEUE = "judge-queue";
-    public static final String EXCHANGE = "judge-exchange";
-    public static final String ROUTING_KEY = "judge.routing.key";
+    // --- Judge Queue Config ---
+    public static final String QUEUE_JUDGE = "judge-queue";
+    public static final String EXCHANGE_JUDGE = "judge-exchange";
+    public static final String ROUTING_KEY_JUDGE = "judge.routing.key";
 
+    // --- Evaluation Queue Config ---
+    public static final String QUEUE_EVALUATION = "evaluation-queue";
+    public static final String EXCHANGE_EVALUATION = "evaluation-exchange";
+    public static final String ROUTING_KEY_EVALUATION = "evaluation.written";
+
+    // ==========================================
+    // 1. JUDGE QUEUE BEANS
+    // ==========================================
     @Bean
-    public Queue queue() {
-        return new Queue(QUEUE, true); // durable queue
+    public Queue judgeQueue() {
+        return new Queue(QUEUE_JUDGE, true);
     }
 
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(EXCHANGE);
+    public TopicExchange judgeExchange() {
+        return new TopicExchange(EXCHANGE_JUDGE);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
+    public Binding judgeBinding(Queue judgeQueue, TopicExchange judgeExchange) {
+        return BindingBuilder.bind(judgeQueue).to(judgeExchange).with(ROUTING_KEY_JUDGE);
     }
 
+    // ==========================================
+    // 2. EVALUATION QUEUE BEANS
+    // ==========================================
+    @Bean
+    public Queue evaluationQueue() {
+        return new Queue(QUEUE_EVALUATION, true);
+    }
+
+    @Bean
+    public TopicExchange evaluationExchange() {
+        return new TopicExchange(EXCHANGE_EVALUATION);
+    }
+
+    @Bean
+    public Binding evaluationBinding(Queue evaluationQueue, TopicExchange evaluationExchange) {
+        return BindingBuilder.bind(evaluationQueue).to(evaluationExchange).with(ROUTING_KEY_EVALUATION);
+    }
+
+    // ==========================================
+    // 3. GLOBAL RABBITMQ CONVERTER & TEMPLATE
+    // ==========================================
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();

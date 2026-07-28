@@ -2,48 +2,22 @@ package com.CodeSphere.backend.service;
 
 import com.CodeSphere.backend.model.RefreshToken;
 import com.CodeSphere.backend.model.User;
-import com.CodeSphere.backend.repository.RefreshTokenRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 
-import org.springframework.transaction.annotation.Transactional; // Ensure this is imported
+public interface RefreshTokenService {
 
-@Service
-@RequiredArgsConstructor
-public class RefreshTokenService {
+    RefreshToken createRefreshToken(Long userId);
 
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final long refreshTokenDurationMs = 604800000; // 7 days
+    RefreshToken createRefreshToken(User user);
 
-    @Transactional // ◄ Add this annotation here!
-    public RefreshToken createRefreshToken(User user) {
-        // This will now execute safely inside a transaction context
-        refreshTokenRepository.deleteByUser(user);
+    Optional<RefreshToken> findByToken(String token);
 
-        RefreshToken token = RefreshToken.builder()
-                .user(user)
-                .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
-                .token(UUID.randomUUID().toString())
-                .build();
+    RefreshToken verifyExpiration(RefreshToken token);
 
-        return refreshTokenRepository.save(token);
-    }
+    boolean isExpired(RefreshToken token);
 
-    public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
-    }
+    int deleteByUserId(Long userId);
 
-    @Transactional
-    public void deleteByUser(User user) {
-        refreshTokenRepository.deleteByUser(user);
-    }
-
-    public boolean isExpired(RefreshToken token) {
-        return token.getExpiryDate().isBefore(Instant.now());
-    }
+    void deleteByUser(User user);
 }

@@ -42,7 +42,7 @@ public class SubmissionConsumer {
     private final CodeAnalysisService codeAnalysisService;
     private final SkillScoreService skillScoreService;
 
-    @RabbitListener(queues = RabbitMQConfig.QUEUE)
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_JUDGE)
     public void consumeMessage(JudgeRequest request) {
         log.info("Received judge request for submission ID: {}, runOnly: {}",
                 request.getSubmissionId(), request.isRunOnly());

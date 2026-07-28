@@ -31,6 +31,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     long countByUserId(Long userId);
 
+    long countByStatus(SubmissionStatus status);
+
     @Query("SELECT COUNT(DISTINCT s.problemId) FROM Submission s WHERE s.userId = :userId AND s.status = 'ACCEPTED'")
     long countDistinctAcceptedProblemsByUserId(@Param("userId") Long userId);
 

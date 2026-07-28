@@ -1,0 +1,79 @@
+spring:
+  application:
+    name: CodeSphere-backend
+  profiles:
+    active: dev
+  
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8080
+
+# Application-specific properties
+app:
+  jwt:
+    # 256-bit secret key for HMAC-SHA256 (Base64 encoded)
+    # This is a development placeholder. Prod should override this via env variable.
+    secret: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVzcGhlcmUtZGV2ZWxvcG1lbnQtcGxhdGZvcm0tc2VjdXJpdHktdGVzdGluZw==
+    access-token-expiration-ms: 900000 # 15 minutes
+    refresh-token-expiration-ms: 604800000 # 7 days
+  minio:
+    endpoint: http://${MINIO_HOST:localhost}:9000
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    bucket-name: questions-import-vault
+
+  cors:
+    allowed-origin: "http://localhost:3000"
+
+# Storage configuration
+storage:
+  active-backend: local
+  max-file-size: 52428800 # 50MB
+  allowed-content-types:
+    - text/plain
+    - text/csv
+    - application/pdf
+    - application/json
+    - application/zip
+    - image/png
+    - image/jpeg
+
+# Judge engine configuration
+judge:
+  default-time-limit: 2000
+  default-memory-limit: 262144
+  max-code-length: 65536
+  thread-pool-core-size: 4
+  thread-pool-max-size: 8
+  queue-capacity: 100
+  use-docker: false   # Set to true in production to enable real Docker sandboxing
+  supported-languages:
+    - java
+    - python
+    - cpp
+    - c
+    - javascript
+
+# Data Encryption Configuration (Added for AES-256 PII protection)
+# Aligned to the root level so Spring can resolve @Value("${security.encryption.key}")
+security:
+  encryption:
+    key: "c0deSph3reSecUr1tyK3y2026AES256!"

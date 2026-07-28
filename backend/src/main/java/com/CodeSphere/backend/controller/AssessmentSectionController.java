@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.controller;
 
-import com.CodeSphere.backend.entity.AssessmentSection;
+import com.CodeSphere.backend.model.AssessmentSection;
 import com.CodeSphere.backend.service.AssessmentSectionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,10 +1,14 @@
 package com.CodeSphere.backend.config;
 
+import com.CodeSphere.backend.security.CustomUserDetailsService;
+import com.CodeSphere.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,13 +25,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Consolidated Security Configuration.
- *
- * Merges the two previous SecurityConfig versions into a single canonical bean.
- * Wires the JwtAuthenticationFilter into the filter chain, defines role-based
- * access rules for all API endpoints, and configures CORS for frontend access.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -35,47 +32,54 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomUserDetailsService userDetailsService;
+
+    @Value("${app.cors.allowed-origin:http://localhost:5173}")
+    private String allowedOrigin;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // ---- Public Endpoints ----
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // ---- Public Endpoints ----
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                // ---- Problem Management (create/update/delete = admin/examiner) ----
-                .requestMatchers(HttpMethod.POST, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.PUT, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.PATCH, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers(HttpMethod.DELETE, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
+                        // ---- Problem Submissions (Placed BEFORE general problem management) ----
+                        .requestMatchers(HttpMethod.POST, "/api/problems/*/submit").authenticated()
 
-                // ---- Submissions (authenticated users) ----
-                .requestMatchers("/api/submissions/**").authenticated()
+                        // ---- Problem Management (create/update/delete = admin/examiner) ----
+                        .requestMatchers(HttpMethod.POST, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers(HttpMethod.PUT, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/problems/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
 
-                // ---- Interview Module ----
-                .requestMatchers(HttpMethod.GET, "/api/interview/categories").permitAll()
-                .requestMatchers("/api/interview/**").authenticated()
+                        // ---- Submissions (Matches both /api/submissions AND /api/submissions/*) ----
+                        .requestMatchers("/api/submissions", "/api/submissions/**").authenticated()
 
-                // ---- File Storage (authenticated users) ----
-                .requestMatchers("/api/files/**").authenticated()
+                        // ---- Interview Module ----
+                        .requestMatchers(HttpMethod.GET, "/api/interview/categories").permitAll()
+                        .requestMatchers("/api/interview/**").authenticated()
 
-                // ---- Admin Endpoints ----
-                .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/api/org/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
-                .requestMatchers("/api/exams/manage/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
-                .requestMatchers("/api/courses/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "INSTRUCTOR")
-                .requestMatchers("/api/candidate/**").hasRole("CANDIDATE")
+                        // ---- File Storage ----
+                        .requestMatchers("/api/files/**").authenticated()
 
-                // ---- Default: require authentication ----
-                .anyRequest().authenticated()
-            )
-            // Wire JWT filter before Spring's UsernamePasswordAuthenticationFilter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                        // ---- Admin & Role Endpoints ----
+                        .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/api/org/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN")
+                        .requestMatchers("/api/exams/manage/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "EXAMINER")
+                        .requestMatchers("/api/courses/**").hasAnyRole("SUPER_ADMIN", "ORG_ADMIN", "INSTRUCTOR")
+                        .requestMatchers("/api/candidate/**").hasRole("CANDIDATE")
+
+                        // ---- Default ----
+                        .anyRequest().authenticated()
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -83,6 +87,14 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean
@@ -94,10 +106,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        // Allows both local dev URLs and property-based origin
         configuration.setAllowedOrigins(List.of(
+                allowedOrigin,
                 "http://localhost:5173",
                 "http://localhost:3000"
         ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of(
                 "Authorization", "Content-Type", "Cache-Control",
