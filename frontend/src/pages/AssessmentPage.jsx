@@ -9,6 +9,9 @@ const QUESTION_TYPES = {
   MCQ_SINGLE: 'MCQ_SINGLE',
   MCQ_MULTI: 'MCQ_MULTI',
   CODING: 'CODING',
+  SQL: 'SQL',
+  API_IMPLEMENTATION: 'API_IMPLEMENTATION',
+  DEBUGGING: 'DEBUGGING',
   SUBJECTIVE: 'SUBJECTIVE',
   WRITTEN: 'WRITTEN',
   READING_COMPREHENSION: 'READING_COMPREHENSION',
@@ -139,8 +142,9 @@ export default function AssessmentPage() {
         }
       } catch (err) {
         if (active) {
-          setError('We could not initialize the assessment session.');
-          toast.error('Assessment session failed to load.');
+          const message = err.response?.data?.message || err.message || 'We could not initialize the assessment session.';
+          setError(message);
+          toast.error(message);
         }
       } finally {
         if (active) setLoading(false);
@@ -258,9 +262,14 @@ export default function AssessmentPage() {
     try {
       const res = await assessmentAPI.submitAssessment(id, {});
       setSubmissionResult(res.data || { status: 'PENDING' });
-      sessionStorage.setItem(`assessment-result-${id}`, JSON.stringify(res.data || { status: 'PENDING' }));
       toast.success('Assessment submitted successfully.');
-      navigate(`/assessments/${id}/result`);
+      if (assessment?.resultsVisible !== false) {
+        sessionStorage.setItem(`assessment-result-${id}`, JSON.stringify(res.data || { status: 'PENDING' }));
+        navigate(`/assessments/${id}/result`);
+      } else {
+        toast.success('Your response was submitted. Results will be released later.');
+        navigate('/assessments');
+      }
     } catch {
       toast.error('Submission failed. Please try again.');
     } finally {
@@ -272,6 +281,12 @@ export default function AssessmentPage() {
     if (!session?.id) return;
     try {
       const question = questions[activeQuestion];
+      if (question?.questionType === QUESTION_TYPES.SQL) {
+        await assessmentAPI.saveAnswer(session.id, question.id, code);
+        setCodeVerdict('SAVED');
+        setCodeOutput('SQL query saved. It will be reviewed after you submit the assessment.');
+        return;
+      }
       if (!question?.codingProblemId) {
         toast.error('This coding question is not linked to a coding problem yet.');
         return;
@@ -301,8 +316,8 @@ export default function AssessmentPage() {
       const res = await assessmentAPI.uploadFile(session.id, question?.id, formData);
       setFileName(res.data?.fileName || file.name);
       toast.success('File uploaded.');
-    } catch {
-      toast.error('Upload endpoint is not available yet.');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to upload this file.');
     } finally {
       setUploading(false);
     }
@@ -490,19 +505,24 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
         </div>
       );
     case QUESTION_TYPES.CODING:
+    case QUESTION_TYPES.API_IMPLEMENTATION:
+    case QUESTION_TYPES.DEBUGGING:
+    case QUESTION_TYPES.SQL:
+      const isSql = currentQuestion.questionType === QUESTION_TYPES.SQL;
       return (
         <div>
           <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-            <select className="select" value={language} onChange={(event) => setLanguage(event.target.value)}>
+            {!isSql && <select className="select" value={language} onChange={(event) => setLanguage(event.target.value)}>
               {LANGUAGES.map((lang) => <option key={lang.value} value={lang.value}>{lang.label}</option>)}
-            </select>
+            </select>}
+            <span className="badge badge-tag">{isSql ? 'SQL query task' : currentQuestion.questionType === QUESTION_TYPES.API_IMPLEMENTATION ? 'API implementation task' : currentQuestion.questionType === QUESTION_TYPES.DEBUGGING ? 'Debugging task' : 'Coding task'}</span>
             <button className="btn btn-secondary btn-sm" onClick={() => setCode(STARTER_CODE[language] || '')}>Reset</button>
-            <button className="btn btn-secondary btn-sm" onClick={onCodingSubmit}>Submit</button>
+            <button className="btn btn-secondary btn-sm" onClick={onCodingSubmit}>{isSql ? 'Save query' : 'Submit to judge'}</button>
           </div>
           <div className="coding-container">
             <Editor
               height="320px"
-              language={LANGUAGES.find((entry) => entry.value === language)?.monacoLan || 'javascript'}
+              language={isSql ? 'sql' : (LANGUAGES.find((entry) => entry.value === language)?.monacoLan || 'javascript')}
               value={code}
               onChange={(next) => setCode(next || '')}
               theme="vs-dark"

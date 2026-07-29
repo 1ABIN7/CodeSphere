@@ -90,6 +90,7 @@ public class AssessmentSessionController {
     }
 
     @PostMapping("/{sessionId}/files")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> uploadAssessmentFile(@PathVariable Long sessionId, @RequestParam Long questionId,
                                                    @RequestParam("file") MultipartFile file) {
         Long userId = getCurrentUserId();
@@ -110,7 +111,8 @@ public class AssessmentSessionController {
     public ResponseEntity<java.util.List<AssessmentHistoryItemDto>> getResultHistory() {
         Long userId = getCurrentUserId();
         return ResponseEntity.ok(sessionRepository.findByCandidateIdAndStatusOrderBySubmittedAtDesc(userId, AssessmentSession.SessionStatus.SUBMITTED)
-                .stream().map(this::toHistoryItem).toList());
+                .stream().filter(session -> assessmentRepository.findById(session.getAssessmentId()).map(assessment -> assessment.isResultsVisible()).orElse(false))
+                .map(this::toHistoryItem).toList());
     }
 
     @GetMapping("/{assessmentId}/result")
@@ -128,6 +130,7 @@ public class AssessmentSessionController {
                 .filter(mapping -> mapping.getMaxScore() != null).mapToDouble(mapping -> mapping.getMaxScore()).sum();
         var assessment = assessmentRepository.findById(assessmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Assessment not found"));
+        if (!assessment.isResultsVisible()) throw new IllegalStateException("Results are not available for this assessment yet.");
         java.util.List<String> feedback = answerRepository.findBySessionId(session.getId()).stream()
                 .map(answer -> answer.getEvaluatorFeedback()).filter(java.util.Objects::nonNull)
                 .filter(value -> !value.isBlank()).toList();
@@ -135,7 +138,7 @@ public class AssessmentSessionController {
         return ResponseEntity.ok(AssessmentResultDTO.builder().sessionId(session.getId()).userId(userId)
                 .assessmentId(assessmentId).assessmentTitle(assessment.getTitle()).score(score).totalScore(total)
                 .passingScore(assessment.getPassingScore()).passed(!pending && (assessment.getPassingScore() == null || score >= assessment.getPassingScore()))
-                .evaluatorFeedback(feedback).sections(sectionResults(session)).status(pending ? "PENDING_EVALUATION" : "COMPLETED").build());
+                .evaluatorFeedback(assessment.isFeedbackVisible() ? feedback : java.util.List.of()).sections(sectionResults(session)).status(pending ? "PENDING_EVALUATION" : "COMPLETED").build());
     }
 
     private java.util.List<SectionResultDto> sectionResults(AssessmentSession session) {

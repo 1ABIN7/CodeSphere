@@ -12,6 +12,7 @@ import com.CodeSphere.backend.security.CustomUserDetails;
 import com.CodeSphere.backend.dto.AssessmentAssignmentStatusDto;
 import com.CodeSphere.backend.repository.UserRepository;
 import com.CodeSphere.backend.repository.AssessmentSessionRepository;
+import com.CodeSphere.backend.repository.CandidateGroupRepository;
 import com.CodeSphere.backend.model.AssessmentSession;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class AssessmentController {
     private final AssessmentQuestionRepository assessmentQuestionRepository;
     private final UserRepository userRepository;
     private final AssessmentSessionRepository assessmentSessionRepository;
+    private final CandidateGroupRepository candidateGroupRepository;
 
     // --- Read Operations ---
 
@@ -75,9 +77,13 @@ public class AssessmentController {
     @GetMapping("/available")
     public ResponseEntity<List<Assessment>> getMyAvailableAssessments() {
         Long userId = getCurrentUserId();
+        LocalDateTime now = LocalDateTime.now();
         List<Assessment> assessments = assignmentRepository.findByUserId(userId).stream()
+                .filter(assignment -> assignment.getDeadline() == null || !assignment.getDeadline().isBefore(now))
                 .map(assignment -> assessmentRepository.findById(assignment.getAssessmentId()).orElse(null))
                 .filter(assessment -> assessment != null && assessment.isPublished())
+                .filter(assessment -> assessment.getStartTime() == null || !assessment.getStartTime().isAfter(now))
+                .filter(assessment -> assessment.getEndTime() == null || !assessment.getEndTime().isBefore(now))
                 .filter(assessment -> sectionRepository.findByAssessmentIdOrderBySectionOrderAsc(assessment.getId()).stream()
                         .anyMatch(section -> !assessmentQuestionRepository.findBySectionIdOrderByOrderIndexAsc(section.getId()).isEmpty()))
                 .toList();
@@ -140,6 +146,17 @@ public class AssessmentController {
             @RequestParam Long userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime deadline) {
         return ResponseEntity.ok(assessmentService.assignAssessment(id, userId, deadline));
+    }
+
+    @PostMapping("/{id}/assign-group")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
+    public ResponseEntity<List<AssessmentAssignment>> assignAssessmentGroup(@PathVariable Long id, @RequestParam Long groupId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime deadline) {
+        var group = candidateGroupRepository.findById(groupId).orElseThrow(() -> new IllegalArgumentException("Candidate group not found"));
+        List<AssessmentAssignment> created = group.getMemberUserIds().stream()
+                .filter(userId -> !assignmentRepository.existsByAssessmentIdAndUserId(id, userId))
+                .map(userId -> assessmentService.assignAssessment(id, userId, deadline)).toList();
+        return ResponseEntity.ok(created);
     }
 
     // --- Security Helper ---

@@ -9,4 +9,5 @@ import java.util.List;
 public interface AssessmentAssignmentRepository extends JpaRepository<AssessmentAssignment, Long> {
     List<AssessmentAssignment> findByAssessmentId(Long assessmentId);
     List<AssessmentAssignment> findByUserId(Long userId);
+    boolean existsByAssessmentIdAndUserId(Long assessmentId, Long userId);
 }

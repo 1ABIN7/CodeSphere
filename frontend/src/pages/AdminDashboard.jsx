@@ -145,6 +145,7 @@ export default function AdminDashboard() {
         <Link className="btn btn-secondary btn-sm" to="/problems">View problems</Link>
         <Link className="btn btn-primary btn-sm" to="/admin/assessments">Manage assessments</Link>
         <Link className="btn btn-primary btn-sm" to="/admin/questions">Manage question bank</Link>
+        <Link className="btn btn-secondary btn-sm" to="/admin/categories">Manage categories</Link>
         <Link className="btn btn-secondary btn-sm" to="/admin/evaluations">Evaluate submissions</Link>
         <Link className="btn btn-secondary btn-sm" to="/admin/reports">View reports</Link>
         <Link className="btn btn-secondary btn-sm" to="/admin/users">Manage users</Link>

@@ -157,18 +157,26 @@ public class AdminController {
         Map<Long, List<com.CodeSphere.backend.model.AssessmentAnswer>> answers = assessmentAnswerRepository.findAll().stream()
                 .filter(answer -> answer.getSelectedAnswer() != null && !answer.getSelectedAnswer().isBlank())
                 .collect(Collectors.groupingBy(com.CodeSphere.backend.model.AssessmentAnswer::getQuestionId));
-        var metrics = questionBankRepository.findAll().stream().map(question -> {
-            List<com.CodeSphere.backend.model.AssessmentAnswer> attempts = answers.getOrDefault(question.getId(), List.of());
-            long successes = attempts.stream().filter(answer -> isCorrect(question, answer)).count();
+        List<com.CodeSphere.backend.model.Question> allQuestions = questionBankRepository.findAll();
+        Map<Long, com.CodeSphere.backend.model.Question> questionsById = allQuestions.stream()
+                .collect(Collectors.toMap(com.CodeSphere.backend.model.Question::getId, question -> question));
+        Map<Long, List<Long>> comprehensionChildren = allQuestions.stream().filter(question -> question.getParentQuestionId() != null)
+                .collect(Collectors.groupingBy(com.CodeSphere.backend.model.Question::getParentQuestionId,
+                        Collectors.mapping(com.CodeSphere.backend.model.Question::getId, Collectors.toList())));
+        var metrics = allQuestions.stream().filter(question -> question.getParentQuestionId() == null).map(question -> {
+            List<com.CodeSphere.backend.model.AssessmentAnswer> attempts = "READING_COMPREHENSION".equals(question.getQuestionType())
+                    ? comprehensionChildren.getOrDefault(question.getId(), List.of()).stream().flatMap(childId -> answers.getOrDefault(childId, List.of()).stream()).toList()
+                    : answers.getOrDefault(question.getId(), List.of());
+            long successes = attempts.stream().filter(answer -> isCorrect(questionsById.get(answer.getQuestionId()), answer)).count();
             double averageScore = attempts.isEmpty() ? 0 : attempts.stream()
-                    .mapToDouble(answer -> answerScorePercent(question, answer)).average().orElse(0);
+                    .mapToDouble(answer -> answerScorePercent(questionsById.get(answer.getQuestionId()), answer)).average().orElse(0);
             long averageSeconds = attempts.stream().mapToLong(answer -> {
                 AssessmentSession session = sessions.get(answer.getSessionId());
                 if (session == null || answer.getUpdatedAt() == null || session.getStartedAt() == null) return 0L;
                 return Math.max(0, java.time.Duration.between(session.getStartedAt().toLocalDateTime(), answer.getUpdatedAt()).getSeconds());
             }).average().stream().mapToLong(Math::round).findFirst().orElse(0L);
             return QuestionAnalyticsResponse.QuestionMetric.builder().id(question.getId()).title(question.getTitle())
-                    .questionType(question.getQuestionType()).attempts(attempts.size())
+                    .questionType(question.getQuestionType()).difficulty(question.getDifficulty()).attempts(attempts.size())
                     .successRate(attempts.isEmpty() ? 0 : successes * 100D / attempts.size())
                     .averageScore(averageScore).averageSecondsSpent(averageSeconds).build();
         }).filter(metric -> metric.getAttempts() > 0).toList();

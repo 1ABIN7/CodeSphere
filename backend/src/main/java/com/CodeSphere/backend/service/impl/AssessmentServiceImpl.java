@@ -70,6 +70,8 @@ public class AssessmentServiceImpl implements AssessmentService {
         assessment.setAllowResume(assessmentDetails.isAllowResume());
         assessment.setCertifying(assessmentDetails.isCertifying());
         assessment.setAccessCode(assessmentDetails.getAccessCode());
+        assessment.setResultsVisible(assessmentDetails.isResultsVisible());
+        assessment.setFeedbackVisible(assessmentDetails.isFeedbackVisible());
 
         return assessmentRepository.save(assessment);
     }
@@ -243,9 +245,16 @@ public class AssessmentServiceImpl implements AssessmentService {
             return existing;
         }
 
-        List<Long> questionIds = questionRepository.findByAssessmentId(assessmentId).stream()
+        List<Long> questionIds = new java.util.ArrayList<>(questionRepository.findByAssessmentId(assessmentId).stream()
                 .sorted((left, right) -> Integer.compare(left.getOrderIndex(), right.getOrderIndex()))
-                .map(AssessmentQuestion::getQuestionBankId).toList();
+                .map(AssessmentQuestion::getQuestionBankId).toList());
+        // Reading passages unlock their child questions during the session; include
+        // their IDs in the snapshot so autosave, manual review, and scoring accept them.
+        java.util.List<Long> passageIds = java.util.List.copyOf(questionIds);
+        java.util.List<Long> comprehensionChildren = questionBankRepository.findAll().stream()
+                .filter(question -> question.getParentQuestionId() != null && passageIds.contains(question.getParentQuestionId()))
+                .map(Question::getId).toList();
+        questionIds.addAll(comprehensionChildren);
         if (questionIds.isEmpty()) {
             throw new IllegalStateException("This assessment has no questions");
         }
@@ -294,7 +303,7 @@ public class AssessmentServiceImpl implements AssessmentService {
         // Written and file answers require a human evaluator after the candidate submits.
         for (AssessmentAnswer answer : answerRepository.findBySessionId(savedSession.getId())) {
             Question question = questionBankRepository.findById(answer.getQuestionId()).orElse(null);
-            if (question != null && ("WRITTEN".equals(question.getQuestionType()) || "SUBJECTIVE".equals(question.getQuestionType()) || "FILE_UPLOAD".equals(question.getQuestionType()))) {
+            if (question != null && ("WRITTEN".equals(question.getQuestionType()) || "SUBJECTIVE".equals(question.getQuestionType()) || "FILE_UPLOAD".equals(question.getQuestionType()) || "SQL".equals(question.getQuestionType()))) {
                 answer.setEvaluationStatus("PENDING_EVALUATION");
                 answerRepository.save(answer);
             }

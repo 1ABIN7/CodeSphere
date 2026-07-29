@@ -59,6 +59,18 @@ export const usersAPI = {
   list: () => api.get('/v1/users'),
 };
 
+export const candidateGroupAPI = {
+  list: () => api.get('/v1/candidate-groups'),
+  create: (data) => api.post('/v1/candidate-groups', data),
+  delete: (id) => api.delete(`/v1/candidate-groups/${id}`),
+};
+
+export const categoryAPI = {
+  list: () => api.get('/v1/categories'),
+  create: (data, parentId) => api.post('/v1/categories', data, { params: parentId ? { parentId } : {} }),
+  delete: (id) => api.delete(`/v1/categories/${id}`),
+};
+
 // ─── Administration ───
 export const adminAPI = {
   getDashboard: (params) => api.get('/v1/admin/dashboard', { params }),
@@ -87,6 +99,7 @@ export const questionBankAPI = {
 export const evaluationAPI = {
   getPending: () => api.get('/v1/evaluations/pending'),
   submit: (answerId, data) => api.put(`/v1/evaluations/${answerId}`, data),
+  downloadFile: (answerId) => api.get(`/v1/evaluations/${answerId}/file`, { responseType: 'blob' }),
 };
 
 // ─── Exams ───
@@ -120,6 +133,7 @@ export const assessmentAPI = {
   publish: (id) => api.put(`/v1/assessments/${id}/publish`),
   unpublish: (id) => api.put(`/v1/assessments/${id}/unpublish`),
   assign: (id, userId, deadline) => api.post(`/v1/assessments/${id}/assign`, null, { params: { userId, deadline } }),
+  assignGroup: (id, groupId, deadline) => api.post(`/v1/assessments/${id}/assign-group`, null, { params: { groupId, deadline } }),
   getAssignments: (id) => api.get(`/v1/assessments/${id}/assigned-candidates`),
   getAssignmentStatus: (id) => api.get(`/v1/assessments/${id}/assignment-status`),
   addSection: (assessmentId, data) => api.post(`/v1/assessments/${assessmentId}/sections`, data),

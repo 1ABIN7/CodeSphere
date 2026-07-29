@@ -19,6 +19,7 @@ public class QuestionAnalyticsResponse {
         private final Long id;
         private final String title;
         private final String questionType;
+        private final String difficulty;
         private final long attempts;
         private final double successRate;
         private final double averageScore;

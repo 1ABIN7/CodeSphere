@@ -20,6 +20,7 @@ import EvaluatorDashboard from './pages/admin/EvaluatorDashboard';
 import ReportsDashboard from './pages/admin/ReportsDashboard';
 import AssessmentManagementPage from './pages/admin/AssessmentManagementPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import CategoryManagementPage from './pages/admin/CategoryManagementPage';
 import SubmissionsPage from './pages/SubmissionsPage';
 import LoginPage from './pages/LoginPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/admin/evaluations" element={<AdminRoute><EvaluatorDashboard /></AdminRoute>} />
               <Route path="/admin/reports" element={<AdminRoute><ReportsDashboard /></AdminRoute>} />
               <Route path="/admin/users" element={<AdminRoute><UserManagementPage /></AdminRoute>} />
+              <Route path="/admin/categories" element={<AdminRoute><CategoryManagementPage /></AdminRoute>} />
               <Route path="/submissions" element={<SubmissionsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
