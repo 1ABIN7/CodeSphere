@@ -12,4 +12,6 @@ public class DockerExecutionResult {
     private Integer execTime; // ms
     private Integer execMemory; // KB
     private String errorMessage;
+    @Builder.Default private Integer testCasesPassed = 0;
+    @Builder.Default private Integer totalTestCases = 0;
 }

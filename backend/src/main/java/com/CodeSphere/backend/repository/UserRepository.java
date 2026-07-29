@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
+import com.CodeSphere.backend.model.Role;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -20,4 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByResetPasswordToken(String token);
 
     Optional<User> findByEmailVerificationToken(String token);
+
+    List<User> findByRole(Role role);
 }

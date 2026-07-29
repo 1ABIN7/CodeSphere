@@ -4,14 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="" />
+    <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSectionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSectionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentSessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentSessionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="386" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -23,7 +31,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="develop" />
+        <entry key="$PROJECT_DIR$" value="feature/ProblemSubmissionNotworkingonbackend" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -44,61 +52,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0354103801208913E-4" />
-      <entry key="MS500" value="0.26914868956179827" />
-      <entry key="S2" value="1.209391894852662" />
-      <entry key="S5" value="1.6352657496465453" />
-      <entry key="S10" value="1.8084218800938914" />
-      <entry key="S30" value="1.9339763357591029" />
-      <entry key="S60" value="1.966709949180496" />
-      <entry key="M2" value="1.9836027872762585" />
-      <entry key="M5" value="2.381363014621062" />
-      <entry key="M10" value="8.11142668208484" />
-      <entry key="M15" value="20.41886922283473" />
-      <entry key="M30" value="69.16425866174683" />
-      <entry key="H1" value="160.4197406338352" />
-      <entry key="H2" value="310.2023573377172" />
-      <entry key="H4" value="503.4859963847052" />
-      <entry key="D1" value="905.1030139972344" />
-      <entry key="W1" value="1035.0713564719422" />
+      <entry key="MS100" value="1.550675144473736" />
+      <entry key="MS500" value="5.459806809874663" />
+      <entry key="S2" value="15.454149550883729" />
+      <entry key="S5" value="24.230347077485526" />
+      <entry key="S10" value="31.545787184820608" />
+      <entry key="S30" value="40.38213524975827" />
+      <entry key="S60" value="43.45347369466958" />
+      <entry key="M2" value="45.16221793401829" />
+      <entry key="M5" value="46.25070622946764" />
+      <entry key="M10" value="46.84590027418946" />
+      <entry key="M15" value="47.82659166928609" />
+      <entry key="M30" value="52.07622955589643" />
+      <entry key="H1" value="59.421623200387224" />
+      <entry key="H2" value="79.75898034083038" />
+      <entry key="H4" value="160.19256748035568" />
+      <entry key="D1" value="857.204022357216" />
+      <entry key="W1" value="1306.717956580691" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.000000000060907" />
-      <entry key="M2" value="1.0000109171606293" />
-      <entry key="M5" value="1.0163537736887978" />
-      <entry key="M10" value="1.2140690433794545" />
-      <entry key="M15" value="1.5373728520962273" />
-      <entry key="M30" value="2.445175599788741" />
-      <entry key="H1" value="3.6578871532853805" />
-      <entry key="H2" value="5.289817542826856" />
-      <entry key="H4" value="8.051848529135146" />
-      <entry key="D1" value="20.68315241454672" />
-      <entry key="W1" value="26.74996805077186" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="5.373206277E-315" />
+      <entry key="S60" value="7.330215735214891E-158" />
+      <entry key="M2" value="2.7074371156528934E-79" />
+      <entry key="M5" value="3.7413085218594517E-32" />
+      <entry key="M10" value="1.9354626459573037E-16" />
+      <entry key="M15" value="3.3691315697397834E-11" />
+      <entry key="M30" value="6.279612449539796E-6" />
+      <entry key="H1" value="0.00317694930567181" />
+      <entry key="H2" value="0.09840778922596935" />
+      <entry key="H4" value="0.9133791676059998" />
+      <entry key="D1" value="14.655439709074582" />
+      <entry key="W1" value="26.993406772399002" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="5.874594703217469E-4" />
-      <entry key="MS500" value="0.48439622249613945" />
-      <entry key="S2" value="1.889697558380835" />
-      <entry key="S5" value="2.492359821241663" />
-      <entry key="S10" value="2.7341957624639517" />
-      <entry key="S30" value="2.9085908142325603" />
-      <entry key="S60" value="2.9539349887303876" />
-      <entry key="M2" value="2.9772054680923676" />
-      <entry key="M5" value="3.395107201607587" />
-      <entry key="M10" value="9.323915104813482" />
-      <entry key="M15" value="21.954844263747837" />
-      <entry key="M30" value="71.60812309156375" />
-      <entry key="H1" value="164.0763719087946" />
-      <entry key="H2" value="315.4910131342754" />
-      <entry key="H4" value="511.5368436192953" />
-      <entry key="D1" value="925.7857438646871" />
-      <entry key="W1" value="1061.821247543335" />
+      <entry key="MS100" value="1.468549744219626" />
+      <entry key="MS500" value="5.402367098818684" />
+      <entry key="S2" value="15.413269455356993" />
+      <entry key="S5" value="24.20280269512964" />
+      <entry key="S10" value="31.52641114742879" />
+      <entry key="S30" value="40.37322821476997" />
+      <entry key="S60" value="43.448580705788515" />
+      <entry key="M2" value="45.159648087616645" />
+      <entry key="M5" value="46.2496467179846" />
+      <entry key="M10" value="46.8453619714194" />
+      <entry key="M15" value="47.82622355819078" />
+      <entry key="M30" value="52.076031819932865" />
+      <entry key="H1" value="59.42468113968941" />
+      <entry key="H2" value="79.85729825051985" />
+      <entry key="H4" value="161.1058001277206" />
+      <entry key="D1" value="871.8591585260403" />
+      <entry key="W1" value="1333.711285092855" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -123,6 +131,7 @@
     "Maven.backend [package].executor": "Run",
     "Maven.backend [test].executor": "Run",
     "Maven.backend [validate].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -131,6 +140,7 @@
     "Spring Boot.BackendApplication.executor": "Run",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "MoreFrontEndFeatures",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",

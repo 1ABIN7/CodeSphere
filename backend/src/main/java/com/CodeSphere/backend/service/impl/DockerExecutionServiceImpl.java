@@ -73,13 +73,26 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
     @Override
     public DockerExecutionResult executeSubmission(Long submissionId, String code,
                                                    String language, Long problemId) {
-        // Fetch sample test case for quick verdict (real judge uses JudgeEngineService for all)
-        var sampleCases = testCaseRepository.findByProblemIdAndIsSampleTrueOrderByOrderIndexAsc(problemId);
-        String sampleInput = sampleCases.isEmpty() ? "" : sampleCases.get(0).getInputData();
-        String expectedOutput = sampleCases.isEmpty() ? "" : sampleCases.get(0).getExpectedOutput();
-
-        return executeInDocker(code, language, sampleInput, expectedOutput,
+        var testCases = testCaseRepository.findByProblemIdOrderByOrderIndexAsc(problemId);
+        if (testCases.isEmpty()) return executeInDocker(code, language, "", null,
                 config.getDefaultTimeLimit(), config.getDefaultMemoryLimit());
+        int passed = 0, totalTime = 0, maxMemory = 0;
+        String firstError = null;
+        String finalVerdict = "ACCEPTED";
+        for (var testCase : testCases) {
+            DockerExecutionResult result = executeInDocker(code, language, testCase.getInputData(), testCase.getExpectedOutput(),
+                    config.getDefaultTimeLimit(), config.getDefaultMemoryLimit());
+            totalTime += result.getExecTime() == null ? 0 : result.getExecTime();
+            maxMemory = Math.max(maxMemory, result.getExecMemory() == null ? 0 : result.getExecMemory());
+            if ("ACCEPTED".equals(result.getVerdict())) passed++;
+            else {
+                if (firstError == null) firstError = result.getErrorMessage();
+                if ("COMPILATION_ERROR".equals(result.getVerdict()) || "RUNTIME_ERROR".equals(result.getVerdict()) || "TIME_LIMIT_EXCEEDED".equals(result.getVerdict())) finalVerdict = result.getVerdict();
+                else if ("ACCEPTED".equals(finalVerdict)) finalVerdict = "WRONG_ANSWER";
+            }
+        }
+        return DockerExecutionResult.builder().verdict(finalVerdict).execTime(totalTime).execMemory(maxMemory)
+                .errorMessage(firstError).testCasesPassed(passed).totalTestCases(testCases.size()).build();
     }
 
     @Override

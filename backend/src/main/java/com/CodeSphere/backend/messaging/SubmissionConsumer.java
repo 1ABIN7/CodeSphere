@@ -8,6 +8,9 @@ import com.CodeSphere.backend.model.Submission;
 import com.CodeSphere.backend.model.SubmissionStatus;
 import com.CodeSphere.backend.repository.ProblemRepository;
 import com.CodeSphere.backend.repository.SubmissionRepository;
+import com.CodeSphere.backend.repository.AssessmentAnswerRepository;
+import com.CodeSphere.backend.repository.AssessmentQuestionRepository;
+import com.CodeSphere.backend.repository.AssessmentSessionRepository;
 import com.CodeSphere.backend.service.CodeAnalysisService;
 import com.CodeSphere.backend.service.DockerExecutionService;
 import com.CodeSphere.backend.service.SkillScoreService;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.math.BigDecimal;
 
 /**
  * RabbitMQ consumer for the judge queue.
@@ -41,6 +45,9 @@ public class SubmissionConsumer {
     private final SimpMessagingTemplate messagingTemplate;
     private final CodeAnalysisService codeAnalysisService;
     private final SkillScoreService skillScoreService;
+    private final AssessmentAnswerRepository assessmentAnswerRepository;
+    private final AssessmentSessionRepository assessmentSessionRepository;
+    private final AssessmentQuestionRepository assessmentQuestionRepository;
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_JUDGE)
     public void consumeMessage(JudgeRequest request) {
@@ -131,12 +138,18 @@ public class SubmissionConsumer {
 
         // 6. Persist final state
         submission.setStatus(finalStatus);
+        submission.setTestCasesPassed(result.getTestCasesPassed());
+        submission.setTotalTestCases(result.getTotalTestCases());
+        int partialScore = result.getTotalTestCases() == null || result.getTotalTestCases() == 0 ? (finalStatus == SubmissionStatus.ACCEPTED ? 100 : 0)
+                : (int) Math.round(result.getTestCasesPassed() * 100D / result.getTotalTestCases());
+        submission.setScore(partialScore);
         if (result.getExecTime() != null)   submission.setExecTime(result.getExecTime());
         if (result.getExecMemory() != null) submission.setExecMemory(result.getExecMemory());
         if (result.getErrorMessage() != null) submission.setErrorMessage(result.getErrorMessage());
         submission.setComplexityAnalysis(analysisResult);
         submission.setAiFeedback(aiFeedback);
         submissionRepository.save(submission);
+        applyCodingAssessmentScore(submission, finalStatus);
 
         // 7. Update skill scores on ACCEPTED
         if (finalStatus == SubmissionStatus.ACCEPTED && submission.getUserId() != null) {
@@ -169,6 +182,25 @@ public class SubmissionConsumer {
         payload.put("errorMessage", result.getErrorMessage());
         if (status != null) payload.put("status", status.name());
         return payload;
+    }
+
+    /** Copies the judge verdict into the corresponding assessment answer when this
+     * submission originated from a coding assessment question. */
+    private void applyCodingAssessmentScore(Submission submission, SubmissionStatus finalStatus) {
+        assessmentAnswerRepository.findByCodingSubmissionId(submission.getId()).ifPresent(answer -> {
+            double maxScore = assessmentSessionRepository.findById(answer.getSessionId())
+                    .map(session -> assessmentQuestionRepository
+                            .findByAssessmentIdAndQuestionBankId(session.getAssessmentId(), answer.getQuestionId())
+                            .stream().mapToDouble(mapping -> mapping.getMaxScore() == null ? 0D : mapping.getMaxScore()).max().orElse(0D))
+                    .orElse(0D);
+            double ratio = submission.getTotalTestCases() == null || submission.getTotalTestCases() == 0
+                    ? (finalStatus == SubmissionStatus.ACCEPTED ? 1D : 0D)
+                    : submission.getTestCasesPassed() / (double) submission.getTotalTestCases();
+            answer.setScore(BigDecimal.valueOf(maxScore * ratio));
+            answer.setEvaluationStatus("EVALUATED");
+            answer.setEvaluatorFeedback("Automated coding judge: " + finalStatus.name());
+            assessmentAnswerRepository.save(answer);
+        });
     }
 
     @SuppressWarnings("unchecked")

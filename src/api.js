@@ -54,14 +54,14 @@ export const submissionsAPI = {
 // ─── Assessments ───
 export const assessmentsAPI = {
   getMyAssessments: (params) => api.get('/assessments/mine', { params }),
-  getAllAssessments: () => api.get('/api/v1/assessments'),
+  getAllAssessments: () => api.get('/v1/assessments'),
   getById: (id) => api.get(`/assessments/${id}`),
-  create: (data) => api.post('/api/v1/assessments', data),
-  update: (id, data) => api.put(`/api/v1/assessments/${id}`, data),
-  deleteAssessment: (id) => api.delete(`/api/v1/assessments/${id}`),
-  cloneAssessment: (id) => api.post(`/api/v1/assessments/${id}/clone`),
-  publishAssessment: (id) => api.put(`/api/v1/assessments/${id}/publish`),
-  unpublishAssessment: (id) => api.put(`/api/v1/assessments/${id}/unpublish`),
+  create: (data) => api.post('/v1/assessments', data),
+  update: (id, data) => api.put(`/v1/assessments/${id}`, data),
+  deleteAssessment: (id) => api.delete(`/v1/assessments/${id}`),
+  cloneAssessment: (id) => api.post(`/v1/assessments/${id}/clone`),
+  publishAssessment: (id) => api.put(`/v1/assessments/${id}/publish`),
+  unpublishAssessment: (id) => api.put(`/v1/assessments/${id}/unpublish`),
   startSession: (assessmentId) => api.post(`/assessments/${assessmentId}/session/start`),
   getSession: (assessmentId) => api.get(`/assessments/${assessmentId}/session`),
   saveAnswer: (assessmentId, questionId, data) =>
@@ -78,6 +78,24 @@ export const assessmentsAPI = {
   // TODO: backend endpoint pending — see AssessmentController
   runCode: (assessmentId, questionId, data) =>
     api.post(`/assessments/${assessmentId}/questions/${questionId}/run`, data),
+};
+
+// ─── Question Bank ───
+export const questionBankAPI = {
+  list: (params) => api.get('/v1/questions', { params }),
+  create: (data) => api.post('/v1/questions', data),
+  update: (id, data) => api.put(`/v1/questions/${id}`, data),
+  delete: (id) => api.delete(`/v1/questions/${id}`),
+};
+
+export const adminAPI = {
+  getDashboard: (params) => api.get('/v1/admin/dashboard', { params }),
+  getAssessmentReports: () => api.get('/v1/admin/reports/assessments'),
+};
+
+export const evaluationAPI = {
+  getPending: () => api.get('/v1/evaluations/pending'),
+  submit: (answerId, data) => api.put(`/v1/evaluations/${answerId}`, data),
 };
 
 // ─── Files ───

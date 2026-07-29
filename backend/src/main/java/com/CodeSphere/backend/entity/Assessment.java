@@ -64,6 +64,14 @@ public class Assessment {
     @Column(name = "access_code")
     private String accessCode;
 
+    @Builder.Default
+    @Column(name = "results_visible", nullable = false)
+    private boolean resultsVisible = true;
+
+    @Builder.Default
+    @Column(name = "feedback_visible", nullable = false)
+    private boolean feedbackVisible = true;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

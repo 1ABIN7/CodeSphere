@@ -39,7 +39,7 @@ export default function AssessmentDashboard() {
       setLoading(true);
       setError('');
       try {
-        const res = await assessmentAPI.list();
+        const res = await assessmentAPI.listAvailable();
         if (active) setAssessments(res.data || []);
       } catch (err) {
         if (active) {
@@ -67,8 +67,9 @@ export default function AssessmentDashboard() {
   return (
     <div className="container fade-in" style={{ paddingBottom: 60 }}>
       <div className="page-header">
-        <h1 className="page-title">Candidate assessments</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><h1 className="page-title">Candidate assessments</h1>
         <p className="page-subtitle">Start or resume your live exam session from here.</p>
+        </div><button className="btn btn-secondary btn-sm" onClick={() => navigate('/assessments/history')}>View history</button></div>
       </div>
 
       {loading ? (

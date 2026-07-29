@@ -9,6 +9,7 @@ import java.util.List;
 public interface AssessmentQuestionRepository extends JpaRepository<AssessmentQuestion, Long> {
     List<AssessmentQuestion> findByAssessmentId(Long assessmentId);
     List<AssessmentQuestion> findBySectionIdOrderByOrderIndexAsc(Long sectionId);
+    List<AssessmentQuestion> findByAssessmentIdAndQuestionBankId(Long assessmentId, Long questionBankId);
     void deleteByAssessmentId(Long assessmentId);
     void deleteBySectionId(Long sectionId);
 }

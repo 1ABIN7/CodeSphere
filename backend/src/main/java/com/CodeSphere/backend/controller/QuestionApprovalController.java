@@ -28,7 +28,7 @@ public class QuestionApprovalController {
 
     // APPROVE: POST /api/v1/questions/{id}/approve
     @PostMapping("/approve")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')") // Ensures Admin/Instructor access
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Question> approveQuestion(@PathVariable Long id) {
         Question question = approvalService.approveQuestion(id);
         return ResponseEntity.ok(question);
@@ -36,7 +36,7 @@ public class QuestionApprovalController {
 
     // REJECT: POST /api/v1/questions/{id}/reject
     @PostMapping("/reject")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')") // Ensures Admin/Instructor access
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Question> rejectQuestion(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @RestController
@@ -30,6 +31,7 @@ public class CategoryController {
 
     // READ TREE: Get all top-level categories along with their nested child objects
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<List<QuestionCategory>> getCategoryTree() {
         return ResponseEntity.ok(service.getRootCategories());
     }

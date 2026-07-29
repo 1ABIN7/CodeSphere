@@ -10,6 +10,7 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +19,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.Set;
 import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class FileUploadAssessmentServiceImpl implements FileUploadAssessmentService {
 
     private final AssessmentAnswerRepository answerRepository;
@@ -102,7 +107,30 @@ public class FileUploadAssessmentServiceImpl implements FileUploadAssessmentServ
             return savedAnswer;
 
         } catch (Exception e) {
-            throw new RuntimeException("Object storage engine initialization processing failure: " + e.getMessage(), e);
+            // Local development remains usable when MinIO is not running. Production
+            // continues to use MinIO whenever it is available.
+            log.warn("MinIO upload unavailable; using local assessment-file storage: {}", e.getMessage());
+            return saveLocalFallback(sessionId, questionId, file, extension);
+        }
+    }
+
+    private AssessmentAnswer saveLocalFallback(Long sessionId, Long questionId, MultipartFile file, String extension) {
+        try {
+            Path directory = Path.of(System.getProperty("user.dir"), ".local-assessment-files");
+            Files.createDirectories(directory);
+            String filename = String.format("session_%d_q_%d_%s.%s", sessionId, questionId,
+                    UUID.randomUUID().toString().substring(0, 8), extension);
+            try (InputStream input = file.getInputStream()) {
+                Files.copy(input, directory.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+            }
+            AssessmentAnswer answer = answerRepository.findBySessionIdAndQuestionId(sessionId, questionId).orElse(new AssessmentAnswer());
+            answer.setSessionId(sessionId);
+            answer.setQuestionId(questionId);
+            answer.setFileUrl("local://" + filename);
+            answer.setEvaluationStatus("PENDING_EVALUATION");
+            return answerRepository.save(answer);
+        } catch (Exception localError) {
+            throw new RuntimeException("Unable to store the uploaded assessment file: " + localError.getMessage(), localError);
         }
     }
 }

@@ -19,12 +19,17 @@ export default function LoginPage() {
       const res = await authAPI.login(form);
       login(res.data);
       toast.success(`Welcome back, ${res.data.username}! 🎉`);
-      navigate('/dashboard');
+      const isAdmin = ['ROLE_SUPER_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_EXAMINER'].includes(res.data.role);
+      navigate(isAdmin ? '/admin' : '/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed. Check your credentials.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const continueWithGoogle = () => {
+    window.location.assign('/oauth2/authorization/google');
   };
 
   return (
@@ -74,6 +79,30 @@ export default function LoginPage() {
             {loading ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Signing in...</> : 'Sign In'}
           </button>
         </form>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+          <div style={{ height: 1, flex: 1, background: 'var(--border)' }} />
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>OR</span>
+          <div style={{ height: 1, flex: 1, background: 'var(--border)' }} />
+        </div>
+
+        <button
+          type="button"
+          className="btn w-full"
+          style={{
+            justifyContent: 'center', padding: '12px', border: '1px solid var(--border)',
+            background: '#fff', color: '#3c4043', fontWeight: 600,
+          }}
+          onClick={continueWithGoogle}
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" focusable="false">
+            <path fill="#EA4335" d="M17.64 9.205c0-.638-.057-1.251-.164-1.841H9v3.483h4.844a4.14 4.14 0 0 1-1.798 2.716v2.258h2.909c1.702-1.567 2.685-3.875 2.685-6.616Z" />
+            <path fill="#4285F4" d="M9 18c2.43 0 4.467-.806 5.955-2.179l-2.909-2.258c-.806.54-1.837.859-3.046.859-2.344 0-4.328-1.584-5.037-3.71H.956v2.332A9 9 0 0 0 9 18Z" />
+            <path fill="#FBBC05" d="M3.963 10.712A5.41 5.41 0 0 1 3.681 9c0-.594.102-1.172.282-1.712V4.956H.956A9 9 0 0 0 0 9c0 1.452.347 2.827.956 4.044l3.007-2.332Z" />
+            <path fill="#34A853" d="M9 3.578c1.321 0 2.508.454 3.442 1.345l2.582-2.582C13.463.891 11.426 0 9 0A9 9 0 0 0 .956 4.956l3.007 2.332C4.672 5.162 6.656 3.578 9 3.578Z" />
+          </svg>
+          Continue with Google
+        </button>
 
         <div style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}

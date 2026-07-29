@@ -8,6 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional(readOnly = true)
     public List<Question> getAllQuestions() {
-        return questionRepository.findAll();
+        return questionRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 
     @Override
@@ -46,6 +47,21 @@ public class QuestionServiceImpl implements QuestionService {
 
         existingQuestion.setTitle(questionDetails.getTitle());
         existingQuestion.setContent(questionDetails.getContent());
+        existingQuestion.setCategory(questionDetails.getCategory());
+        existingQuestion.setType(questionDetails.getType());
+        existingQuestion.setQuestionType(questionDetails.getQuestionType());
+        existingQuestion.setCodingProblemId(questionDetails.getCodingProblemId());
+        existingQuestion.setDifficulty(questionDetails.getDifficulty());
+        existingQuestion.setTags(questionDetails.getTags());
+        existingQuestion.setOptions(questionDetails.getOptions());
+        existingQuestion.setCorrectAnswers(questionDetails.getCorrectAnswers());
+        existingQuestion.setPoints(questionDetails.getPoints());
+        existingQuestion.setNegativeScore(questionDetails.getNegativeScore());
+        existingQuestion.setMinWordCount(questionDetails.getMinWordCount());
+        existingQuestion.setMaxWordCount(questionDetails.getMaxWordCount());
+        existingQuestion.setPassageText(questionDetails.getPassageText());
+        existingQuestion.setReadingDurationSeconds(questionDetails.getReadingDurationSeconds());
+        existingQuestion.setSubQuestions(questionDetails.getSubQuestions());
 
         return questionRepository.save(existingQuestion);
     }
@@ -67,7 +83,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<Question> getFilteredQuestions(String category, String difficulty, String status, List<String> tags, String search) {
-        // Basic fallback implementation
-        return questionRepository.findAll();
+        // Filtering will be expanded separately; always return the newest entries first
+        // so recently created questions are visible immediately in the bank.
+        return questionRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 }

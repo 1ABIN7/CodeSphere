@@ -67,6 +67,7 @@ public class DataSeeder implements CommandLineRunner {
         // Seed non-coding question banks and assessments
         seedInterviewQuestions();
         seedQuestions();
+        seedActiveQuestionBank();
         seedAssessment();
 
         // Check if coding problems exist; if not, seed them
@@ -251,12 +252,45 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     /**
+     * Seeds the question table used by the current /api/v1/questions API.
+     * The older seed above is retained for legacy features that still read
+     * question_bank, but assessment authoring uses this active question bank.
+     */
+    private void seedActiveQuestionBank() {
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM questions", Integer.class);
+        if (count != null && count > 0) {
+            return;
+        }
+
+        Object[][] questions = {
+                {"Binary Search Complexity", "What is the time complexity of binary search on a sorted array?", "Algorithms", "MCQ_SINGLE", "MEDIUM", "B", 5},
+                {"Java Primitive Types", "Which option is not a Java primitive type?", "Java", "MCQ_SINGLE", "EASY", "C", 3},
+                {"REST Fundamentals", "What does REST stand for in web architecture?", "Web Development", "MCQ_SINGLE", "EASY", "B", 3},
+                {"SQL JOINs", "Explain when you would use an INNER JOIN versus a LEFT JOIN.", "Databases", "WRITTEN", "MEDIUM", "", 10},
+                {"Two Sum", "Write a function that returns indices of two values whose sum matches a target.", "Algorithms", "CODING", "MEDIUM", "", 15}
+        };
+
+        for (Object[] question : questions) {
+            jdbcTemplate.update(
+                    "INSERT INTO questions (title, content, category, type, difficulty, status, correct_answers, points, negative_score, question_type) VALUES (?, ?, ?, ?, ?, 'APPROVED', ?, ?, 0, ?)",
+                    question[0], question[1], question[2], question[3], question[4], question[5], question[6], question[3]
+            );
+        }
+        System.out.println("[DataSeeder] Active question bank seeded.");
+    }
+
+    /**
      * Seeds a sample MCQ assessment
      */
     /**
      * Seeds a sample MCQ assessment
      */
     private void seedAssessment() {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM assessments WHERE title = 'Demo MCQ Assessment'", Integer.class);
+        if (count != null && count > 0) {
+            return;
+        }
         jdbcTemplate.update(
                 "INSERT INTO assessments (title, description, assessment_type, duration_minutes, " +
                         "passing_score, is_published, created_by, organization_id) " +

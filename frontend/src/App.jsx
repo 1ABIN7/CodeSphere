@@ -13,9 +13,17 @@ import DashboardPage from './pages/DashboardPage';
 import AssessmentDashboard from './pages/AssessmentDashboard';
 import AssessmentPage from './pages/AssessmentPage';
 import AssessmentResultPage from './pages/AssessmentResultPage';
+import AssessmentHistoryPage from './pages/AssessmentHistoryPage';
 import AdminDashboard from './pages/AdminDashboard';
+import QuestionBankPage from './pages/admin/QuestionBankPage';
+import EvaluatorDashboard from './pages/admin/EvaluatorDashboard';
+import ReportsDashboard from './pages/admin/ReportsDashboard';
+import AssessmentManagementPage from './pages/admin/AssessmentManagementPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
+import CategoryManagementPage from './pages/admin/CategoryManagementPage';
 import SubmissionsPage from './pages/SubmissionsPage';
 import LoginPage from './pages/LoginPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminRoute from './components/AdminRoute';
 
@@ -37,9 +45,17 @@ export default function App() {
               <Route path="/assessments" element={<PrivateRoute><AssessmentDashboard /></PrivateRoute>} />
               <Route path="/assessments/:id/session" element={<PrivateRoute><AssessmentPage /></PrivateRoute>} />
               <Route path="/assessments/:id/result" element={<PrivateRoute><AssessmentResultPage /></PrivateRoute>} />
+              <Route path="/assessments/history" element={<PrivateRoute><AssessmentHistoryPage /></PrivateRoute>} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin/questions" element={<AdminRoute><QuestionBankPage /></AdminRoute>} />
+              <Route path="/admin/assessments" element={<AdminRoute><AssessmentManagementPage /></AdminRoute>} />
+              <Route path="/admin/evaluations" element={<AdminRoute><EvaluatorDashboard /></AdminRoute>} />
+              <Route path="/admin/reports" element={<AdminRoute><ReportsDashboard /></AdminRoute>} />
+              <Route path="/admin/users" element={<AdminRoute><UserManagementPage /></AdminRoute>} />
+              <Route path="/admin/categories" element={<AdminRoute><CategoryManagementPage /></AdminRoute>} />
               <Route path="/submissions" element={<SubmissionsPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="*" element={
                 <div className="container" style={{ paddingTop: 80, textAlign: 'center' }}>
