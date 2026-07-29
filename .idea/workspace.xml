@@ -6,21 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSectionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSectionController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/CategoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/CategoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/entity/Assessment.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/entity/Assessment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentAssignmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentAssignmentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentSessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentSessionService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/FileUploadAssessmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/FileUploadAssessmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/AssessmentManagementPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/AssessmentManagementPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/EvaluatorDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/EvaluatorDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/QuestionBankPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/QuestionBankPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,23 +52,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.625080182753973" />
-      <entry key="MS500" value="4.609158230243915" />
-      <entry key="S2" value="9.429930435061292" />
-      <entry key="S5" value="14.789706160938309" />
-      <entry key="S10" value="18.671418307712354" />
-      <entry key="S30" value="22.521404586992666" />
-      <entry key="S60" value="23.706545228913804" />
-      <entry key="M2" value="24.339038147182034" />
-      <entry key="M5" value="24.732105552939906" />
-      <entry key="M10" value="24.865459849503736" />
-      <entry key="M15" value="24.910186064294844" />
-      <entry key="M30" value="24.99382873878218" />
-      <entry key="H1" value="27.364111470786614" />
-      <entry key="H2" value="48.54517569180348" />
-      <entry key="H4" value="137.7451571824696" />
-      <entry key="D1" value="837.1348052254625" />
-      <entry key="W1" value="1265.6160173911326" />
+      <entry key="MS100" value="1.550675144473736" />
+      <entry key="MS500" value="5.459806809874663" />
+      <entry key="S2" value="15.454149550883729" />
+      <entry key="S5" value="24.230347077485526" />
+      <entry key="S10" value="31.545787184820608" />
+      <entry key="S30" value="40.38213524975827" />
+      <entry key="S60" value="43.45347369466958" />
+      <entry key="M2" value="45.16221793401829" />
+      <entry key="M5" value="46.25070622946764" />
+      <entry key="M10" value="46.84590027418946" />
+      <entry key="M15" value="47.82659166928609" />
+      <entry key="M30" value="52.07622955589643" />
+      <entry key="H1" value="59.421623200387224" />
+      <entry key="H2" value="79.75898034083038" />
+      <entry key="H4" value="160.19256748035568" />
+      <entry key="D1" value="857.204022357216" />
+      <entry key="W1" value="1306.717956580691" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -82,37 +76,37 @@
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
-      <entry key="S30" value="4.2173341440525995E-274" />
-      <entry key="S60" value="2.053614896725427E-137" />
-      <entry key="M2" value="4.5316827964073347E-69" />
-      <entry key="M5" value="4.597311942821411E-28" />
-      <entry key="M10" value="2.145482709471688E-14" />
-      <entry key="M15" value="7.774601201943657E-10" />
-      <entry key="M30" value="3.0165665904642212E-5" />
-      <entry key="H1" value="0.006963062964617781" />
-      <entry key="H2" value="0.14568823907660064" />
-      <entry key="H4" value="1.1113442615328353" />
-      <entry key="D1" value="15.142529836475386" />
-      <entry key="W1" value="27.119783075686428" />
+      <entry key="S30" value="5.373206277E-315" />
+      <entry key="S60" value="7.330215735214891E-158" />
+      <entry key="M2" value="2.7074371156528934E-79" />
+      <entry key="M5" value="3.7413085218594517E-32" />
+      <entry key="M10" value="1.9354626459573037E-16" />
+      <entry key="M15" value="3.3691315697397834E-11" />
+      <entry key="M30" value="6.279612449539796E-6" />
+      <entry key="H1" value="0.00317694930567181" />
+      <entry key="H2" value="0.09840778922596935" />
+      <entry key="H4" value="0.9133791676059998" />
+      <entry key="D1" value="14.655439709074582" />
+      <entry key="W1" value="26.993406772399002" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5550082729834538" />
-      <entry key="MS500" value="4.564276661548829" />
-      <entry key="S2" value="9.403612444228768" />
-      <entry key="S5" value="14.76980131417428" />
-      <entry key="S10" value="18.65745015297934" />
-      <entry key="S30" value="22.515317697506656" />
-      <entry key="S60" value="23.703273881964193" />
-      <entry key="M2" value="24.337341035488006" />
-      <entry key="M5" value="24.731411353373517" />
-      <entry key="M10" value="24.86511013807086" />
-      <entry key="M15" value="24.90995233973916" />
-      <entry key="M30" value="24.993741633443022" />
-      <entry key="H1" value="27.371010852934134" />
-      <entry key="H2" value="48.690797512532356" />
-      <entry key="H4" value="138.85635056518606" />
-      <entry key="D1" value="852.2770253122412" />
-      <entry key="W1" value="1292.73572237906" />
+      <entry key="MS100" value="1.468549744219626" />
+      <entry key="MS500" value="5.402367098818684" />
+      <entry key="S2" value="15.413269455356993" />
+      <entry key="S5" value="24.20280269512964" />
+      <entry key="S10" value="31.52641114742879" />
+      <entry key="S30" value="40.37322821476997" />
+      <entry key="S60" value="43.448580705788515" />
+      <entry key="M2" value="45.159648087616645" />
+      <entry key="M5" value="46.2496467179846" />
+      <entry key="M10" value="46.8453619714194" />
+      <entry key="M15" value="47.82622355819078" />
+      <entry key="M30" value="52.076031819932865" />
+      <entry key="H1" value="59.42468113968941" />
+      <entry key="H2" value="79.85729825051985" />
+      <entry key="H4" value="161.1058001277206" />
+      <entry key="D1" value="871.8591585260403" />
+      <entry key="W1" value="1333.711285092855" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">

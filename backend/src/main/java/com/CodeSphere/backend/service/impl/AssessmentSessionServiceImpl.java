@@ -63,7 +63,13 @@ public class AssessmentSessionServiceImpl implements AssessmentSessionService {
 
     @Override
     public AssessmentAnswer autoSaveAnswer(Long sessionId, Long questionId, String answerContent) {
-        verifyActiveSession(sessionId);
+        AssessmentSession session = verifyActiveSession(sessionId);
+        enforceCurrentSectionDeadline(session,
+                sectionRepository.findByAssessmentIdOrderBySectionOrderAsc(session.getAssessmentId()),
+                OffsetDateTime.now(ZoneOffset.UTC));
+        if (session.getStatus() != AssessmentSession.SessionStatus.IN_PROGRESS) {
+            throw new IllegalStateException("The assessment time has expired");
+        }
 
         AssessmentAnswer answer = answerRepository.findBySessionIdAndQuestionId(sessionId, questionId)
                 .orElse(new AssessmentAnswer());
@@ -118,53 +124,65 @@ public class AssessmentSessionServiceImpl implements AssessmentSessionService {
     }
 
     @Override
-    public List<Question> navigateToSection(Long sessionId, int targetSectionIndex, List<AssessmentSection> allSections, int pageSize) {
+    public AssessmentSession navigateToSection(Long sessionId, int targetSectionIndex) {
         AssessmentSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+        if (session.getStatus() != AssessmentSession.SessionStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Session is no longer active");
+        }
+        List<AssessmentSection> allSections = sectionRepository
+                .findByAssessmentIdOrderBySectionOrderAsc(session.getAssessmentId());
+        if (targetSectionIndex < 0 || targetSectionIndex >= allSections.size()) {
+            throw new IllegalArgumentException("Section does not exist");
+        }
+
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        enforceCurrentSectionDeadline(session, allSections, now);
+        if (session.getStatus() != AssessmentSession.SessionStatus.IN_PROGRESS) {
+            throw new IllegalStateException("The assessment time has expired");
+        }
 
         int currentIdx = session.getCurrentSectionIndex();
-
-        // 1. Enforce SEQUENTIAL Validation Guard Check
-        if (targetSectionIndex > currentIdx) {
-            for (int i = currentIdx; i < targetSectionIndex; i++) {
-                AssessmentSection previousSection = allSections.get(i);
-                if (previousSection.getNavigationMode() == AssessmentSection.NavigationMode.SEQUENTIAL
-                        && !session.getCompletedSectionIndexes().contains(i)) {
-                    throw new IllegalStateException("Cannot advance. Section " + i + " must be completed first.");
-                }
-            }
+        if (targetSectionIndex < currentIdx) {
+            throw new IllegalStateException("A completed section cannot be reopened.");
         }
+        if (targetSectionIndex > currentIdx + 1) {
+            throw new IllegalStateException("Sections must be completed in order.");
+        }
+        if (targetSectionIndex == currentIdx) return session;
 
-        // 2. Handle per-section isolated countdown timer transitions
-        AssessmentSection targetSection = allSections.get(targetSectionIndex);
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        session.getCompletedSectionIndexes().add(currentIdx);
+        session.setCurrentSectionIndex(targetSectionIndex);
+        session.setCurrentSectionStartedAt(now);
+        return sessionRepository.save(session);
+    }
 
-        if (targetSectionIndex != currentIdx) {
-            session.getCompletedSectionIndexes().add(currentIdx);
-            session.setCurrentSectionIndex(targetSectionIndex);
-
-            if (targetSection.getDurationMinutes() != null) {
-                session.setCurrentSectionStartedAt(now);
-            } else {
-                session.setCurrentSectionStartedAt(null);
-            }
+    private void enforceCurrentSectionDeadline(AssessmentSession session, List<AssessmentSection> sections, OffsetDateTime now) {
+        if (sections.isEmpty() || session.getStatus() != AssessmentSession.SessionStatus.IN_PROGRESS) return;
+        int index = session.getCurrentSectionIndex();
+        if (index < 0 || index >= sections.size()) {
+            throw new IllegalStateException("The session has an invalid current section");
+        }
+        AssessmentSection current = sections.get(index);
+        if (current.getDurationMinutes() == null || current.getDurationMinutes() <= 0) return;
+        if (session.getCurrentSectionStartedAt() == null) {
+            session.setCurrentSectionStartedAt(now);
             sessionRepository.save(session);
-        } else {
-            if (session.getCurrentSectionStartedAt() != null && targetSection.getDurationMinutes() != null) {
-                OffsetDateTime expirationTime = session.getCurrentSectionStartedAt().plusMinutes(targetSection.getDurationMinutes());
-                if (now.isAfter(expirationTime)) {
-                    session.getCompletedSectionIndexes().add(currentIdx);
-                    if (targetSectionIndex + 1 < allSections.size()) {
-                        return navigateToSection(sessionId, targetSectionIndex + 1, allSections, pageSize);
-                    } else {
-                        submitSession(sessionId);
-                        throw new IllegalStateException("Final section runtime expired. Global exam submitted.");
-                    }
-                }
-            }
+            return;
         }
+        if (now.isBefore(session.getCurrentSectionStartedAt().plusMinutes(current.getDurationMinutes()))) return;
 
-        return getSectionQuestions(sessionId, targetSectionIndex, pageSize);
+        session.getCompletedSectionIndexes().add(index);
+        if (index + 1 < sections.size()) {
+            session.setCurrentSectionIndex(index + 1);
+            session.setCurrentSectionStartedAt(now);
+            sessionRepository.save(session);
+            return;
+        }
+        session.setStatus(AssessmentSession.SessionStatus.TIMED_OUT);
+        session.setSubmittedAt(now);
+        sessionRepository.save(session);
+        triggerEvaluationPipeline(session);
     }
 
     @Override
@@ -185,7 +203,10 @@ public class AssessmentSessionServiceImpl implements AssessmentSessionService {
                 session.setSubmittedAt(now);
                 sessionRepository.save(session);
                 triggerEvaluationPipeline(session);
+                continue;
             }
+            enforceCurrentSectionDeadline(session,
+                    sectionRepository.findByAssessmentIdOrderBySectionOrderAsc(session.getAssessmentId()), now);
         }
     }
 

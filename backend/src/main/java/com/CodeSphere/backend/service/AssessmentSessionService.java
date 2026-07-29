@@ -19,7 +19,12 @@ public interface AssessmentSessionService {
 
     List<Question> getSectionQuestions(Long sessionId, int sectionIndex, int pageSize);
 
-    List<Question> navigateToSection(Long sessionId, int targetSectionIndex, List<AssessmentSection> allSections, int pageSize);
+    /**
+     * Moves an in-progress session to its next section.  This is deliberately
+     * server-side: the browser timer is only a display, while this method owns
+     * the start time and expiry of every section.
+     */
+    AssessmentSession navigateToSection(Long sessionId, int targetSectionIndex);
 
     List<AssessmentSection> getAssessmentSectionsForSession(Long sessionId);
 

@@ -89,6 +89,19 @@ public class AssessmentSessionController {
         return ResponseEntity.ok(assessmentSessionService.autoSaveAnswer(sessionId, request.questionId(), request.value()));
     }
 
+    /** Server-authoritative section transition.  The returned session contains
+     * the server start timestamp used by the browser to render its countdown. */
+    @PostMapping("/{sessionId}/sections/{sectionIndex}/navigate")
+    public ResponseEntity<AssessmentSession> navigateSection(@PathVariable Long sessionId, @PathVariable int sectionIndex) {
+        Long userId = getCurrentUserId();
+        AssessmentSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Assessment session not found"));
+        if (!userId.equals(session.getCandidate().getId())) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(assessmentSessionService.navigateToSection(sessionId, sectionIndex));
+    }
+
     @PostMapping("/{sessionId}/files")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> uploadAssessmentFile(@PathVariable Long sessionId, @RequestParam Long questionId,

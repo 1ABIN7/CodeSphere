@@ -43,6 +43,14 @@ public class AssessmentSectionController {
         return ResponseEntity.ok(questions);
     }
 
+    @GetMapping("/sections/{sectionId}/questions")
+    public ResponseEntity<List<Question>> getSectionQuestions(@PathVariable Long sectionId) {
+        List<Question> questions = assessmentQuestionRepository.findBySectionIdOrderByOrderIndexAsc(sectionId).stream()
+                .map(mapping -> questionBankRepository.findById(mapping.getQuestionBankId()).orElse(null))
+                .filter(java.util.Objects::nonNull).toList();
+        return ResponseEntity.ok(questions);
+    }
+
     @PutMapping("/{assessmentId}/sections/reorder")
     public ResponseEntity<Void> reorderSections(
             @PathVariable Long assessmentId,

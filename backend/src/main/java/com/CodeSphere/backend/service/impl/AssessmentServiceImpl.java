@@ -269,6 +269,8 @@ public class AssessmentServiceImpl implements AssessmentService {
                 .candidate(candidate)
                 .durationMinutes(assessment.getDurationMinutes())
                 .status(AssessmentSession.SessionStatus.IN_PROGRESS)
+                .currentSectionIndex(0)
+                .currentSectionStartedAt(java.time.OffsetDateTime.now())
                 .questionIdsSnapshot(questionIds)
                 .build();
         return assessmentSessionRepository.save(session);

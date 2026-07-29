@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import toast from 'react-hot-toast';
-import { assessmentAPI, proctoringAPI } from '../api';
+import { assessmentAPI, proctoringAPI, submissionsAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { getSectionSecondsRemaining } from '../utils/assessmentTimer';
 
 const QUESTION_TYPES = {
   MCQ_SINGLE: 'MCQ_SINGLE',
@@ -81,6 +82,7 @@ export default function AssessmentPage() {
   const [answers, setAnswers] = useState({});
   const [saveState, setSaveState] = useState('idle');
   const [timeLeft, setTimeLeft] = useState(0);
+  const [sectionTimeLeft, setSectionTimeLeft] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [fullscreenWarning, setFullscreenWarning] = useState(false);
   const [submissionPending, setSubmissionPending] = useState(false);
@@ -92,6 +94,7 @@ export default function AssessmentPage() {
   const [dragActive, setDragActive] = useState(false);
   const [codeVerdict, setCodeVerdict] = useState(null);
   const [codeOutput, setCodeOutput] = useState('');
+  const [codingHistory, setCodingHistory] = useState([]);
   const [readingView, setReadingView] = useState(null);
   const saveTimerRef = useRef(null);
   const sessionRef = useRef(null);
@@ -115,19 +118,25 @@ export default function AssessmentPage() {
 
         if (!active) return;
         setAssessment(assessmentRes.data || null);
-        setSections(sectionsRes.data || []);
-        setQuestions(questionsRes.data || []);
+        const loadedSections = sectionsRes.data || [];
+        setSections(loadedSections);
         const saved = getInitialState()[String(id)] || {};
         setAnswers(saved.answers || {});
-        setActiveSection(saved.activeSection || 0);
         setActiveQuestion(saved.activeQuestion || 0);
-        setTimeLeft((assessmentRes.data?.durationMinutes || 60) * 60);
 
         try {
           const sessionRes = await assessmentAPI.startSession(id);
           if (!active) return;
-          sessionRef.current = sessionRes.data || { id: null };
-          setSession(sessionRes.data || { id: null });
+          const activeSession = sessionRes.data || { id: null };
+          const serverSection = Math.max(0, activeSession.currentSectionIndex || 0);
+          sessionRef.current = activeSession;
+          setSession(activeSession);
+          setActiveSection(serverSection);
+          setTimeLeft(Math.max(0, (assessmentRes.data?.durationMinutes || 60) * 60 - Math.floor((Date.now() - new Date(activeSession.startedAt || Date.now()).getTime()) / 1000)));
+          const initialSectionQuestions = loadedSections[serverSection]
+            ? await assessmentAPI.getSectionQuestions(loadedSections[serverSection].id).catch(() => questionsRes)
+            : questionsRes;
+          if (active) setQuestions(initialSectionQuestions.data || []);
         } catch (startErr) {
           // TODO: replace with real resume endpoint once backend exposes it.
           const fallback = await assessmentAPI.getSession(id).catch(() => null);
@@ -135,6 +144,12 @@ export default function AssessmentPage() {
             if (fallback?.data) {
               sessionRef.current = fallback.data;
               setSession(fallback.data);
+              const serverSection = Math.max(0, fallback.data.currentSectionIndex || 0);
+              setActiveSection(serverSection);
+              const initialSectionQuestions = loadedSections[serverSection]
+                ? await assessmentAPI.getSectionQuestions(loadedSections[serverSection].id).catch(() => questionsRes)
+                : questionsRes;
+              setQuestions(initialSectionQuestions.data || []);
             } else {
               throw startErr;
             }
@@ -162,6 +177,22 @@ export default function AssessmentPage() {
     }, 1000);
     return () => clearInterval(tick);
   }, [session, assessment]);
+
+  useEffect(() => {
+    setSectionTimeLeft(getSectionSecondsRemaining(sections[activeSection], session));
+  }, [activeSection, sections, session]);
+
+  useEffect(() => {
+    if (sectionTimeLeft === null) return undefined;
+    const timer = setInterval(() => setSectionTimeLeft((value) => value > 0 ? value - 1 : 0), 1000);
+    return () => clearInterval(timer);
+  }, [sectionTimeLeft === null]);
+
+  useEffect(() => {
+    if (sectionTimeLeft !== 0 || !sections.length) return;
+    if (activeSection + 1 < sections.length) { toast('Section time is up. Moving to the next section.'); navigateSection(activeSection + 1); }
+    else { toast('Final section time is up. Submit your assessment now.'); }
+  }, [sectionTimeLeft, activeSection, sections.length]);
 
   useEffect(() => {
     if (!session?.id) return;
@@ -233,7 +264,7 @@ export default function AssessmentPage() {
     if (session?.id) debouncedSave(questionId, value);
   };
 
-  const navigateSection = (nextIndex) => {
+  const navigateSection = async (nextIndex) => {
     const target = sections[nextIndex];
     if (!target) return;
     const previousSection = sections[activeSection];
@@ -242,8 +273,19 @@ export default function AssessmentPage() {
       toast.error('This section is locked until the current one is completed.');
       return;
     }
-    setActiveSection(nextIndex);
-    setActiveQuestion(0);
+    try {
+      const transition = await assessmentAPI.navigateSection(session.id, nextIndex);
+      const activeSession = transition.data || session;
+      const serverIndex = activeSession.currentSectionIndex ?? nextIndex;
+      sessionRef.current = activeSession;
+      setSession(activeSession);
+      setActiveSection(serverIndex);
+      setActiveQuestion(0);
+      const serverTarget = sections[serverIndex];
+      if (!serverTarget) return;
+      const { data } = await assessmentAPI.getSectionQuestions(serverTarget.id);
+      setQuestions(data || []);
+    } catch (err) { toast.error(err.response?.data?.message || 'Unable to load this section.'); }
     persistAnswer('__navigation__', JSON.stringify({ section: nextIndex, question: 0 }));
   };
 
@@ -295,6 +337,19 @@ export default function AssessmentPage() {
       const res = await assessmentAPI.submitCodingAnswer(question.codingProblemId, { language, code }, session.id, question.id);
       setCodeVerdict(res.data?.status || 'PENDING');
       setCodeOutput(res.data?.submissionId ? `Judge submission #${res.data.submissionId} queued.` : res.data?.output || '');
+      if (res.data?.submissionId) {
+        const submissionId = res.data.submissionId;
+        const poll = async (remaining = 12) => {
+          try {
+            const { data } = await submissionsAPI.getById(submissionId);
+            setCodingHistory((items) => [{ ...data, id: submissionId }, ...items.filter((item) => item.id !== submissionId)].slice(0, 8));
+            setCodeVerdict(data.status || 'PENDING');
+            if (data.status && !['PENDING', 'RUNNING'].includes(data.status)) { setCodeOutput(`${data.testCasesPassed ?? 0}/${data.totalTestCases ?? 0} test cases passed · ${data.execTime ?? 0} ms · ${data.execMemory ?? 0} KB`); return; }
+          } catch { /* judge may still be writing the submission */ }
+          if (remaining > 0) setTimeout(() => poll(remaining - 1), 1500);
+        };
+        setTimeout(() => poll(), 1000);
+      }
     } catch {
       setCodeVerdict('ERROR');
       setCodeOutput('Unable to queue the coding submission.');
@@ -406,6 +461,7 @@ export default function AssessmentPage() {
                 <h2 style={{ fontSize: 20, fontWeight: 700 }}>{currentSection?.title || 'Section'}</h2>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
+                {sectionTimeLeft !== null && <span className="badge badge-tag">Section: {formatTime(sectionTimeLeft)}</span>}
                 <button className="btn btn-secondary btn-sm" onClick={() => setShowConfirm(true)}>Submit assessment</button>
                 <button className="btn btn-primary btn-sm" onClick={handleSubmitSection}>Save progress</button>
               </div>
@@ -424,7 +480,7 @@ export default function AssessmentPage() {
                   <div style={{ fontSize: 18, fontWeight: 700, marginTop: 4 }}>{currentQuestion.prompt || currentQuestion.content || 'Question prompt'}</div>
                 </div>
 
-                {renderQuestion(currentQuestion, answers, handleAnswerChange, language, setLanguage, code, setCode, handleCodingSubmit, codeVerdict, codeOutput, uploading, fileName, dragActive, setDragActive, handleUpload, readingView)}
+                {renderQuestion(currentQuestion, answers, handleAnswerChange, language, setLanguage, code, setCode, handleCodingSubmit, codeVerdict, codeOutput, uploading, fileName, dragActive, setDragActive, handleUpload, readingView, codingHistory)}
               </div>
             ) : (
               <div className="empty-state">
@@ -457,7 +513,7 @@ export default function AssessmentPage() {
   );
 }
 
-function renderQuestion(currentQuestion, answers, onAnswerChange, language, setLanguage, code, setCode, onCodingSubmit, codeVerdict, codeOutput, uploading, fileName, dragActive, setDragActive, onUpload, readingView = null) {
+function renderQuestion(currentQuestion, answers, onAnswerChange, language, setLanguage, code, setCode, onCodingSubmit, codeVerdict, codeOutput, uploading, fileName, dragActive, setDragActive, onUpload, readingView = null, codingHistory = []) {
   const type = currentQuestion?.questionType || currentQuestion?.type || 'MCQ_SINGLE';
   const value = answers[currentQuestion?.id] || '';
   const options = currentQuestion?.options || [];
@@ -530,6 +586,7 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
           </div>
           {codeVerdict && <div className="feedback-box correct">{codeVerdict}</div>}
           {codeOutput && <pre className="sample-code" style={{ marginTop: 12 }}>{codeOutput}</pre>}
+          {codingHistory.length > 0 && <div className="card" style={{ marginTop: 14, padding: 14 }}><strong>Submission history</strong>{codingHistory.map((submission) => <div key={submission.id} className="text-secondary" style={{ marginTop: 7 }}>{submission.status} · {submission.testCasesPassed ?? 0}/{submission.totalTestCases ?? 0} tests · {submission.execTime ?? 0} ms · {submission.execMemory ?? 0} KB</div>)}</div>}
         </div>
       );
     case QUESTION_TYPES.SUBJECTIVE:
