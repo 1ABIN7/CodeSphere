@@ -1,5 +1,6 @@
 package com.CodeSphere.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.OffsetDateTime;
@@ -26,6 +27,7 @@ public class AssessmentSession {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User candidate;
 
     @Enumerated(EnumType.STRING)
@@ -46,6 +48,7 @@ public class AssessmentSession {
     @CollectionTable(name = "session_question_snapshots", joinColumns = @JoinColumn(name = "session_id"))
     @Column(name = "question_id")
     @Builder.Default
+    @JsonIgnore
     private List<Long> questionIdsSnapshot = new ArrayList<>();
 
     @Builder.Default
@@ -59,6 +62,7 @@ public class AssessmentSession {
     @CollectionTable(name = "session_completed_sections", joinColumns = @JoinColumn(name = "session_id"))
     @Column(name = "section_index")
     @Builder.Default
+    @JsonIgnore
     private Set<Integer> completedSectionIndexes = new HashSet<>();
 
     // --- Proctoring & Anti-Cheat Fields ---

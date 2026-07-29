@@ -4,6 +4,15 @@ import com.CodeSphere.backend.entity.Assessment;
 import com.CodeSphere.backend.entity.AssessmentAssignment;
 import com.CodeSphere.backend.service.AssessmentService;
 import com.CodeSphere.backend.service.AuditLogService;
+import com.CodeSphere.backend.repository.AssessmentAssignmentRepository;
+import com.CodeSphere.backend.repository.AssessmentRepository;
+import com.CodeSphere.backend.repository.AssessmentSectionRepository;
+import com.CodeSphere.backend.repository.AssessmentQuestionRepository;
+import com.CodeSphere.backend.security.CustomUserDetails;
+import com.CodeSphere.backend.dto.AssessmentAssignmentStatusDto;
+import com.CodeSphere.backend.repository.UserRepository;
+import com.CodeSphere.backend.repository.AssessmentSessionRepository;
+import com.CodeSphere.backend.model.AssessmentSession;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +33,12 @@ public class AssessmentController {
 
     private final AssessmentService assessmentService;
     private final AuditLogService auditLogService;
+    private final AssessmentAssignmentRepository assignmentRepository;
+    private final AssessmentRepository assessmentRepository;
+    private final AssessmentSectionRepository sectionRepository;
+    private final AssessmentQuestionRepository assessmentQuestionRepository;
+    private final UserRepository userRepository;
+    private final AssessmentSessionRepository assessmentSessionRepository;
 
     // --- Read Operations ---
 
@@ -41,10 +57,37 @@ public class AssessmentController {
         return ResponseEntity.ok(assessmentService.getAssignedCandidates(id));
     }
 
+    @GetMapping("/{id}/assignment-status")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<AssessmentAssignmentStatusDto>> getAssignmentStatus(@PathVariable Long id) {
+        java.util.Map<Long, AssessmentSession> sessions = assessmentSessionRepository.findByAssessmentId(id).stream()
+                .collect(java.util.stream.Collectors.toMap(session -> session.getCandidate().getId(), session -> session, (first, second) -> first));
+        return ResponseEntity.ok(assignmentRepository.findByAssessmentId(id).stream().map(assignment -> {
+            var user = userRepository.findById(assignment.getUserId()).orElse(null);
+            var session = sessions.get(assignment.getUserId());
+            return new AssessmentAssignmentStatusDto(assignment.getUserId(), user != null ? user.getUsername() : "Unknown",
+                    user != null ? user.getFullName() : null, assignment.getDeadline(), session == null ? "ASSIGNED" : session.getStatus().name(),
+                    session != null && session.getSubmittedAt() != null ? session.getSubmittedAt().toLocalDateTime() : null);
+        }).toList());
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<Assessment>> getMyAvailableAssessments() {
+        Long userId = getCurrentUserId();
+        List<Assessment> assessments = assignmentRepository.findByUserId(userId).stream()
+                .map(assignment -> assessmentRepository.findById(assignment.getAssessmentId()).orElse(null))
+                .filter(assessment -> assessment != null && assessment.isPublished())
+                .filter(assessment -> sectionRepository.findByAssessmentIdOrderBySectionOrderAsc(assessment.getId()).stream()
+                        .anyMatch(section -> !assessmentQuestionRepository.findBySectionIdOrderByOrderIndexAsc(section.getId()).isEmpty()))
+                .toList();
+        return ResponseEntity.ok(assessments);
+    }
+
     // --- Admin CRUD & Lifecycle Operations ---
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Assessment> createAssessment(@RequestBody Assessment assessment, HttpServletRequest request) {
         Long adminId = getCurrentUserId();
         Assessment created = assessmentService.createAssessment(assessment);
@@ -60,38 +103,38 @@ public class AssessmentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Assessment> updateAssessment(@PathVariable Long id, @RequestBody Assessment assessment) {
         return ResponseEntity.ok(assessmentService.updateAssessment(id, assessment));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Void> deleteAssessment(@PathVariable Long id) {
         assessmentService.deleteAssessment(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/clone")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Assessment> cloneAssessment(@PathVariable Long id) {
         return ResponseEntity.ok(assessmentService.cloneAssessment(id));
     }
 
     @PutMapping("/{id}/publish")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Assessment> publishAssessment(@PathVariable Long id) {
         return ResponseEntity.ok(assessmentService.publishAssessment(id));
     }
 
     @PutMapping("/{id}/unpublish")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<Assessment> unpublishAssessment(@PathVariable Long id) {
         return ResponseEntity.ok(assessmentService.unpublishAssessment(id));
     }
 
     @PostMapping("/{id}/assign")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<AssessmentAssignment> assignAssessment(
             @PathVariable Long id,
             @RequestParam Long userId,
@@ -106,6 +149,9 @@ public class AssessmentController {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("Authentication context is missing or invalid.");
         }
-        return (Long) authentication.getPrincipal();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return userDetails.getId();
+        }
+        throw new IllegalStateException("Authenticated user details are unavailable.");
     }
 }

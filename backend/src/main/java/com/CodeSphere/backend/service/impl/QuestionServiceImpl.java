@@ -47,6 +47,21 @@ public class QuestionServiceImpl implements QuestionService {
 
         existingQuestion.setTitle(questionDetails.getTitle());
         existingQuestion.setContent(questionDetails.getContent());
+        existingQuestion.setCategory(questionDetails.getCategory());
+        existingQuestion.setType(questionDetails.getType());
+        existingQuestion.setQuestionType(questionDetails.getQuestionType());
+        existingQuestion.setCodingProblemId(questionDetails.getCodingProblemId());
+        existingQuestion.setDifficulty(questionDetails.getDifficulty());
+        existingQuestion.setTags(questionDetails.getTags());
+        existingQuestion.setOptions(questionDetails.getOptions());
+        existingQuestion.setCorrectAnswers(questionDetails.getCorrectAnswers());
+        existingQuestion.setPoints(questionDetails.getPoints());
+        existingQuestion.setNegativeScore(questionDetails.getNegativeScore());
+        existingQuestion.setMinWordCount(questionDetails.getMinWordCount());
+        existingQuestion.setMaxWordCount(questionDetails.getMaxWordCount());
+        existingQuestion.setPassageText(questionDetails.getPassageText());
+        existingQuestion.setReadingDurationSeconds(questionDetails.getReadingDurationSeconds());
+        existingQuestion.setSubQuestions(questionDetails.getSubQuestions());
 
         return questionRepository.save(existingQuestion);
     }

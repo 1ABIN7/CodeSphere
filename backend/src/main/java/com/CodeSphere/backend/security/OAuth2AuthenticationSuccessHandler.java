@@ -1,10 +1,8 @@
 package com.CodeSphere.backend.security;
 
-import com.CodeSphere.backend.model.RefreshToken;
 import com.CodeSphere.backend.model.Role;
 import com.CodeSphere.backend.model.User;
 import com.CodeSphere.backend.repository.UserRepository;
-import com.CodeSphere.backend.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +22,6 @@ import java.util.List;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenService refreshTokenService;
 
     @Value("${app.oauth2.authorized-redirect-uri}")
     private String redirectUri;
@@ -37,15 +34,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         if (email == null || email.isBlank()) throw new IllegalStateException("Google did not provide an email address");
         String displayName = oauthUser.getAttribute("name");
         User user = userRepository.findByEmail(email).orElseGet(() -> createCandidate(email, displayName));
+        // Google OAuth is intentionally candidate-only. Existing staff users keep
+        // their stored role for password login, but receive candidate privileges
+        // when they choose the public Google sign-in path.
+        Role oauthRole = Role.ROLE_CANDIDATE;
         var appAuthentication = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
                 new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
-                        List.of(new SimpleGrantedAuthority(user.getRole().name()))), null,
-                List.of(new SimpleGrantedAuthority(user.getRole().name())));
+                        List.of(new SimpleGrantedAuthority(oauthRole.name()))), null,
+                List.of(new SimpleGrantedAuthority(oauthRole.name())));
         String token = jwtTokenProvider.generateToken(appAuthentication);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
         String target = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("token", token).queryParam("refreshToken", refreshToken.getToken())
-                .queryParam("username", user.getUsername()).queryParam("role", user.getRole().name()).build().toUriString();
+                .queryParam("token", token)
+                .queryParam("username", user.getUsername()).queryParam("role", oauthRole.name()).build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, target);
     }
 

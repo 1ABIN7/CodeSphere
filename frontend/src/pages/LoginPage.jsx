@@ -19,7 +19,8 @@ export default function LoginPage() {
       const res = await authAPI.login(form);
       login(res.data);
       toast.success(`Welcome back, ${res.data.username}! 🎉`);
-      navigate('/dashboard');
+      const isAdmin = ['ROLE_SUPER_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_EXAMINER'].includes(res.data.role);
+      navigate(isAdmin ? '/admin' : '/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed. Check your credentials.');
     } finally {

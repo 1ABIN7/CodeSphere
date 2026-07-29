@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,4 +17,9 @@ public class AssessmentResultDTO {
     private Double score;
     private Double totalScore;
     private String status;
+    private String assessmentTitle;
+    private Double passingScore;
+    private Boolean passed;
+    private List<String> evaluatorFeedback;
+    private List<SectionResultDto> sections;
 }

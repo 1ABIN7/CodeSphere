@@ -55,16 +55,38 @@ export const submissionsAPI = {
 export const usersAPI = {
   getMyProfile: () => api.get('/users/me/profile'),
   updateProfile: (data) => api.put('/users/me/profile', data),
+  listCandidates: () => api.get('/v1/users/candidates'),
+  list: () => api.get('/v1/users'),
 };
 
 // ─── Administration ───
 export const adminAPI = {
   getDashboard: (params) => api.get('/v1/admin/dashboard', { params }),
+  getAssessmentReports: () => api.get('/v1/admin/reports/assessments'),
+  getQuestionAnalytics: () => api.get('/v1/admin/reports/questions'),
+  getCandidateAnalytics: () => api.get('/v1/admin/reports/candidates'),
+  updateUserRole: (id, role) => api.put(`/v1/admin/users/${id}/role`, null, { params: { newRole: role } }),
 };
 
 export const questionBankAPI = {
   list: (params) => api.get('/v1/questions', { params }),
   create: (data) => api.post('/v1/questions', data),
+  update: (id, data) => api.put(`/v1/questions/${id}`, data),
+  delete: (id) => api.delete(`/v1/questions/${id}`),
+  import: (formData) => api.post('/v1/questions/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  export: (format) => api.get(`/v1/questions/export?format=${format}`, { responseType: 'blob' }),
+  submitForApproval: (id) => api.post(`/v1/questions/${id}/submit-for-approval`),
+  approve: (id) => api.post(`/v1/questions/${id}/approve`),
+  reject: (id, feedback) => api.post(`/v1/questions/${id}/reject`, { feedback }),
+  versions: (id) => api.get(`/v1/questions/${id}/versions`),
+  restoreVersion: (id, version) => api.post(`/v1/questions/${id}/restore/${version}`),
+  getRubric: (id) => api.get(`/v1/questions/${id}/rubric`),
+  saveRubric: (id, criteria) => api.post(`/v1/questions/${id}/rubric`, criteria),
+};
+
+export const evaluationAPI = {
+  getPending: () => api.get('/v1/evaluations/pending'),
+  submit: (answerId, data) => api.put(`/v1/evaluations/${answerId}`, data),
 };
 
 // ─── Exams ───
@@ -90,19 +112,32 @@ export const filesAPI = {
 
 // ─── Assessments ───
 export const assessmentAPI = {
-  list: () => api.get('/assessments'),
-  getById: (id) => api.get(`/assessments/${id}`),
-  getSections: (id) => api.get(`/assessments/${id}/sections`),
-  startSession: (assessmentId) => api.post(`/assessment-sessions/${assessmentId}/start`),
+  list: () => api.get('/v1/assessments'),
+  listAvailable: () => api.get('/v1/assessments/available'),
+  getById: (id) => api.get(`/v1/assessments/${id}`),
+  create: (data) => api.post('/v1/assessments', data),
+  update: (id, data) => api.put(`/v1/assessments/${id}`, data),
+  publish: (id) => api.put(`/v1/assessments/${id}/publish`),
+  unpublish: (id) => api.put(`/v1/assessments/${id}/unpublish`),
+  assign: (id, userId, deadline) => api.post(`/v1/assessments/${id}/assign`, null, { params: { userId, deadline } }),
+  getAssignments: (id) => api.get(`/v1/assessments/${id}/assigned-candidates`),
+  getAssignmentStatus: (id) => api.get(`/v1/assessments/${id}/assignment-status`),
+  addSection: (assessmentId, data) => api.post(`/v1/assessments/${assessmentId}/sections`, data),
+  addQuestionToSection: (assessmentId, sectionId, data) => api.post(`/v1/sections/${sectionId}/questions`, data, { params: { assessmentId } }),
+  getSections: (id) => api.get(`/v1/assessments/${id}/sections`),
+  getQuestions: (id) => api.get(`/v1/assessments/${id}/questions`),
+  startSession: (assessmentId) => api.post(`/v1/assessment-sessions/${assessmentId}/start`),
   getSession: (assessmentId) => api.get(`/assessment-sessions/${assessmentId}`),
-  saveAnswer: (sessionId, questionId, value) => api.post(`/assessment-sessions/${sessionId}/answers`, { questionId, value }),
-  submitSession: (assessmentId) => api.post(`/assessment-sessions/${assessmentId}/submit`),
-  submitAssessment: (assessmentId, payload) => api.post(`/assessment-sessions/${assessmentId}/submit`, payload),
-  submitCodingAnswer: (sessionId, questionId, payload) => api.post(`/assessment-sessions/${sessionId}/coding-submissions`, { questionId, ...payload }),
-  uploadFile: (sessionId, questionId, formData) => api.post(`/assessment-sessions/${sessionId}/files`, formData, {
+  saveAnswer: (sessionId, questionId, value) => api.post(`/v1/assessment-sessions/${sessionId}/answers`, { questionId, value }),
+  submitSession: (assessmentId) => api.post(`/v1/assessment-sessions/${assessmentId}/submit`),
+  submitAssessment: (assessmentId, payload) => api.post(`/v1/assessment-sessions/${assessmentId}/submit`, payload),
+  submitCodingAnswer: (problemId, payload, sessionId, questionId) => api.post(`/v1/problems/${problemId}/submit`, payload, { params: { assessmentSessionId: sessionId, assessmentQuestionId: questionId } }),
+  uploadFile: (sessionId, questionId, formData) => api.post(`/v1/assessment-sessions/${sessionId}/files?questionId=${questionId}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  getResult: (assessmentId) => api.get(`/assessment-sessions/${assessmentId}/result`),
+  getResult: (assessmentId) => api.get(`/v1/assessment-sessions/${assessmentId}/result`),
+  getResultHistory: () => api.get('/v1/assessment-sessions/results'),
+  getReadingView: (sessionId, questionId) => api.get(`/v1/comprehension/session/${sessionId}/passage/${questionId}`),
 };
 
 // ─── Interview Prep ───

@@ -10,5 +10,7 @@ public interface JwtService {
 
     String extractTokenId(String token);
 
+    String extractRole(String token);
+
     long getRemainingExpiryTimeMs(String token);
 }

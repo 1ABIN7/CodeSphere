@@ -19,7 +19,8 @@ export default function AuthCallbackPage() {
     }
 
     login({ token, refreshToken, username, role });
-    navigate('/dashboard', { replace: true });
+    const isAdmin = ['ROLE_SUPER_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_EXAMINER'].includes(role);
+    navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
   }, [login, navigate, searchParams]);
 
   return (

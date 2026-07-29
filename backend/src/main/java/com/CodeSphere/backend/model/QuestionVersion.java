@@ -1,6 +1,8 @@
 package com.CodeSphere.backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,11 +20,20 @@ public class QuestionVersion {
     @Column(nullable = false)
     private Integer versionNumber;
 
+    /** Legacy schema column retained alongside versionNumber. */
+    @Column(name = "version", nullable = false)
+    private Integer legacyVersion;
+
     @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    /** Required by the original question_versions schema. */
+    @Column(name = "content_snapshot", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String contentSnapshot;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -33,9 +44,17 @@ public class QuestionVersion {
     public QuestionVersion(Question question, Integer versionNumber, String title, String content) {
         this.question = question;
         this.versionNumber = versionNumber;
+        this.legacyVersion = versionNumber;
         this.title = title;
         this.content = content;
+        this.contentSnapshot = "{\"title\":\"" + jsonEscape(title) + "\",\"content\":\"" + jsonEscape(content) + "\"}";
         this.createdAt = LocalDateTime.now();
+    }
+
+    private static String jsonEscape(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
     }
 
     // Getters and Setters

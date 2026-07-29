@@ -141,6 +141,15 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
+        <Link className="btn btn-secondary btn-sm" to="/problems">View problems</Link>
+        <Link className="btn btn-primary btn-sm" to="/admin/assessments">Manage assessments</Link>
+        <Link className="btn btn-primary btn-sm" to="/admin/questions">Manage question bank</Link>
+        <Link className="btn btn-secondary btn-sm" to="/admin/evaluations">Evaluate submissions</Link>
+        <Link className="btn btn-secondary btn-sm" to="/admin/reports">View reports</Link>
+        <Link className="btn btn-secondary btn-sm" to="/admin/users">Manage users</Link>
+      </div>
+
       <div style={{ display: 'grid', gap: 24, gridTemplateColumns: '1.1fr 0.9fr' }}>
         <div className="card">
           <div className="card-header">

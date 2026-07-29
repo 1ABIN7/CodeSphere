@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class ReadingComprehensionServiceImpl implements ReadingComprehensionServ
                 .orElseThrow(() -> new IllegalArgumentException("Passage question target not found"));
 
         // Compute elapsed tracking time against the specific passage phase rules
-        long secondsElapsed = ChronoUnit.SECONDS.between(session.getStartedAt(), LocalDateTime.now());
+        long secondsElapsed = ChronoUnit.SECONDS.between(session.getStartedAt(), OffsetDateTime.now());
         long readingLimit = passageQuestion.getReadingDurationSeconds();
 
         if (secondsElapsed < readingLimit) {

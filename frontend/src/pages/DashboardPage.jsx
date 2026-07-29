@@ -145,6 +145,9 @@ export default function DashboardPage() {
               <Link to="/problems?difficulty=EASY" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>
                 🟢 Practice Easy Problems
               </Link>
+              <Link to="/assessments" className="btn btn-primary" style={{ justifyContent: 'flex-start' }}>
+                🧪 My Assessments
+              </Link>
               <Link to="/problems?difficulty=MEDIUM" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>
                 🟡 Tackle Medium Problems
               </Link>

@@ -1,5 +1,6 @@
 package com.CodeSphere.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
@@ -25,10 +26,15 @@ public class Question {
     private String type;
     private String difficulty;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "question_tags", joinColumns = @JoinColumn(name = "question_id"))
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "question_options", joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "option_text")
+    private List<String> options = new ArrayList<>();
 
     // Workflow Status Fields
     @Enumerated(EnumType.STRING)
@@ -50,6 +56,9 @@ public class Question {
     @Column(name = "question_type")
     private String questionType; // "MCQ_SINGLE", "MCQ_MULTI", etc.
 
+    @Column(name = "coding_problem_id")
+    private Long codingProblemId;
+
     @Column(name = "min_word_count")
     private Integer minWordCount = 0;
 
@@ -65,8 +74,9 @@ public class Question {
     @Column(name = "parent_question_id")
     private Long parentQuestionId;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_question_id")
+    @JsonIgnore
     private List<Question> subQuestions = new ArrayList<>();
 
     // --- Standard Getters and Setters ---
@@ -92,6 +102,9 @@ public class Question {
     public List<String> getTags() { return tags; }
     public void setTags(List<String> tags) { this.tags = tags; }
 
+    public List<String> getOptions() { return options; }
+    public void setOptions(List<String> options) { this.options = options; }
+
     public ApprovalStatus getStatus() { return status; }
     public void setStatus(ApprovalStatus status) { this.status = status; }
 
@@ -111,6 +124,9 @@ public class Question {
 
     public String getQuestionType() { return questionType; }
     public void setQuestionType(String questionType) { this.questionType = questionType; }
+
+    public Long getCodingProblemId() { return codingProblemId; }
+    public void setCodingProblemId(Long codingProblemId) { this.codingProblemId = codingProblemId; }
 
     public Integer getMinWordCount() { return minWordCount; }
     public void setMinWordCount(Integer minWordCount) { this.minWordCount = minWordCount; }

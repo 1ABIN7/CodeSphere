@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -61,12 +62,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     // 2. Load UserDetails to retain roles & authorities
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    String tokenRole = jwtService.extractRole(token);
+                    var authorities = tokenRole != null
+                            ? java.util.List.of(new SimpleGrantedAuthority(tokenRole))
+                            : userDetails.getAuthorities();
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
                                     null,
-                                    userDetails.getAuthorities()
+                                    authorities
                             );
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

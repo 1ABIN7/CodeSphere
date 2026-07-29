@@ -21,4 +21,5 @@ public interface AssessmentSessionRepository extends JpaRepository<AssessmentSes
             Long assessmentId, Long candidateId, AssessmentSession.SessionStatus status);
 
     List<AssessmentSession> findByAssessmentId(Long assessmentId);
+    List<AssessmentSession> findByCandidateIdAndStatusOrderBySubmittedAtDesc(Long candidateId, AssessmentSession.SessionStatus status);
 }

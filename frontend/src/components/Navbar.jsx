@@ -22,22 +22,31 @@ export default function Navbar() {
           </Link>
 
           <div className="navbar-nav">
-            <Link to="/problems" className={`nav-link ${isActive('/problems') ? 'active' : ''}`}>
-              Problems
-            </Link>
-            {isLoggedIn && (
+            {!isAdmin && (
+              <Link to="/problems" className={`nav-link ${isActive('/problems') ? 'active' : ''}`}>
+                Problems
+              </Link>
+            )}
+            {isLoggedIn && !isAdmin && (
                 <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
                   Dashboard
                 </Link>
+            )}
+            {isLoggedIn && !isAdmin && (
+              <Link to="/assessments" className={`nav-link ${isActive('/assessments') ? 'active' : ''}`}>
+                Assessments
+              </Link>
             )}
             {isLoggedIn && isAdmin && (
                 <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
                   Admin
                 </Link>
             )}
-            <Link to="/submissions" className={`nav-link ${isActive('/submissions') ? 'active' : ''}`}>
-              Submissions
-            </Link>
+            {!isAdmin && (
+              <Link to="/submissions" className={`nav-link ${isActive('/submissions') ? 'active' : ''}`}>
+                Submissions
+              </Link>
+            )}
           </div>
 
           <div className="navbar-actions">

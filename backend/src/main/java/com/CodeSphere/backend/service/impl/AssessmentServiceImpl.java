@@ -9,6 +9,7 @@ import com.CodeSphere.backend.model.AssessmentSection;
 import com.CodeSphere.backend.model.AssessmentSession;
 import com.CodeSphere.backend.model.AssessmentAnswer;
 import com.CodeSphere.backend.model.User;
+import com.CodeSphere.backend.model.Question;
 import com.CodeSphere.backend.repository.AssessmentAssignmentRepository;
 import com.CodeSphere.backend.repository.AssessmentQuestionRepository;
 import com.CodeSphere.backend.repository.AssessmentRepository;
@@ -16,6 +17,7 @@ import com.CodeSphere.backend.repository.AssessmentSectionRepository;
 import com.CodeSphere.backend.repository.AssessmentSessionRepository;
 import com.CodeSphere.backend.repository.UserRepository;
 import com.CodeSphere.backend.repository.AssessmentAnswerRepository;
+import com.CodeSphere.backend.repository.QuestionBankRepository;
 import com.CodeSphere.backend.service.McqEvaluationService;
 import com.CodeSphere.backend.service.AssessmentService;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,7 @@ public class AssessmentServiceImpl implements AssessmentService {
     private final AssessmentSessionRepository assessmentSessionRepository;
     private final UserRepository userRepository;
     private final AssessmentAnswerRepository answerRepository;
+    private final QuestionBankRepository questionBankRepository;
     private final McqEvaluationService mcqEvaluationService;
 
     // ==========================================
@@ -287,6 +290,15 @@ public class AssessmentServiceImpl implements AssessmentService {
         session.setStatus(AssessmentSession.SessionStatus.SUBMITTED);
         session.setSubmittedAt(java.time.OffsetDateTime.now());
         AssessmentSession savedSession = assessmentSessionRepository.save(session);
+
+        // Written and file answers require a human evaluator after the candidate submits.
+        for (AssessmentAnswer answer : answerRepository.findBySessionId(savedSession.getId())) {
+            Question question = questionBankRepository.findById(answer.getQuestionId()).orElse(null);
+            if (question != null && ("WRITTEN".equals(question.getQuestionType()) || "SUBJECTIVE".equals(question.getQuestionType()) || "FILE_UPLOAD".equals(question.getQuestionType()))) {
+                answer.setEvaluationStatus("PENDING_EVALUATION");
+                answerRepository.save(answer);
+            }
+        }
 
         double score = mcqEvaluationService.evaluateSessionMcqs(savedSession);
         double totalScore = questionRepository.findByAssessmentId(assessmentId).stream()

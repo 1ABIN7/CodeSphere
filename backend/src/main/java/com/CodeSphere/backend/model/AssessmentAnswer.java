@@ -44,6 +44,10 @@ public class AssessmentAnswer {
     @Column(name = "file_url", length = 1024)
     private String fileUrl;
 
+    /** Links a coding assessment answer to its asynchronous judge submission. */
+    @Column(name = "coding_submission_id")
+    private Long codingSubmissionId;
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -67,4 +71,6 @@ public class AssessmentAnswer {
     public void setEvaluatedAt(OffsetDateTime evaluatedAt) { this.evaluatedAt = evaluatedAt; }
     public String getFileUrl() { return fileUrl; }
     public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
+    public Long getCodingSubmissionId() { return codingSubmissionId; }
+    public void setCodingSubmissionId(Long codingSubmissionId) { this.codingSubmissionId = codingSubmissionId; }
 }
