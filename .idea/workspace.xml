@@ -4,53 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile.frontend" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile.frontend" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/EvaluationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/EvaluationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/ProblemController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/ProblemController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/ProblemSubmissionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/ProblemSubmissionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/UserProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/UserProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/CertificationDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/CertificationDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/evaluation/EvaluationQueueItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/evaluation/EvaluationQueueItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/problem/ProblemRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/problem/ProblemRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/messaging/SubmissionProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/messaging/SubmissionProducer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/Question.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/Question.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentAnswerRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentAnswerRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentSessionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/AssessmentSessionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/QuestionBankRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/QuestionBankRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/seeder/DataSeeder.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/seeder/DataSeeder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/ProblemService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/ProblemService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/DockerExecutionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/DockerExecutionServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionBankServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionBankServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/UserProfileServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/UserProfileServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application-dev.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application-dev.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AssessmentDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AssessmentDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/DashboardPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/DashboardPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/HomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/ProblemDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/ProblemDetailPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/AssessmentManagementPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/AssessmentManagementPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/EvaluatorDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/EvaluatorDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/QuestionBankPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/QuestionBankPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/ReportsDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/ReportsDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-    </list>
+    <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
