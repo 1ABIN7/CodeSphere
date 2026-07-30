@@ -51,7 +51,8 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**", "/login/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/problems/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
+                        .requestMatchers("/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("SUPER_ADMIN")                        
                         // ---- Problem Submissions (Placed BEFORE general problem management) ----
                         .requestMatchers(HttpMethod.POST, "/api/problems/*/submit").authenticated()
 
