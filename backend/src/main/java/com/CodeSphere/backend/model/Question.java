@@ -1,6 +1,6 @@
 package com.CodeSphere.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.util.ArrayList;
@@ -92,7 +92,9 @@ public class Question {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_question_id")
-    @JsonIgnore
+    // Accept nested passage questions from admin forms, but do not serialize this
+    // lazy collection in ordinary Question Bank responses.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Question> subQuestions = new ArrayList<>();
 
     // --- Standard Getters and Setters ---

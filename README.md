@@ -8,10 +8,10 @@ proctoring and evaluation tooling sit on top.
 
 Built as a BTech final-year team project.
 
-> **Status:** actively in development ahead of a scheduled demo. See
-> [Known Issues & Current Status](#known-issues--current-status) below for
-> an honest picture of what's live vs. in progress — this project is not
-> feature-complete yet.
+> **Submission documentation:** [API reference](docs/api/README.md),
+> [architecture/design](docs/architecture/README.md),
+> [database schema](docs/database/README.md), [deployment guide](docs/deployment/README.md),
+> [test evidence](docs/testing/README.md), and the [end-to-end demo guide](docs/DEMO_GUIDE.md).
 
 ---
 
@@ -27,13 +27,11 @@ Built as a BTech final-year team project.
 - Basic proctoring: event logging, webcam snapshots, session flagging
 - Interview-prep practice sessions with categories and performance tracking
 
-**Planned, not yet live** (see [Known Issues](#known-issues--current-status)):
-- Question bank management (create/approve/version questions)
-- Full assessment-taking experience for candidates (session timers, autosave, resume)
-- MCQ/written/reading-comprehension/file-upload assessment engines
-- Manual evaluation workflow for reviewers
-- Reporting & analytics dashboards
-- Email notifications, certifications, plagiarism detection
+**Current assessment workflow:**
+- Admins can create question-bank items and coding/debugging tasks, assemble and publish assessments, assign candidates or groups, and release final results.
+- Candidates can take timed assessments with autosave, submit coding/SQL/API/file answers, and view released result history.
+- Evaluators can review written and file responses using rubric scores and two-reviewer consensus.
+- Reports include assessment, candidate, question, difficulty, and elapsed-time metrics.
 
 ---
 
@@ -92,11 +90,7 @@ npm run dev
 ```
 Runs on `http://localhost:5173`, proxying `/api` to `VITE_API_URL` (defaults to `http://localhost:8080`).
 
-> ⚠️ There is a second, more complete frontend implementation sitting at the
-> repo root (`/src`, `/public`, `/vite.config.ts`) alongside `/frontend`.
-> `docker-compose.yml` and `Dockerfile.frontend` currently build `/frontend`.
-> The two haven't been reconciled yet — see
-> [Known Issues](#known-issues--current-status).
+The active application is the React/Vite project in `frontend/`.
 
 ### Running tests
 ```bash
@@ -120,7 +114,7 @@ CodeSphere/
 │       ├── dto/                    # Request/response objects
 │       └── config/                  # Spring config (CORS, RabbitMQ, WebSocket, etc.)
 ├── frontend/                 # React + Vite app (built by Docker Compose)
-├── src/, public/              # A second, separate frontend build (see note above)
+├── src/, public/              # Legacy source material; not used by the active Vite app
 ├── docs/
 │   ├── api/                   # Endpoint reference
 │   ├── architecture/           # System design docs
@@ -137,11 +131,13 @@ CodeSphere/
 
 ## Documentation
 
+- [Submission Deliverables](docs/DELIVERABLES.md)
 - [API Reference](docs/api/README.md)
 - [Architecture](docs/architecture/README.md)
 - [Database Schema](docs/database/README.md)
 - [Deployment Guide](docs/deployment/README.md)
 - [Testing](docs/testing/README.md)
+- [End-to-End Demonstration](docs/DEMO_GUIDE.md)
 
 ---
 
@@ -160,30 +156,11 @@ for stable milestones only.
 
 ---
 
-## Known Issues & Current Status
+## Delivery Notes
 
-This section exists so anyone picking up the repo — including future us —
-doesn't waste time assuming more is finished than actually is:
-
-- **Two frontend implementations exist** (`/frontend` vs. root `/src`). The
-  root version is more feature-complete but isn't the one currently wired
-  into Docker Compose.
-- **Two parallel submission/judging implementations exist** (`/api/submissions`,
-  synchronous, vs. `/api/v1/problems/{id}/submit`, async/queue-based). Not
-  yet reconciled into one path.
-- **A significant amount of backend code — the full Question Bank suite,
-  assessment session lifecycle, MCQ/written/reading-comprehension/file-upload
-  engines, and some security-hardening services — currently sits outside the
-  Maven build path** (`backend/controller/`, `backend/service/`, etc. at the
-  repo root, instead of under `backend/src/main/java/...`) and is **not
-  compiled into the running application**. This needs to be moved before
-  those features can be demoed or tested.
-- Forgot-password, reset-password, and email verification are not
-  implemented yet, despite supporting DTOs/entity fields already existing.
-- Manual evaluation workflow, reporting/analytics, notifications, and
-  certifications have not been started.
-
-See [docs/architecture/README.md](docs/architecture/README.md) for more detail.
+- The Docker code judge requires Docker Desktop to be running. The first judged submission may take longer while language images are downloaded.
+- Google sign-in requires a valid Google OAuth client ID, client secret, and redirect URI in the local environment; never commit those values.
+- Password reset and email verification require mail-provider credentials before they can send real email outside local development.
 
 ## License
 

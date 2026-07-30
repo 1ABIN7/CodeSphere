@@ -132,7 +132,7 @@ public class EvaluationController {
                 .orElseThrow(() -> new IllegalStateException("Session not found"));
         Question question = questionRepository.findById(answer.getQuestionId())
                 .orElseThrow(() -> new IllegalStateException("Question not found"));
-        List<EvaluationQueueItem.RubricCriterionItem> rubricCriteria = rubricRepository.findById(question.getId())
+        List<EvaluationQueueItem.RubricCriterionItem> rubricCriteria = rubricRepository.findByQuestionId(question.getId())
                 .map(rubric -> rubric.getCriteria().stream().map(criterion -> EvaluationQueueItem.RubricCriterionItem.builder()
                         .name(criterion.getCriterionName()).maxPoints(criterion.getMaxPoints()).build()).toList())
                 .orElse(List.of());

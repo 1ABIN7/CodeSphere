@@ -31,7 +31,10 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import NotificationsPage from './pages/NotificationsPage';
 import CertificationsPage from './pages/CertificationsPage';
+import CodingHelpPage from './pages/CodingHelpPage';
 import AdminRoute from './components/AdminRoute';
+import AdminAiInsightsPage from './pages/admin/AdminAiInsightsPage';
+import AdminSecurityPage from './pages/admin/AdminSecurityPage';
 
 export default function App() {
   return (
@@ -60,6 +63,8 @@ export default function App() {
               <Route path="/admin/reports" element={<AdminRoute><ReportsDashboard /></AdminRoute>} />
               <Route path="/admin/users" element={<AdminRoute><UserManagementPage /></AdminRoute>} />
               <Route path="/admin/categories" element={<AdminRoute><CategoryManagementPage /></AdminRoute>} />
+              <Route path="/admin/ai-insights" element={<AdminRoute><AdminAiInsightsPage /></AdminRoute>} />
+              <Route path="/admin/security" element={<AdminRoute><AdminSecurityPage /></AdminRoute>} />
               <Route path="/submissions" element={<SubmissionsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
@@ -69,6 +74,7 @@ export default function App() {
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
               <Route path="/certifications" element={<PrivateRoute><CertificationsPage /></PrivateRoute>} />
+              <Route path="/coding-help" element={<PrivateRoute><CodingHelpPage /></PrivateRoute>} />
               <Route path="*" element={
                 <div className="container" style={{ paddingTop: 80, textAlign: 'center' }}>
                   <div style={{ fontSize: 80 }}>404</div>

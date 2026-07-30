@@ -67,6 +67,7 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         return AuthResponse.builder()
+                .userId(user.getId())
                 .token(jwt)
                 .refreshToken(refreshToken.getToken())
                 .username(user.getUsername())
@@ -105,6 +106,7 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         return AuthResponse.builder()
+                .userId(user.getId())
                 .token(jwt)
                 .refreshToken(refreshToken.getToken())
                 .username(user.getUsername())

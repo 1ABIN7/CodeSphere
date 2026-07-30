@@ -107,6 +107,11 @@ judge:
     - c
     - javascript
 
+# Gemini powers the candidate Coding Help page. Keep the key only in .env.
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-3.6-flash}
+
 # Security Encryption
 security:
   encryption:

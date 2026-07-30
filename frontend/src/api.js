@@ -28,6 +28,7 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   refresh: (token) => api.post(`/auth/refresh?refreshToken=${token}`),
   health: () => api.get('/auth/health'),
+  logout: () => api.post('/auth/logout'),
   forgotPassword: (data) => api.post('/auth/forgot-password', data),
   resetPassword: (data) => api.post('/auth/reset-password', data),
   verifyEmail: (token) => api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`),
@@ -77,6 +78,10 @@ export const certificationAPI = {
   verify: (code) => api.get(`/v1/certifications/verify/${code}`),
 };
 
+export const codingHelpAPI = {
+  chat: (message) => api.post('/v1/coding-help', { message }),
+};
+
 export const candidateGroupAPI = {
   list: () => api.get('/v1/candidate-groups'),
   create: (data) => api.post('/v1/candidate-groups', data),
@@ -96,6 +101,13 @@ export const adminAPI = {
   getQuestionAnalytics: () => api.get('/v1/admin/reports/questions'),
   getCandidateAnalytics: () => api.get('/v1/admin/reports/candidates'),
   updateUserRole: (id, role) => api.put(`/v1/admin/users/${id}/role`, null, { params: { newRole: role } }),
+  getCandidateAiInsight: (candidateId) => api.get('/v1/admin/ai-insights', { params: { candidateId } }),
+  getCandidateSkillMetrics: (candidateId) => api.get('/v1/admin/ai-insights/metrics', { params: { candidateId } }),
+};
+
+export const securityAPI = {
+  auditLogs: (params) => api.get('/v1/admin/audit-logs', { params }),
+  proctoringEvents: () => api.get('/proctoring/events/recent'),
 };
 
 export const questionBankAPI = {
@@ -103,7 +115,7 @@ export const questionBankAPI = {
   create: (data) => api.post('/v1/questions', data),
   update: (id, data) => api.put(`/v1/questions/${id}`, data),
   delete: (id) => api.delete(`/v1/questions/${id}`),
-  import: (formData) => api.post('/v1/questions/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  import: (formData, mode = 'UPSERT') => api.post(`/v1/questions/import?mode=${mode}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   export: (format) => api.get(`/v1/questions/export?format=${format}`, { responseType: 'blob' }),
   submitForApproval: (id) => api.post(`/v1/questions/${id}/submit-for-approval`),
   approve: (id) => api.post(`/v1/questions/${id}/approve`),

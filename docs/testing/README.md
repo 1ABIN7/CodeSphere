@@ -1,25 +1,34 @@
 # CodeSphere — Testing
 
-## Current state (honest snapshot)
+## Automated test coverage and evidence
 
-Test coverage is early-stage. As of this writing:
+The backend uses JUnit 5 and Mockito for fast service-level tests, plus a Spring context-load test.
 
 | Test file | Type | Covers |
 |---|---|---|
 | `BackendApplicationTests` | Context load | Verifies the Spring context boots cleanly |
 | `AuthServiceTest` | Unit (Mockito) | Register/login happy paths + duplicate-user rejection |
-| `ProblemServiceTest`* | Unit (Mockito) | Problem CRUD, publish/unpublish guard (requires ≥1 test case) |
-| `AssessmentServiceImplTest`* | Unit (Mockito) | Assessment CRUD, publish validation, deep clone, candidate assignment |
-| `SubmissionServiceTest`* | Unit (Mockito) | Submission validation guards, judging flow, owner-only access check |
+| `ProblemServiceTest` | Unit (Mockito) | Problem CRUD, publish/unpublish guard, generated question-bank linkage |
+| `AssessmentServiceImplTest` | Unit (Mockito) | Assessment CRUD, publish validation, deep clone, candidate assignment |
+| `SubmissionServiceTest` | Unit (Mockito) | Submission validation guards, judging flow, owner-only access check |
+| `AssessmentSessionServiceImplTest` | Unit (Mockito) | Server-enforced section timing and navigation |
+| `SqlAssessmentRunnerServiceImplTest` | Unit | Read-only SQL validation and isolated execution behavior |
 
-\* Drafted and verified against actual source, not yet merged into `develop` as of this doc's last update — add them to this table's "done" status once pushed.
+### Recorded evidence
+
+| Check | Command | Result |
+|---|---|---|
+| Full backend suite | `cd backend && ./mvnw test` | **39 tests passed, 0 failures, 0 errors** (July 30, 2026) |
+| Frontend timer suite | `cd frontend && npm test` | **3 tests passed, 0 failures** (July 30, 2026) |
+| Backend compilation | `cd backend && ./mvnw -DskipTests compile` | Build successful (July 30, 2026) |
+| Frontend production build | `cd frontend && npm run build` | Build successful (July 30, 2026) |
 
 **Not covered at all yet:**
 - Integration tests (no TestContainers setup — nothing exercises a real Postgres/Redis/RabbitMQ/MinIO)
 - `ProctoringService`, `FileService`, `InterviewService`
 - The async, queue-based submission path (`ProblemSubmissionController` → RabbitMQ → `SubmissionConsumer` → `DockerExecutionService`)
-- Anything in the Question Bank / session-lifecycle code, since that code isn't even compiled into the build yet (see [Architecture](../architecture/README.md))
-- Frontend tests (no test runner configured in either frontend tree)
+- Full browser-driven candidate/admin flows
+- Broad frontend component/browser-flow tests beyond assessment timing
 - Load/performance testing
 
 ## Test setup
@@ -28,7 +37,7 @@ Tests run against an in-memory H2 database configured to mimic Postgres
 (`backend/src/test/resources/application.yml`), so `mvn test` works without
 Docker or a real database running. Key details:
 - Flyway is disabled for tests — Hibernate auto-creates the schema (`ddl-auto: update`) instead of applying real migrations. This means a broken Flyway migration won't be caught by `mvn test`; only manual `docker compose up` will surface that.
-- RabbitMQ listener auto-startup is disabled, so tests don't need a running broker.
+- The suite does not require a running broker to pass. The context-load test may emit RabbitMQ connection warnings when no local broker is present; this is recorded as an environment warning, not a test failure.
 - JWT secret is a dummy value baked into the test config — never reuse this for anything real.
 
 ## Running tests
@@ -48,15 +57,6 @@ CI runs `mvn test` automatically on every push/PR via `.github/workflows/ci.yml`
 - One test class per service, named `<ServiceName>Test`.
 - Test method names follow `methodUnderTest_ExpectedBehavior_WhenCondition` (e.g. `togglePublish_ThrowsException_WhenNoTestCases`).
 - Prefer `ArgumentCaptor` over loose `any()` matchers when asserting on *what* got saved, not just *that* something got saved.
-
-## Known limitation worth flagging to the team
-
-A meaningful chunk of backend functionality (Question Bank, assessment
-session lifecycle, the four remaining assessment-type engines) currently
-lives outside the Maven build path and isn't compiled. **Writing tests
-against that code now would be testing something that doesn't run.**
-Once it's moved into `backend/src/main/java/...`, this doc and the test
-suite both need a follow-up pass.
 
 ## Priorities for remaining test work
 

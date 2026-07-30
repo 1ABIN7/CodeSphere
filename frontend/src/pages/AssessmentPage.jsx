@@ -90,6 +90,7 @@ export default function AssessmentPage() {
   const [language, setLanguage] = useState('java');
   const [code, setCode] = useState(STARTER_CODE.java);
   const [codeByQuestion, setCodeByQuestion] = useState({});
+  const [startedCodeQuestions, setStartedCodeQuestions] = useState({});
   const [starterCodeByQuestion, setStarterCodeByQuestion] = useState({});
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState('');
@@ -99,8 +100,10 @@ export default function AssessmentPage() {
   const [codingSubmissionPending, setCodingSubmissionPending] = useState(false);
   const [codingHistory, setCodingHistory] = useState([]);
   const [readingView, setReadingView] = useState(null);
+  const [proctoringConfig, setProctoringConfig] = useState(null);
   const saveTimerRef = useRef(null);
   const sessionRef = useRef(null);
+  const proctoringLastEventRef = useRef({});
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -225,6 +228,38 @@ export default function AssessmentPage() {
       document.documentElement.requestFullscreen?.().catch(() => {});
     }
   }, [assessment]);
+
+  useEffect(() => {
+    let active = true;
+    proctoringAPI.getConfig(id).then(({ data }) => { if (active) setProctoringConfig(data); }).catch(() => { if (active) setProctoringConfig(null); });
+    return () => { active = false; };
+  }, [id]);
+
+  useEffect(() => {
+    if (!session?.id || !proctoringConfig?.enableTabSwitchDetection) return undefined;
+    const report = (eventType, severity, metadata = {}) => {
+      const now = Date.now();
+      const lastEventAt = proctoringLastEventRef.current[eventType] ?? 0;
+      // Browsers often emit blur and visibility events together. Keep useful
+      // signals without creating duplicate records for one user action.
+      if (now - lastEventAt < 2500) return;
+      proctoringLastEventRef.current[eventType] = now;
+      proctoringAPI.recordEvent(session.id, { eventType, severity, metadata: { ...metadata, recordedAt: new Date().toISOString() } }).catch(() => {});
+    };
+    const handleVisibility = () => { if (document.hidden) report('TAB_SWITCH', 'MEDIUM', { visibilityState: document.visibilityState }); };
+    const handleBlur = () => report('WINDOW_FOCUS_LOST', 'LOW');
+    const handleFullscreen = () => {
+      if (assessment?.isFullscreenRequired && !document.fullscreenElement) report('FULLSCREEN_EXIT', 'MEDIUM');
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
+    document.addEventListener('fullscreenchange', handleFullscreen);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('fullscreenchange', handleFullscreen);
+    };
+  }, [session?.id, proctoringConfig?.enableTabSwitchDetection, assessment?.isFullscreenRequired]);
 
   useEffect(() => {
     const question = questions[activeQuestion];
@@ -423,7 +458,10 @@ export default function AssessmentPage() {
 
   const updateCodeForQuestion = (nextCode) => {
     setCode(nextCode);
-    if (currentQuestion?.id) setCodeByQuestion((saved) => ({ ...saved, [currentQuestion.id]: nextCode }));
+    if (currentQuestion?.id) {
+      setCodeByQuestion((saved) => ({ ...saved, [currentQuestion.id]: nextCode }));
+      setStartedCodeQuestions((saved) => ({ ...saved, [currentQuestion.id]: true }));
+    }
   };
 
   const resetCodeForQuestion = () => {
@@ -491,7 +529,9 @@ export default function AssessmentPage() {
           <div className="question-grid question-navigation-list">
             {questions.map((q, index) => {
               const value = answers[q.id];
-              const state = value ? 'answered' : 'unanswered';
+              const type = q.questionType || q.type;
+              const isCodeResponse = ['CODING', 'DEBUGGING', 'SQL', 'API_IMPLEMENTATION'].includes(type);
+              const state = value || (isCodeResponse && startedCodeQuestions[q.id]) ? 'answered' : 'unanswered';
               return (
                 <button
                   key={q.id}
@@ -650,6 +690,7 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
       );
     case QUESTION_TYPES.SUBJECTIVE:
     case QUESTION_TYPES.WRITTEN:
+    case 'SHORT_ANSWER':
       return (
         <div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}><button type="button" className="btn btn-secondary btn-sm" onMouseDown={(event) => { event.preventDefault(); document.execCommand('bold'); }}>Bold</button><button type="button" className="btn btn-secondary btn-sm" onMouseDown={(event) => { event.preventDefault(); document.execCommand('italic'); }}>Italic</button><button type="button" className="btn btn-secondary btn-sm" onMouseDown={(event) => { event.preventDefault(); document.execCommand('insertUnorderedList'); }}>List</button></div>
@@ -670,6 +711,7 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
           </div>
           {isReading && <div className="empty-state"><div className="empty-title">Read the passage</div><div className="empty-subtitle">Questions unlock when the reading timer ends.</div></div>}
           {!isReading && <div className="question-stack">
+            {subQuestions.length === 0 && <div className="empty-state"><div className="empty-title">No passage questions available</div><div className="empty-subtitle">This passage was published without nested questions.</div></div>}
             {subQuestions.map((subQuestion) => (
               <div key={subQuestion.id} className="card" style={{ padding: 16, marginBottom: 12 }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>{subQuestion.prompt}</div>

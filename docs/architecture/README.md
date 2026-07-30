@@ -39,7 +39,7 @@ graph TB
 ```
 
 - **Backend:** Java 21, Spring Boot 3.3.1, stateless JWT auth, Spring Data JPA over PostgreSQL, Flyway migrations.
-- **Frontend:** React 19 + Vite. **Two separate implementations currently exist** — see [Known Issues](#known-issues) below.
+- **Frontend:** React 19 + Vite, with the active application in `frontend/`.
 - **Async work:** RabbitMQ carries judge jobs from the queue-based submission path to a consumer that executes code and pushes results back over WebSocket.
 - **Storage:** file uploads go through a `StorageProvider` abstraction with local-disk and MinIO implementations, selected by config.
 
@@ -60,21 +60,11 @@ graph TB
 | `messaging/` | `SubmissionProducer`/`SubmissionConsumer` for the async judge path |
 | `seeder/` | `DataSeeder` — populates demo data (Demo Corp org, admin/evaluator/candidate accounts) on the `dev` profile |
 
-### Code that exists but isn't part of the build
+### Build-path status
 
-`backend/controller/`, `backend/service/`, `backend/dto/`, and `backend/model/`
-at the **repository root** (not under `backend/src/main/java/...`) contain a
-large amount of real, written code — the full Question Bank suite,
-`AssessmentSessionService`/`Controller`, the MCQ/Written/ReadingComprehension/
-FileUpload assessment engines, `AdminController`, `AuditLogService`,
-`RateLimiterService`, `LoginAttemptService`, `TokenDenylistService` — none of
-which Maven picks up, because it's outside the standard source path. It is
-**not compiled, not running, and not covered by any test**. This is very
-likely the single highest-leverage fix available: moving this into
-`backend/src/main/java/com/CodeSphere/backend/...` (matching package
-structure) would bring a large chunk of "missing" functionality online
-immediately, assuming it compiles cleanly against the current entity model
-once relocated.
+The active controllers, services, DTOs, and models are located under
+`backend/src/main/java/com/CodeSphere/backend/...`, which is Maven’s standard
+source path. The backend compile check succeeds with this source layout.
 
 ---
 
@@ -233,18 +223,29 @@ For full column-level detail, see [Database Schema](../database/README.md).
 
 ---
 
-## Frontend Structure (whichever tree is canonical — see Known Issues)
+## Frontend Structure
 
-Both frontend trees follow a similar shape: pages per route, shared layout
-components (public/candidate/admin/assessment layouts in the root `/src`
-version), a small reusable UI component set, and Axios-based API calls.
-Auth state is held in React context (`AuthContext`) and persisted... check
-the actual implementation before assuming `localStorage` vs. in-memory, since
-this affects refresh-token handling on reload.
+The active frontend is `frontend/`: React/Vite pages per route, shared
+components, Axios API calls, Monaco for code editing, and auth state in
+`AuthContext`. It persists the JWT and current user in browser storage for a
+local development session. The repository-root `src/` directory is legacy
+material and is not the Vite application used by the current Docker or local
+frontend workflow.
 
 ---
 
 ## Deployment Topology
+
+## Recent design additions
+
+### AI boundary
+
+Gemini calls are made only by the Spring Boot backend. The browser never receives `GEMINI_API_KEY`.
+Candidate Coding Help has a tutoring-only prompt; admin AI Insights analyzes completed submission excerpts and is explicitly advisory. Charts use deterministic database metrics rather than AI-generated numbers.
+
+### Security and proctoring boundary
+
+The browser can record observable assessment events—tab visibility changes, window focus loss, and fullscreen exits—but cannot inspect other installed applications or other browser windows. These signals are written to `proctoring_events` and displayed to authorized admins in the Security center. Login/logout and key administrative actions are stored in encrypted-IP audit records.
 
 See [Deployment Guide](../deployment/README.md) for the full Docker Compose
 breakdown, ports, and environment variables. In short: Nginx on `:80` fronts

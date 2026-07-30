@@ -5,6 +5,7 @@ import com.CodeSphere.backend.model.AssessmentSession;
 import com.CodeSphere.backend.model.ProctoringConfig;
 import com.CodeSphere.backend.model.ProctoringEvent;
 import com.CodeSphere.backend.dto.file.FileUploadResponse;
+import com.CodeSphere.backend.dto.admin.ProctoringEventSummary;
 import com.CodeSphere.backend.repository.AssessmentSessionRepository;
 import com.CodeSphere.backend.repository.ProctoringConfigRepository;
 import com.CodeSphere.backend.repository.ProctoringEventRepository;
@@ -107,6 +108,17 @@ public class ProctoringService {
     
     public List<ProctoringEvent> getSessionEvents(Long sessionId) {
         return eventRepository.findBySessionIdOrderByTimestampDesc(sessionId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProctoringEventSummary> getRecentEvents() {
+        return eventRepository.findTop50ByOrderByTimestampDesc().stream().map(event -> {
+            AssessmentSession session = event.getSession();
+            String candidate = session.getCandidate().getFullName();
+            if (candidate == null || candidate.isBlank()) candidate = session.getCandidate().getUsername();
+            return new ProctoringEventSummary(event.getId(), session.getId(), session.getAssessmentId(), candidate,
+                    event.getEventType(), event.getSeverity(), event.getTimestamp(), event.getMetadata());
+        }).toList();
     }
     
     @Transactional

@@ -20,11 +20,13 @@ public class QuestionImportController {
 
     // BULK IMPORT: POST /api/v1/questions/import
     @PostMapping("/import")
-    public ResponseEntity<List<Question>> importBulkQuestions(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<List<Question>> importBulkQuestions(@RequestParam("file") MultipartFile file,
+                                                              @RequestParam(defaultValue = "UPSERT") String mode) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        List<Question> savedList = importService.importBulkQuestions(file);
+        boolean updateExisting = !"CREATE".equalsIgnoreCase(mode);
+        List<Question> savedList = importService.importBulkQuestions(file, updateExisting);
         return ResponseEntity.ok(savedList);
     }
 }

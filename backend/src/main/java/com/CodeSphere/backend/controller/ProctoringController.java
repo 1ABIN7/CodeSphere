@@ -6,6 +6,7 @@ import com.CodeSphere.backend.model.ProctoringEvent;
 import com.CodeSphere.backend.service.ProctoringService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +43,12 @@ public class ProctoringController {
     public ResponseEntity<List<ProctoringEvent>> getSessionEvents(@PathVariable Long sessionId) {
         // In reality, this should be restricted to EXAMINER/ADMIN roles
         return ResponseEntity.ok(proctoringService.getSessionEvents(sessionId));
+    }
+
+    @GetMapping("/events/recent")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN')")
+    public ResponseEntity<?> getRecentEvents() {
+        return ResponseEntity.ok(proctoringService.getRecentEvents());
     }
 
     @GetMapping("/assessments/{assessmentId}/config")

@@ -81,6 +81,10 @@ npm run dev
 | JWT_EXPIRATION | JWT expiry in ms | 86400000 |
 | SERVER_PORT | Backend server port | 8080 |
 | FRONTEND_URL | Frontend origin for CORS | http://localhost:5173 |
+| GEMINI_API_KEY | Server-only Gemini key for Coding Help and Admin AI Insights | obtain from Google AI Studio |
+| GEMINI_MODEL | Optional Gemini model override | gemini-3.6-flash |
+
+Never commit `.env`. In production, use your deployment platform’s secret manager instead of a file. `GEMINI_API_KEY` must remain on the backend and must not be added to Vite (`VITE_*`) variables.
 
 ---
 

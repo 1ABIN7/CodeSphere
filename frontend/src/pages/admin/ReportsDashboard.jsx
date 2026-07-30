@@ -5,6 +5,13 @@ import { adminAPI } from '../../api';
 
 const EMPTY = { summary: { averageScore: 0, passRate: 0 }, assessments: [] };
 const percent = (value) => `${Number(value ?? 0).toFixed(1)}%`;
+const formatDuration = (value) => {
+  const seconds = Math.max(0, Number(value) || 0);
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const amount = seconds < 3600 ? seconds / 60 : seconds / 3600;
+  const rounded = Math.round(amount * 10) / 10;
+  return `${rounded}${seconds < 3600 ? ' min' : ' hr'}`;
+};
 const COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ec4899', '#06b6d4'];
 
 export default function ReportsDashboard() {
@@ -40,7 +47,7 @@ export default function ReportsDashboard() {
     </div>}
     <ReportTable title="Assessment details" headers={['Assessment', 'Candidates', 'Average score', 'Pass rate']} empty="No assessment results are available yet.">{(report.assessments ?? []).map((item) => <tr key={item.id}><td>{item.title}</td><td>{item.candidates ?? 0}</td><td>{percent(item.averageScore)}</td><td>{percent(item.passRate)}</td></tr>)}</ReportTable>
     <ReportTable title="Candidate performance" headers={['Rank', 'Candidate', 'Completed', 'Average', 'Recent trend']} empty="Candidate performance appears after completed assessments.">{candidateMetrics.map((item) => <tr key={item.userId}><td>#{item.rank}</td><td><strong>{item.name}</strong></td><td>{item.completedAssessments}</td><td>{percent(item.averageScore)}</td><td>{item.trend.slice(-3).map((point) => `${point.assessmentTitle}: ${percent(point.score)}`).join(' · ')}</td></tr>)}</ReportTable>
-    <ReportTable title="Question effectiveness" headers={['Question', 'Attempts', 'Avg. score', 'Avg. time']} empty="Question metrics appear after candidates submit answers.">{questionMetrics.map((item) => <tr key={item.id}><td><strong>{item.title}</strong><div className="text-secondary" style={{ fontSize: 12 }}>{item.questionType} · {item.difficulty || 'Unclassified'}</div></td><td>{item.attempts}</td><td>{percent(item.averageScore)}</td><td>{item.averageSecondsSpent}s</td></tr>)}</ReportTable>
+    <ReportTable title="Question effectiveness" headers={['Question', 'Attempts', 'Avg. score', 'Avg. time']} empty="Question metrics appear after candidates submit answers.">{questionMetrics.map((item) => <tr key={item.id}><td><strong>{item.title}</strong><div className="text-secondary" style={{ fontSize: 12 }}>{item.questionType} · {item.difficulty || 'Unclassified'}</div></td><td>{item.attempts}</td><td>{percent(item.averageScore)}</td><td>{formatDuration(item.averageSecondsSpent)}</td></tr>)}</ReportTable>
   </div>;
 }
 

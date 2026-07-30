@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../api';
 
 const ADMIN_NAV_ITEMS = [
   { to: '/admin', label: 'Overview' },
@@ -8,6 +9,8 @@ const ADMIN_NAV_ITEMS = [
   { to: '/admin/evaluations', label: 'Evaluation' },
   { to: '/admin/reports', label: 'Reports' },
   { to: '/admin/users', label: 'People' },
+  { to: '/admin/ai-insights', label: 'AI insights' },
+  { to: '/admin/security', label: 'Security' },
 ];
 
 export default function Navbar() {
@@ -18,9 +21,12 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try { await authAPI.logout(); } catch { /* Clear the local session even if the server is unavailable. */ }
+    finally {
+      logout();
+      navigate('/');
+    }
   };
 
   return (
@@ -33,9 +39,10 @@ export default function Navbar() {
 
           <div className="navbar-nav">
             {isLoggedIn && !isAdmin && (
-                <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
-                  Dashboard
-                </Link>
+                <>
+                  <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>Dashboard</Link>
+                  <Link to="/coding-help" className={`nav-link ${isActive('/coding-help') ? 'active' : ''}`}>Coding Help</Link>
+                </>
             )}
             {isLoggedIn && isEvaluator && (
               <Link to="/admin/evaluations" className={`nav-link ${isActive('/admin/evaluations') ? 'active' : ''}`}>

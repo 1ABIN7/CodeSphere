@@ -2,7 +2,7 @@
 
 ## Base URL
 - Local: `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
 ## Authentication
@@ -17,9 +17,10 @@ Roles referenced below (`SUPER_ADMIN`, `ORG_ADMIN`, `EXAMINER`, `INSTRUCTOR`, `C
 legacy `ADMIN`/`MODERATOR` on a couple of older endpoints) are enforced with `@PreAuthorize`.
 Endpoints with no role listed just require a valid token (any authenticated user).
 
-> **Known inconsistency:** a few endpoints (`QuestionController`) still check the older
-> `ADMIN`/`MODERATOR` roles instead of the current `SUPER_ADMIN`/`ORG_ADMIN`/`EXAMINER` scheme.
-> Flagged here so it doesn't get missed — see [Known Issues](../../README.md#known-issues--current-status).
+> Role names are enforced by the backend. Use the current `SUPER_ADMIN`, `ORG_ADMIN`,
+> `EXAMINER`, and `CANDIDATE` roles when configuring demo accounts.
+
+For the full machine-readable contract, start the backend and open `/v3/api-docs` or Swagger UI. This document is the human-readable submission guide for the active application flows.
 
 ---
 
@@ -237,18 +238,39 @@ password 8+ chars with at least one digit, lowercase, uppercase, and special cha
 
 ## 16. Proctoring — `/api/proctoring`
 
-| Method | Path | Description |
-|---|---|---|
-| POST | `/sessions/{sessionId}/events` | Log a proctoring event (tab-switch, focus-loss, etc.) |
-| POST | `/sessions/{sessionId}/snapshot` | Upload a webcam snapshot |
-| GET | `/sessions/{sessionId}/events` | All events for a session |
-| GET | `/assessments/{assessmentId}/config` | Get proctoring config for an assessment |
-| PUT | `/assessments/{assessmentId}/config` | Update proctoring config |
-| PUT | `/sessions/{sessionId}/flag` | Manually flag a session for review |
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/sessions/{sessionId}/events` | Candidate owning session | Record a tab-switch, focus-loss, fullscreen, or consented-proctoring event |
+| POST | `/sessions/{sessionId}/snapshot` | Candidate owning session | Upload a consented webcam snapshot |
+| GET | `/sessions/{sessionId}/events` | authenticated | List events for one session |
+| GET | `/events/recent` | SUPER_ADMIN / ORG_ADMIN | Recent proctoring events for the Security dashboard |
+| GET | `/assessments/{assessmentId}/config` | authenticated | Read proctoring configuration |
+| PUT | `/assessments/{assessmentId}/config` | admin/examiner | Update proctoring configuration |
+
+## 17. AI features
+
+### Candidate Coding Help — `/api/v1/coding-help`
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `` | CANDIDATE | Body `{ "message": "..." }`; Gemini-backed coding concepts, debugging explanations, and hints. It is intentionally instructed not to supply live-assessment answers. |
+
+### Admin AI Insights — `/api/v1/admin/ai-insights`
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `` | SUPER_ADMIN / ORG_ADMIN | Query `candidateId`; Gemini advisory narrative based on up to 12 recent coding submissions |
+| GET | `/metrics` | SUPER_ADMIN / ORG_ADMIN | Query `candidateId`; deterministic submission, verdict, language, and score-trend data for charts |
+
+## 18. Security activity — `/api/v1/admin/audit-logs`
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `` | SUPER_ADMIN / ORG_ADMIN | Paginated audit activity. Supports `username`, `action`, `startDate`, `endDate`, `page`, `size`, `sortBy`, and `sortDir`. IP addresses are shown to authorized admins only. |
 
 ---
 
-## 17. Admin — `/api/v1/admin`
+## 19. Admin — `/api/v1/admin`
 
 *(all endpoints require SUPER_ADMIN / ORG_ADMIN, most also allow EXAMINER)*
 
@@ -260,7 +282,7 @@ password 8+ chars with at least one digit, lowercase, uppercase, and special cha
 | GET | `/reports/candidates` | EXAMINER+ | `CandidateAnalyticsResponse` |
 | PUT | `/submissions/{submissionId}/score` | EXAMINER+ | Manually override a submission's score |
 | PUT | `/users/{targetUserId}/role` | SUPER_ADMIN/ORG_ADMIN only | Change a user's role |
-| GET | `/audit-logs` | ADMIN *(legacy role)* | Paginated, filterable `Page<AuditLog>` |
+| GET | `/audit-logs` | SUPER_ADMIN / ORG_ADMIN | Paginated, filterable `Page<AuditLog>` |
 
 ---
 
@@ -272,9 +294,8 @@ password 8+ chars with at least one digit, lowercase, uppercase, and special cha
   returned as `ApiErrorResponse`.
 - All timestamps are UTC ISO-8601.
 
-## Not yet implemented (no working endpoints for these)
+## Deployment-dependent or future work
 
-- Certification issuance/verification (the DTO and the `/me/certifications` read endpoint exist,
-  but nothing ever populates it)
-- Email notifications (register/forgot-password print tokens to console instead of sending mail)
-- Plagiarism detection
+- Outbound password-reset and verification email delivery requires a configured mail provider.
+- Plagiarism detection is not yet a scored workflow.
+- The documented endpoints are the handoff contract; Swagger/OpenAPI is the authoritative runtime source.
