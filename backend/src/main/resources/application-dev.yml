@@ -44,4 +44,6 @@ logging:
     root: INFO
     com.CodeSphere: DEBUG
     org.springframework.security: INFO
-    org.hibernate.SQL: DEBUG
+    # Keep development startup readable. Set this to DEBUG only while diagnosing a query.
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN

@@ -1,10 +1,20 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const ADMIN_NAV_ITEMS = [
+  { to: '/admin', label: 'Overview' },
+  { to: '/admin/assessments', label: 'Assessments' },
+  { to: '/admin/questions', label: 'Question bank' },
+  { to: '/admin/evaluations', label: 'Evaluation' },
+  { to: '/admin/reports', label: 'Reports' },
+  { to: '/admin/users', label: 'People' },
+];
+
 export default function Navbar() {
   const { user, logout, isLoggedIn, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const isEvaluator = user?.role === 'ROLE_EXAMINER';
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
@@ -16,36 +26,28 @@ export default function Navbar() {
   return (
       <nav className="navbar">
         <div className="navbar-inner">
-          <Link to="/" className="navbar-brand">
+          <Link to={isEvaluator ? "/admin/evaluations" : (isAdmin ? "/admin" : "/")} className="navbar-brand">
             <div className="brand-icon">⚡</div>
             CodeSphere
           </Link>
 
           <div className="navbar-nav">
-            {!isAdmin && (
-              <Link to="/problems" className={`nav-link ${isActive('/problems') ? 'active' : ''}`}>
-                Problems
-              </Link>
-            )}
             {isLoggedIn && !isAdmin && (
                 <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
                   Dashboard
                 </Link>
             )}
-            {isLoggedIn && !isAdmin && (
-              <Link to="/assessments" className={`nav-link ${isActive('/assessments') ? 'active' : ''}`}>
-                Assessments
+            {isLoggedIn && isEvaluator && (
+              <Link to="/admin/evaluations" className={`nav-link ${isActive('/admin/evaluations') ? 'active' : ''}`}>
+                My reviews
               </Link>
             )}
-            {isLoggedIn && isAdmin && (
-                <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
-                  Admin
+            {isLoggedIn && isAdmin && !isEvaluator && (
+              ADMIN_NAV_ITEMS.map((item) => (
+                <Link key={item.to} to={item.to} className={`nav-link ${(item.to === '/admin' ? location.pathname === '/admin' : isActive(item.to)) ? 'active' : ''}`}>
+                  {item.label}
                 </Link>
-            )}
-            {!isAdmin && (
-              <Link to="/submissions" className={`nav-link ${isActive('/submissions') ? 'active' : ''}`}>
-                Submissions
-              </Link>
+              ))
             )}
           </div>
 

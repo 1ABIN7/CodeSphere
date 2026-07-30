@@ -59,6 +59,22 @@ public class Question {
     @Column(name = "coding_problem_id")
     private Long codingProblemId;
 
+    /** Curated Problem Bank entries are selectable but not editable as question content. */
+    @Column(name = "system_generated", nullable = false)
+    private boolean systemGenerated = false;
+
+    /** Admin-authored DDL/shared seed data for a disposable SQL assessment database. */
+    @Column(name = "sql_setup", columnDefinition = "TEXT")
+    private String sqlSetup;
+
+    /** JSON array of isolated SQL test cases: name, setupSql, expectedRows, hidden. */
+    @Column(name = "sql_test_cases", columnDefinition = "TEXT")
+    private String sqlTestCases;
+
+    /** JSON request/response checks for a JavaScript HTTP API task. */
+    @Column(name = "api_test_cases", columnDefinition = "TEXT")
+    private String apiTestCases;
+
     @Column(name = "min_word_count")
     private Integer minWordCount = 0;
 
@@ -127,6 +143,14 @@ public class Question {
 
     public Long getCodingProblemId() { return codingProblemId; }
     public void setCodingProblemId(Long codingProblemId) { this.codingProblemId = codingProblemId; }
+    public boolean isSystemGenerated() { return systemGenerated; }
+    public void setSystemGenerated(boolean systemGenerated) { this.systemGenerated = systemGenerated; }
+    public String getSqlSetup() { return sqlSetup; }
+    public void setSqlSetup(String sqlSetup) { this.sqlSetup = sqlSetup; }
+    public String getSqlTestCases() { return sqlTestCases; }
+    public void setSqlTestCases(String sqlTestCases) { this.sqlTestCases = sqlTestCases; }
+    public String getApiTestCases() { return apiTestCases; }
+    public void setApiTestCases(String apiTestCases) { this.apiTestCases = apiTestCases; }
 
     public Integer getMinWordCount() { return minWordCount; }
     public void setMinWordCount(Integer minWordCount) { this.minWordCount = minWordCount; }

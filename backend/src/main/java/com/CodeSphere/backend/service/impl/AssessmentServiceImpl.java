@@ -27,6 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Collections;
+import java.util.UUID;
+import com.CodeSphere.backend.model.Certification;
+import com.CodeSphere.backend.repository.CertificationRepository;
+import com.CodeSphere.backend.service.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +45,8 @@ public class AssessmentServiceImpl implements AssessmentService {
     private final AssessmentAnswerRepository answerRepository;
     private final QuestionBankRepository questionBankRepository;
     private final McqEvaluationService mcqEvaluationService;
+    private final CertificationRepository certificationRepository;
+    private final NotificationService notificationService;
 
     // ==========================================
     // Admin & Lifecycle Methods
@@ -305,7 +311,7 @@ public class AssessmentServiceImpl implements AssessmentService {
         // Written and file answers require a human evaluator after the candidate submits.
         for (AssessmentAnswer answer : answerRepository.findBySessionId(savedSession.getId())) {
             Question question = questionBankRepository.findById(answer.getQuestionId()).orElse(null);
-            if (question != null && ("WRITTEN".equals(question.getQuestionType()) || "SUBJECTIVE".equals(question.getQuestionType()) || "FILE_UPLOAD".equals(question.getQuestionType()) || "SQL".equals(question.getQuestionType()))) {
+            if (question != null && ("WRITTEN".equals(question.getQuestionType()) || "SUBJECTIVE".equals(question.getQuestionType()) || "FILE_UPLOAD".equals(question.getQuestionType()) || ("SQL".equals(question.getQuestionType()) && answer.getScore() == null))) {
                 answer.setEvaluationStatus("PENDING_EVALUATION");
                 answerRepository.save(answer);
             }
@@ -317,6 +323,11 @@ public class AssessmentServiceImpl implements AssessmentService {
                 .filter(java.util.Objects::nonNull)
                 .mapToDouble(Double::doubleValue)
                 .sum();
+        var assessment = assessmentRepository.findById(assessmentId).orElseThrow(() -> new IllegalArgumentException("Assessment not found"));
+        if (assessment.getPassingScore() != null && score >= assessment.getPassingScore() && certificationRepository.findByUserIdAndAssessmentId(userId, assessmentId).isEmpty()) {
+            certificationRepository.save(Certification.builder().userId(userId).assessmentId(assessmentId).title(assessment.getTitle()).score(score).verificationCode("CS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()).issuedAt(java.time.OffsetDateTime.now()).build());
+            notificationService.notify(userId, "Certification earned", "You passed \"" + assessment.getTitle() + "\" and earned a certification.");
+        }
         return AssessmentResultDTO.builder()
                 .sessionId(savedSession.getId())
                 .userId(userId)

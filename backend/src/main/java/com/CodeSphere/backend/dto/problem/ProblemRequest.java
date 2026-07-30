@@ -50,6 +50,11 @@ public class ProblemRequest {
 
     private List<String> companyTags;
 
+    /** Assessment metadata applied to the generated Question Bank entry. */
+    private String category;
+    private Integer points;
+    private Integer negativeScore;
+
     @Valid
     private List<TestCaseRequest> testCases;
 }

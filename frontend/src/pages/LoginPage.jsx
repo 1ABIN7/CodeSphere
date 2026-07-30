@@ -55,6 +55,7 @@ export default function LoginPage() {
               autoFocus
             />
           </div>
+          <div style={{ textAlign: 'right', marginTop: -8 }}><Link to="/forgot-password" className="auth-link" style={{ fontSize: 13 }}>Forgot password?</Link></div>
           <div className="form-group">
             <label className="label">Password</label>
             <input

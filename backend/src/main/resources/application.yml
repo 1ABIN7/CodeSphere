@@ -99,7 +99,7 @@ judge:
   thread-pool-core-size: 4
   thread-pool-max-size: 8
   queue-capacity: 100
-  use-docker: false
+  use-docker: ${JUDGE_USE_DOCKER:false}
   supported-languages:
     - java
     - python

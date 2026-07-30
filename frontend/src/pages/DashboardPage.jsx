@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { submissionsAPI, problemsAPI } from '../api';
+import { submissionsAPI, assessmentAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -19,23 +19,33 @@ export default function DashboardPage() {
   const { user, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [submissions, setSubmissions] = useState([]);
+  const [finalResults, setFinalResults] = useState([]);
+  const [availableAssessments, setAvailableAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ total: 0, accepted: 0, problems: 0 });
+  const [stats, setStats] = useState({ total: 0, accepted: 0, problems: 0, assignments: 0 });
 
   useEffect(() => {
     if (!isLoggedIn) { navigate('/login'); return; }
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await submissionsAPI.getMySubmissions({ page: 0, size: 20 });
-        const data = res.data.content || [];
+        const [submissionResult, assessmentResult, resultHistory] = await Promise.allSettled([
+          submissionsAPI.getMySubmissions({ page: 0, size: 20 }),
+          assessmentAPI.listAvailable(),
+          assessmentAPI.getResultHistory(),
+        ]);
+        const data = submissionResult.status === 'fulfilled' ? (submissionResult.value.data.content || []) : [];
+        const available = assessmentResult.status === 'fulfilled'
+          ? (assessmentResult.value.data?.content || assessmentResult.value.data || []) : [];
         setSubmissions(data);
+        setFinalResults(resultHistory.status === 'fulfilled' ? (resultHistory.value.data ?? []) : []);
+        setAvailableAssessments(Array.isArray(available) ? available : []);
         const accepted = data.filter(s => s.status === 'ACCEPTED').length;
         const problems = new Set(data.filter(s => s.status === 'ACCEPTED').map(s => s.problemId)).size;
-        setStats({ total: res.data.totalElements || data.length, accepted, problems });
+        setStats({ total: submissionResult.status === 'fulfilled' ? (submissionResult.value.data.totalElements || data.length) : 0, accepted, problems, assignments: Array.isArray(available) ? available.length : 0 });
       } catch {
         setSubmissions(MOCK_SUBMISSIONS);
-        setStats({ total: 24, accepted: 9, problems: 7 });
+        setStats({ total: 24, accepted: 9, problems: 7, assignments: 0 });
       } finally {
         setLoading(false);
       }
@@ -43,35 +53,48 @@ export default function DashboardPage() {
     fetchData();
   }, [isLoggedIn]);
 
-  const acceptRate = stats.total > 0 ? ((stats.accepted / stats.total) * 100).toFixed(1) : '0.0';
-
   return (
-    <div className="container fade-in">
-      <div className="page-header">
-        <h1 className="page-title">Welcome back, {user?.username || 'Coder'} 👋</h1>
-        <p className="page-subtitle">Track your progress and coding skills</p>
-      </div>
+    <div className="container fade-in candidate-dashboard">
+      <section className="candidate-hero">
+        <div>
+          <div className="candidate-eyebrow">Your learning space</div>
+          <h1>Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : user?.username ? `, ${user.username}` : ''}.</h1>
+          <p>Continue an assessment or spend a few focused minutes practicing.</p>
+        </div>
+        <div className="candidate-hero-actions">
+          <Link className="btn btn-secondary" to="/problems">Browse problems</Link>
+          <Link className="btn btn-primary" to="/assessments">My assessments</Link>
+        </div>
+      </section>
 
-      {/* Stat Cards */}
-      <div className="dashboard-grid">
+      <section className="candidate-overview-section">
+        <div className="candidate-section-heading">
+          <div><h2>Your progress</h2><p>A snapshot of your coding activity.</p></div>
+          {loading && <span className="candidate-loading-label"><span className="spinner" /> Updating</span>}
+        </div>
+        <div className="candidate-stat-grid">
         {[
-          { icon: '📬', value: stats.total, label: 'Total Submissions' },
-          { icon: '✅', value: stats.accepted, label: 'Accepted' },
-          { icon: '🧩', value: stats.problems, label: 'Problems Solved' },
-          { icon: '📈', value: `${acceptRate}%`, label: 'Acceptance Rate' },
+          { icon: '🧪', value: stats.assignments, label: 'Available assessments', description: 'Ready when you are' },
+          { icon: '🧩', value: stats.problems, label: 'Problems solved', description: 'Unique accepted problems' },
+          { icon: '✅', value: stats.accepted, label: 'Accepted submissions', description: 'Solutions that passed' },
         ].map(s => (
-          <div key={s.label} className="card stat-card">
-            <div className="stat-card-icon">{s.icon}</div>
-            <div className="stat-card-value">{s.value}</div>
-            <div className="stat-card-label">{s.label}</div>
+          <div key={s.label} className="candidate-stat-card">
+            <div className="candidate-stat-icon">{s.icon}</div>
+            <div><div className="candidate-stat-value">{s.value}</div><div className="candidate-stat-label">{s.label}</div><div className="candidate-stat-description">{s.description}</div></div>
           </div>
         ))}
-      </div>
+        </div>
+      </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24 }}>
+      {availableAssessments.length > 0 && <section className="candidate-overview-section"><div className="candidate-section-heading"><div><h2>Assigned assessments</h2><p>Tests that are ready for you to start or resume.</p></div><Link to="/assessments" className="btn btn-ghost btn-sm">View all</Link></div><div className="question-stack">{availableAssessments.slice(0, 3).map((assessment) => <div className="card" key={assessment.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: 16 }}><div><strong>{assessment.title}</strong><div className="text-secondary" style={{ marginTop: 4 }}>{assessment.assessmentType || 'Assessment'} · {assessment.durationMinutes || 60} minutes</div></div><Link className="btn btn-primary btn-sm" to={`/assessments/${assessment.id}/session`}>Start assessment</Link></div>)}</div></section>}
+
+      {finalResults.length > 0 && <section className="candidate-overview-section"><div className="candidate-section-heading"><div><h2>Final results</h2><p>Scores your administrator has released.</p></div><Link to="/assessments/history" className="btn btn-ghost btn-sm">View all</Link></div><div className="question-stack">{finalResults.slice(0, 3).map((result) => <div className="card" key={result.assessmentId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: 16 }}><div><strong>{result.title}</strong><div className="text-secondary" style={{ marginTop: 4 }}>{result.status === 'PENDING_EVALUATION' ? 'Evaluation in progress' : `Final score: ${result.score} / ${result.totalScore}`}</div></div><Link className="btn btn-primary btn-sm" to={`/assessments/${result.assessmentId}/result`}>View result</Link></div>)}</div></section>}
+
+      <section className="candidate-overview-section"><div className="candidate-section-heading"><div><h2>Recent activity</h2><p>Your latest coding submissions and progress.</p></div></div></section>
+      <div className="candidate-workspace-grid">
         {/* Recent Submissions */}
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div className="candidate-panel-heading">
             <h2 style={{ fontSize: 18, fontWeight: 700 }}>Recent Submissions</h2>
             <Link to="/submissions" className="btn btn-ghost btn-sm">View All →</Link>
           </div>
@@ -133,32 +156,11 @@ export default function DashboardPage() {
 
         {/* Skill Breakdown */}
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Skill Breakdown</h2>
-          <div className="card">
+          <div className="candidate-panel-heading"><h2>Skills</h2><Link to="/assessments/history" className="btn btn-ghost btn-sm">Assessment history</Link></div>
+          <div className="card candidate-skill-card">
             <SkillBreakdown submissions={submissions} />
           </div>
 
-          {/* Quick Actions */}
-          <div style={{ marginTop: 20 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Quick Actions</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <Link to="/problems?difficulty=EASY" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>
-                🟢 Practice Easy Problems
-              </Link>
-              <Link to="/assessments" className="btn btn-primary" style={{ justifyContent: 'flex-start' }}>
-                🧪 My Assessments
-              </Link>
-              <Link to="/problems?difficulty=MEDIUM" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>
-                🟡 Tackle Medium Problems
-              </Link>
-              <Link to="/problems?difficulty=HARD" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>
-                🔴 Challenge Hard Problems
-              </Link>
-              <Link to="/problems" className="btn btn-primary" style={{ justifyContent: 'flex-start' }}>
-                🚀 Browse All Problems
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -175,13 +177,6 @@ function SkillBreakdown({ submissions }) {
 
   const entries = Object.entries(skills).sort((a, b) => b[1] - a[1]);
   const max = entries[0]?.[1] || 1;
-
-  // Difficulty breakdown from mock data
-  const diffBreakdown = [
-    { label: 'Easy', count: 4, color: '#10b981' },
-    { label: 'Medium', count: 3, color: '#f59e0b' },
-    { label: 'Hard', count: 0, color: '#ef4444' },
-  ];
 
   return (
     <div>
@@ -212,21 +207,11 @@ function SkillBreakdown({ submissions }) {
         </>
       )}
 
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 12 }}>
-        By Difficulty
-      </div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        {diffBreakdown.map(d => (
-          <div key={d.label} style={{
-            flex: 1, textAlign: 'center', padding: '12px 8px',
-            background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)',
-            border: `1px solid ${d.color}33`
-          }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: d.color }}>{d.count}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{d.label}</div>
-          </div>
-        ))}
-      </div>
+      {entries.length === 0 && (
+        <div className="text-secondary" style={{ fontSize: 13, lineHeight: 1.6 }}>
+          Your accepted submissions will appear here by programming language.
+        </div>
+      )}
     </div>
   );
 }

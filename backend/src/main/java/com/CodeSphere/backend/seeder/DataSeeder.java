@@ -6,6 +6,7 @@ import com.CodeSphere.backend.model.User;
 import com.CodeSphere.backend.repository.OrganizationRepository;
 import com.CodeSphere.backend.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Component
 @Profile("dev")
+@Order(1)
 public class DataSeeder implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
@@ -68,7 +70,6 @@ public class DataSeeder implements CommandLineRunner {
         seedInterviewQuestions();
         seedQuestions();
         seedActiveQuestionBank();
-        seedAssessment();
 
         // Check if coding problems exist; if not, seed them
         Integer problemCount = jdbcTemplate.queryForObject(

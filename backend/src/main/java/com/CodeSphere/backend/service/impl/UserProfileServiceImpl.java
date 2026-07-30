@@ -5,6 +5,7 @@ import com.CodeSphere.backend.dto.CertificationDTO;
 import com.CodeSphere.backend.dto.submission.ExamHistoryDTO;
 import com.CodeSphere.backend.dto.submission.SubmissionHistoryDTO;
 import com.CodeSphere.backend.service.UserProfileService;
+import com.CodeSphere.backend.repository.CertificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserProfileServiceImpl implements UserProfileService {
+    private final CertificationRepository certificationRepository;
 
     // Inject repositories as needed:
     // private final SubmissionRepository submissionRepository;
@@ -39,8 +41,9 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public List<CertificationDTO> getCertifications(Long userId) {
-        // TODO: Fetch user certificates
-        return Collections.emptyList();
+        return certificationRepository.findByUserIdOrderByIssuedAtDesc(userId).stream().map(certification -> {
+            CertificationDTO dto = new CertificationDTO(); dto.setCertificationId(certification.getId()); dto.setTitle(certification.getTitle()); dto.setIssuedAt(certification.getIssuedAt().toInstant()); dto.setVerificationCode(certification.getVerificationCode()); dto.setScore(certification.getScore()); dto.setCertificateUrl("/api/v1/certifications/verify/" + certification.getVerificationCode()); return dto;
+        }).toList();
     }
 
     /**

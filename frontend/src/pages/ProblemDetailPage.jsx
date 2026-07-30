@@ -75,6 +75,21 @@ function DiffBadge({ d }) {
   return <span className={`badge ${cls}`}>{d}</span>;
 }
 
+function StatementSection({ title, children, preformatted = false }) {
+  if (!children) return null;
+
+  return (
+    <section style={{ marginBottom: 24 }}>
+      <div className="section-title">{title}</div>
+      {preformatted ? (
+        <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', margin: 0 }}>{children}</pre>
+      ) : (
+        <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.65 }}>{children}</div>
+      )}
+    </section>
+  );
+}
+
 export default function ProblemDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -123,7 +138,8 @@ export default function ProblemDetailPage() {
       setResult(res.data);
       setActiveTab('submissions');
       const status = res.data.status;
-      if (status === 'ACCEPTED') toast.success('🎉 Accepted! All test cases passed.');
+      if (status === 'PENDING' || status === 'RUNNING') toast.success('Submission queued for judging.');
+      else if (status === 'ACCEPTED') toast.success('🎉 Accepted! All test cases passed.');
       else toast.error(`${STATUS_META[status]?.label || status}`);
     } catch (err) {
       const msg = err.response?.data?.message || 'Submission failed. Make sure the backend is running.';
@@ -183,26 +199,10 @@ export default function ProblemDetailPage() {
         {/* Tab Content */}
         {activeTab === 'description' && (
           <div className="problem-description">
-            <p>{p.description}</p>
-
-            {p.inputFormat && (
-              <>
-                <div className="section-title">Input Format</div>
-                <p>{p.inputFormat}</p>
-              </>
-            )}
-            {p.outputFormat && (
-              <>
-                <div className="section-title">Output Format</div>
-                <p>{p.outputFormat}</p>
-              </>
-            )}
-            {p.constraints && (
-              <>
-                <div className="section-title">Constraints</div>
-                <pre style={{ whiteSpace: 'pre-wrap' }}>{p.constraints}</pre>
-              </>
-            )}
+            <StatementSection title="Problem">{p.description}</StatementSection>
+            <StatementSection title="Input Format">{p.inputFormat}</StatementSection>
+            <StatementSection title="Output Format">{p.outputFormat}</StatementSection>
+            <StatementSection title="Constraints" preformatted>{p.constraints}</StatementSection>
 
             {/* Sample Test Cases */}
             {(p.sampleTestCases || []).length > 0 && (

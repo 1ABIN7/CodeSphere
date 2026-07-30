@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import toast from 'react-hot-toast';
-import { assessmentAPI, proctoringAPI, submissionsAPI } from '../api';
+import { assessmentAPI, problemsAPI, proctoringAPI, submissionsAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { getSectionSecondsRemaining } from '../utils/assessmentTimer';
 
@@ -89,11 +89,14 @@ export default function AssessmentPage() {
   const [submissionResult, setSubmissionResult] = useState(null);
   const [language, setLanguage] = useState('java');
   const [code, setCode] = useState(STARTER_CODE.java);
+  const [codeByQuestion, setCodeByQuestion] = useState({});
+  const [starterCodeByQuestion, setStarterCodeByQuestion] = useState({});
   const [uploading, setUploading] = useState(false);
   const [fileName, setFileName] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [codeVerdict, setCodeVerdict] = useState(null);
   const [codeOutput, setCodeOutput] = useState('');
+  const [codingSubmissionPending, setCodingSubmissionPending] = useState(false);
   const [codingHistory, setCodingHistory] = useState([]);
   const [readingView, setReadingView] = useState(null);
   const saveTimerRef = useRef(null);
@@ -321,12 +324,23 @@ export default function AssessmentPage() {
 
   const handleCodingSubmit = async () => {
     if (!session?.id) return;
+    const question = questions[activeQuestion];
+    const taskLabel = question?.questionType === QUESTION_TYPES.API_IMPLEMENTATION ? 'HTTP tests' : question?.questionType === QUESTION_TYPES.SQL ? 'SQL tests' : 'the judge';
+    setCodingSubmissionPending(true);
+    setCodeVerdict('RUNNING');
+    setCodeOutput(`Running ${taskLabel}…`);
     try {
-      const question = questions[activeQuestion];
+      if (question?.questionType === QUESTION_TYPES.API_IMPLEMENTATION && language !== 'javascript') setLanguage('javascript');
       if (question?.questionType === QUESTION_TYPES.SQL) {
-        await assessmentAPI.saveAnswer(session.id, question.id, code);
-        setCodeVerdict('SAVED');
-        setCodeOutput('SQL query saved. It will be reviewed after you submit the assessment.');
+        const { data } = await assessmentAPI.runSql(session.id, question.id, code);
+        setCodeVerdict(data.status || 'COMPLETED');
+        setCodeOutput(`${data.passedTestCases ?? 0}/${data.totalTestCases ?? 0} SQL test cases passed · ${data.scorePercent ?? 0}%`);
+        return;
+      }
+      if (question?.questionType === QUESTION_TYPES.API_IMPLEMENTATION) {
+        const { data } = await assessmentAPI.runApi(session.id, question.id, code);
+        setCodeVerdict(data.status || 'COMPLETED');
+        setCodeOutput(`${data.passedTestCases ?? 0}/${data.totalTestCases ?? 0} HTTP checks passed · ${data.scorePercent ?? 0}%${data.message ? ` · ${data.message}` : ''}`);
         return;
       }
       if (!question?.codingProblemId) {
@@ -344,15 +358,17 @@ export default function AssessmentPage() {
             const { data } = await submissionsAPI.getById(submissionId);
             setCodingHistory((items) => [{ ...data, id: submissionId }, ...items.filter((item) => item.id !== submissionId)].slice(0, 8));
             setCodeVerdict(data.status || 'PENDING');
-            if (data.status && !['PENDING', 'RUNNING'].includes(data.status)) { setCodeOutput(`${data.testCasesPassed ?? 0}/${data.totalTestCases ?? 0} test cases passed · ${data.execTime ?? 0} ms · ${data.execMemory ?? 0} KB`); return; }
+            if (data.status && !['PENDING', 'RUNNING'].includes(data.status)) { setCodeOutput(`${data.testCasesPassed ?? 0}/${data.totalTestCases ?? 0} test cases passed · ${data.execTime ?? 0} ms · ${data.execMemory ?? 0} KB${data.errorMessage ? `\n\n${data.errorMessage}` : ''}`); return; }
           } catch { /* judge may still be writing the submission */ }
           if (remaining > 0) setTimeout(() => poll(remaining - 1), 1500);
         };
         setTimeout(() => poll(), 1000);
       }
-    } catch {
+    } catch (error) {
       setCodeVerdict('ERROR');
-      setCodeOutput('Unable to queue the coding submission.');
+      setCodeOutput(error.response?.data?.message || 'The coding submission could not be started. Please try again.');
+    } finally {
+      setCodingSubmissionPending(false);
     }
   };
 
@@ -380,6 +396,42 @@ export default function AssessmentPage() {
 
   const currentSection = sections[activeSection] || null;
   const currentQuestion = questions[activeQuestion] || null;
+
+  useEffect(() => {
+    const type = currentQuestion?.questionType || currentQuestion?.type;
+    if (!['CODING', 'DEBUGGING', 'SQL', 'API_IMPLEMENTATION'].includes(type)) return;
+    const defaultCode = type === 'SQL' ? '' : STARTER_CODE[type === 'API_IMPLEMENTATION' ? 'javascript' : language];
+    setCode(codeByQuestion[currentQuestion.id] ?? defaultCode ?? '');
+    setCodeVerdict(null);
+    setCodeOutput('');
+    setCodingHistory([]);
+  }, [currentQuestion?.id]);
+
+  useEffect(() => {
+    if (currentQuestion?.questionType !== QUESTION_TYPES.DEBUGGING || !currentQuestion?.codingProblemId || codeByQuestion[currentQuestion.id] !== undefined) return;
+    let active = true;
+    problemsAPI.getById(currentQuestion.codingProblemId).then(({ data }) => {
+      const templates = data?.starterCode || {};
+      const repairCode = templates[language] || templates.java || Object.values(templates)[0];
+      if (!active || !repairCode) return;
+      setStarterCodeByQuestion((saved) => ({ ...saved, [currentQuestion.id]: repairCode }));
+      setCodeByQuestion((saved) => ({ ...saved, [currentQuestion.id]: repairCode }));
+      setCode(repairCode);
+    }).catch(() => { /* A generic template remains available if this task has no repair file. */ });
+    return () => { active = false; };
+  }, [currentQuestion?.id]);
+
+  const updateCodeForQuestion = (nextCode) => {
+    setCode(nextCode);
+    if (currentQuestion?.id) setCodeByQuestion((saved) => ({ ...saved, [currentQuestion.id]: nextCode }));
+  };
+
+  const resetCodeForQuestion = () => {
+    if (!currentQuestion) return;
+    const type = currentQuestion.questionType || currentQuestion.type;
+    const fallback = type === 'SQL' ? '' : STARTER_CODE[type === 'API_IMPLEMENTATION' ? 'javascript' : language];
+    updateCodeForQuestion(starterCodeByQuestion[currentQuestion.id] ?? fallback ?? '');
+  };
 
   if (loading) return <LoadingSkeleton />;
   if (error) {
@@ -436,7 +488,7 @@ export default function AssessmentPage() {
           </div>
 
           <h3 style={{ fontSize: 15, fontWeight: 700, marginTop: 20, marginBottom: 12 }}>Questions</h3>
-          <div className="question-grid">
+          <div className="question-grid question-navigation-list">
             {questions.map((q, index) => {
               const value = answers[q.id];
               const state = value ? 'answered' : 'unanswered';
@@ -446,7 +498,8 @@ export default function AssessmentPage() {
                   className={`question-pill ${state}`}
                   onClick={() => setActiveQuestion(index)}
                 >
-                  {index + 1}
+                  <span>{index + 1}</span>
+                  <small>{q.title || q.questionType || 'Question'}</small>
                 </button>
               );
             })}
@@ -477,10 +530,11 @@ export default function AssessmentPage() {
               <div>
                 <div style={{ marginBottom: 16 }}>
                   <div className="text-muted" style={{ fontSize: 12, textTransform: 'uppercase' }}>Question {activeQuestion + 1}</div>
+                  {currentQuestion.title && <div style={{ fontSize: 14, fontWeight: 700, marginTop: 4, color: 'var(--accent)' }}>{currentQuestion.title}</div>}
                   <div style={{ fontSize: 18, fontWeight: 700, marginTop: 4 }}>{currentQuestion.prompt || currentQuestion.content || 'Question prompt'}</div>
                 </div>
 
-                {renderQuestion(currentQuestion, answers, handleAnswerChange, language, setLanguage, code, setCode, handleCodingSubmit, codeVerdict, codeOutput, uploading, fileName, dragActive, setDragActive, handleUpload, readingView, codingHistory)}
+                {renderQuestion(currentQuestion, answers, handleAnswerChange, language, setLanguage, code, updateCodeForQuestion, handleCodingSubmit, codeVerdict, codeOutput, codingSubmissionPending, uploading, fileName, dragActive, setDragActive, handleUpload, readingView, codingHistory, resetCodeForQuestion)}
               </div>
             ) : (
               <div className="empty-state">
@@ -513,7 +567,7 @@ export default function AssessmentPage() {
   );
 }
 
-function renderQuestion(currentQuestion, answers, onAnswerChange, language, setLanguage, code, setCode, onCodingSubmit, codeVerdict, codeOutput, uploading, fileName, dragActive, setDragActive, onUpload, readingView = null, codingHistory = []) {
+function renderQuestion(currentQuestion, answers, onAnswerChange, language, setLanguage, code, setCode, onCodingSubmit, codeVerdict, codeOutput, codingSubmissionPending, uploading, fileName, dragActive, setDragActive, onUpload, readingView = null, codingHistory = [], onResetCode = () => {}) {
   const type = currentQuestion?.questionType || currentQuestion?.type || 'MCQ_SINGLE';
   const value = answers[currentQuestion?.id] || '';
   const options = currentQuestion?.options || [];
@@ -565,26 +619,31 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
     case QUESTION_TYPES.DEBUGGING:
     case QUESTION_TYPES.SQL:
       const isSql = currentQuestion.questionType === QUESTION_TYPES.SQL;
+      const isApi = currentQuestion.questionType === QUESTION_TYPES.API_IMPLEMENTATION;
       return (
         <div>
           <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-            {!isSql && <select className="select" value={language} onChange={(event) => setLanguage(event.target.value)}>
+            {!isSql && !isApi && <select className="select" value={language} onChange={(event) => setLanguage(event.target.value)}>
               {LANGUAGES.map((lang) => <option key={lang.value} value={lang.value}>{lang.label}</option>)}
             </select>}
-            <span className="badge badge-tag">{isSql ? 'SQL query task' : currentQuestion.questionType === QUESTION_TYPES.API_IMPLEMENTATION ? 'API implementation task' : currentQuestion.questionType === QUESTION_TYPES.DEBUGGING ? 'Debugging task' : 'Coding task'}</span>
-            <button className="btn btn-secondary btn-sm" onClick={() => setCode(STARTER_CODE[language] || '')}>Reset</button>
-            <button className="btn btn-secondary btn-sm" onClick={onCodingSubmit}>{isSql ? 'Save query' : 'Submit to judge'}</button>
+            <span className="badge badge-tag">{isSql ? 'SQL query task' : currentQuestion.questionType === QUESTION_TYPES.API_IMPLEMENTATION ? 'API implementation task' : currentQuestion.questionType === QUESTION_TYPES.DEBUGGING ? 'Debugging task' : 'Coding task'} · {currentQuestion.title || 'Untitled task'}</span>
+            <button className="btn btn-secondary btn-sm" onClick={onResetCode}>Reset</button>
+            <button className="btn btn-secondary btn-sm" onClick={onCodingSubmit} disabled={codingSubmissionPending}>{codingSubmissionPending ? (isSql ? 'Running SQL tests…' : currentQuestion.questionType === QUESTION_TYPES.API_IMPLEMENTATION ? 'Running HTTP tests…' : 'Submitting…') : (isSql ? 'Run SQL tests' : currentQuestion.questionType === QUESTION_TYPES.API_IMPLEMENTATION ? 'Run HTTP tests' : 'Submit to judge')}</button>
           </div>
           <div className="coding-container">
             <Editor
               height="320px"
-              language={isSql ? 'sql' : (LANGUAGES.find((entry) => entry.value === language)?.monacoLan || 'javascript')}
+              language={isSql ? 'sql' : isApi ? 'javascript' : (LANGUAGES.find((entry) => entry.value === language)?.monacoLan || 'javascript')}
               value={code}
               onChange={(next) => setCode(next || '')}
               theme="vs-dark"
             />
           </div>
-          {codeVerdict && <div className="feedback-box correct">{codeVerdict}</div>}
+          {isSql && <div className="text-secondary" style={{ marginTop: 10 }}>
+            Write one read-only query. Use the exact value stated in the question (for example, <code>120000</code>) rather than a <code>?</code> parameter placeholder. A final semicolon is optional.
+          </div>}
+          {isApi && <div className="text-secondary" style={{ marginTop: 10 }}>Export a Node HTTP server that listens on port 3000. Your service is tested privately without internet access.</div>}
+          {codeVerdict && <div className={`feedback-box ${codeVerdict === 'ERROR' || codeVerdict === 'WRONG_ANSWER' ? 'incorrect' : 'correct'}`}>{codeVerdict === 'RUNNING' ? 'RUNNING — your request was received.' : codeVerdict}</div>}
           {codeOutput && <pre className="sample-code" style={{ marginTop: 12 }}>{codeOutput}</pre>}
           {codingHistory.length > 0 && <div className="card" style={{ marginTop: 14, padding: 14 }}><strong>Submission history</strong>{codingHistory.map((submission) => <div key={submission.id} className="text-secondary" style={{ marginTop: 7 }}>{submission.status} · {submission.testCasesPassed ?? 0}/{submission.totalTestCases ?? 0} tests · {submission.execTime ?? 0} ms · {submission.execMemory ?? 0} KB</div>)}</div>}
         </div>
@@ -594,7 +653,7 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
       return (
         <div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}><button type="button" className="btn btn-secondary btn-sm" onMouseDown={(event) => { event.preventDefault(); document.execCommand('bold'); }}>Bold</button><button type="button" className="btn btn-secondary btn-sm" onMouseDown={(event) => { event.preventDefault(); document.execCommand('italic'); }}>Italic</button><button type="button" className="btn btn-secondary btn-sm" onMouseDown={(event) => { event.preventDefault(); document.execCommand('insertUnorderedList'); }}>List</button></div>
-          <div className="textarea" contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" style={{ minHeight: 220, overflowY: 'auto' }} dangerouslySetInnerHTML={{ __html: value }} onInput={(event) => onAnswerChange(currentQuestion.id, event.currentTarget.innerHTML)} />
+          <RichTextAnswer questionId={currentQuestion.id} value={value} onChange={(nextValue) => onAnswerChange(currentQuestion.id, nextValue)} />
           <div style={{ marginTop: 8, color: 'var(--text-secondary)' }}>
             Word count: {String(value || '').replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length}
           </div>
@@ -614,7 +673,7 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
             {subQuestions.map((subQuestion) => (
               <div key={subQuestion.id} className="card" style={{ padding: 16, marginBottom: 12 }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>{subQuestion.prompt}</div>
-                {renderQuestion(subQuestion, answers, onAnswerChange, language, setLanguage, code, setCode, onCodingSubmit, codeVerdict, codeOutput, uploading, fileName, dragActive, setDragActive, onUpload)}
+                {renderQuestion(subQuestion, answers, onAnswerChange, language, setLanguage, code, setCode, onCodingSubmit, codeVerdict, codeOutput, codingSubmissionPending, uploading, fileName, dragActive, setDragActive, onUpload)}
               </div>
             ))}
           </div>}
@@ -645,4 +704,14 @@ function renderQuestion(currentQuestion, answers, onAnswerChange, language, setL
     default:
       return <div className="empty-state">TODO: render this question type.</div>;
   }
+}
+
+function RichTextAnswer({ questionId, value, onChange }) {
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    if (editorRef.current) editorRef.current.innerHTML = value || '';
+  }, [questionId]);
+
+  return <div ref={editorRef} className="textarea" contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" style={{ minHeight: 220, overflowY: 'auto' }} onInput={(event) => onChange(event.currentTarget.innerHTML)} />;
 }

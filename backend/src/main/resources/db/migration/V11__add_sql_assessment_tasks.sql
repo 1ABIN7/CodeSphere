@@ -1,0 +1,2 @@
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS sql_setup TEXT;
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS sql_test_cases TEXT;

@@ -96,9 +96,10 @@ public class AdminController {
 
         return ResponseEntity.ok(AdminDashboardResponse.builder()
                 .totalAssessments(assessmentRepository.count())
-                .pendingReviews(submissionRepository.countByStatus(SubmissionStatus.PENDING))
+                // Manual written and file answers live in session_answers, not the coding-submission queue.
+                .pendingReviews(assessmentAnswerRepository.countByEvaluationStatusIn(List.of("PENDING_EVALUATION", "UNDER_REVIEW")))
                 .activeSessions(assessmentSessionRepository.countByStatus(AssessmentSession.SessionStatus.IN_PROGRESS))
-                .publishedQuestions(problemRepository.countByIsPublishedTrue())
+                .publishedQuestions(questionBankRepository.count())
                 .recentActivity(activity)
                 .build());
     }
@@ -130,7 +131,7 @@ public class AdminController {
         double totalPossible = assessmentQuestionRepository.findByAssessmentId(assessment.getId()).stream()
                 .map(AssessmentQuestion::getMaxScore).filter(java.util.Objects::nonNull).mapToDouble(Double::doubleValue).sum();
         double[] scorePercentages = completed.stream().mapToDouble(session -> totalPossible == 0 ? 0 :
-                (mcqEvaluationService.evaluateSessionMcqs(session) / totalPossible) * 100).toArray();
+                (sessionEarnedScore(session) / totalPossible) * 100).toArray();
         double averageScore = average(scorePercentages);
         double passRate = completed.isEmpty() || assessment.getPassingScore() == null ? 0 :
                 (double) java.util.Arrays.stream(scorePercentages).filter(score -> score >= assessment.getPassingScore()).count() / completed.size() * 100;
@@ -141,6 +142,15 @@ public class AdminController {
 
     private double average(double[] values) {
         return values.length == 0 ? 0 : java.util.Arrays.stream(values).average().orElse(0);
+    }
+
+    /** Uses the same finalized MCQ plus evaluator-scored answer total in every report. */
+    private double sessionEarnedScore(AssessmentSession session) {
+        double manualScore = assessmentAnswerRepository.findBySessionId(session.getId()).stream()
+                .filter(answer -> "EVALUATED".equals(answer.getEvaluationStatus()) && answer.getScore() != null)
+                .mapToDouble(answer -> answer.getScore().doubleValue())
+                .sum();
+        return mcqEvaluationService.evaluateSessionMcqs(session) + manualScore;
     }
 
     private double weightedAverage(List<AssessmentReportResponse.AssessmentMetric> metrics, long totalCandidates,
@@ -173,7 +183,11 @@ public class AdminController {
             long averageSeconds = attempts.stream().mapToLong(answer -> {
                 AssessmentSession session = sessions.get(answer.getSessionId());
                 if (session == null || answer.getUpdatedAt() == null || session.getStartedAt() == null) return 0L;
-                return Math.max(0, java.time.Duration.between(session.getStartedAt().toLocalDateTime(), answer.getUpdatedAt()).getSeconds());
+                // Answers are stored as local timestamps while sessions use UTC offsets.
+                // Convert the session start to the server's local clock before comparing.
+                return Math.max(0, java.time.Duration.between(
+                        session.getStartedAt().atZoneSameInstant(java.time.ZoneId.systemDefault()).toLocalDateTime(),
+                        answer.getUpdatedAt()).getSeconds());
             }).average().stream().mapToLong(Math::round).findFirst().orElse(0L);
             return QuestionAnalyticsResponse.QuestionMetric.builder().id(question.getId()).title(question.getTitle())
                     .questionType(question.getQuestionType()).difficulty(question.getDifficulty()).attempts(attempts.size())
@@ -213,9 +227,7 @@ public class AdminController {
             List<CandidateAnalyticsResponse.TrendPoint> trend = entry.getValue().stream()
                     .sorted(java.util.Comparator.comparing(AssessmentSession::getSubmittedAt, java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
                     .map(session -> {
-                        double earned = mcqEvaluationService.evaluateSessionMcqs(session) + assessmentAnswerRepository.findBySessionId(session.getId()).stream()
-                                .filter(answer -> "EVALUATED".equals(answer.getEvaluationStatus()) && answer.getScore() != null)
-                                .mapToDouble(answer -> answer.getScore().doubleValue()).sum();
+                        double earned = sessionEarnedScore(session);
                         double total = totals.getOrDefault(session.getAssessmentId(), 0D);
                         Assessment assessment = assessments.get(session.getAssessmentId());
                         return CandidateAnalyticsResponse.TrendPoint.builder().completedAt(session.getSubmittedAt())
