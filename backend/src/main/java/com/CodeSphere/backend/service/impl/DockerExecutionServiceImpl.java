@@ -38,7 +38,7 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
 
     // Language → Docker image mapping
     private static final Map<String, String> DOCKER_IMAGES = Map.of(
-            "java",       "openjdk:21-slim",
+            "java",       "eclipse-temurin:21-jdk-jammy",
             "python",     "python:3.12-slim",
             "cpp",        "gcc:13-slim",
             "c",          "gcc:13-slim",
@@ -134,14 +134,18 @@ public class DockerExecutionServiceImpl implements DockerExecutionService {
                 DockerExecutionResult compileResult = runDockerCommand(
                         buildDockerCmd(image, absPath, containerPath,
                                 compileCmd, null, memoryLimitKb),
-                        timeLimitMs
+                        // Container startup and javac are not part of the candidate's
+                        // per-test runtime budget. Give compilation a sane window.
+                        Math.max(timeLimitMs, 10_000)
                 );
                 if (!compileResult.getVerdict().equals("OK")) {
                     return DockerExecutionResult.builder()
-                            .verdict("COMPILATION_ERROR")
+                            .verdict("TIMEOUT".equals(compileResult.getVerdict()) ? "TIME_LIMIT_EXCEEDED" : "COMPILATION_ERROR")
                             .execTime(0)
                             .execMemory(0)
-                            .errorMessage(compileResult.getErrorMessage())
+                            .errorMessage(compileResult.getErrorMessage() == null || compileResult.getErrorMessage().isBlank()
+                                    ? "The compiler did not return an error message. Please retry after Docker finishes preparing the language image."
+                                    : compileResult.getErrorMessage())
                             .build();
                 }
             }

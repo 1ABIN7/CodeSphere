@@ -8,9 +8,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -67,6 +70,21 @@ public class ProblemController {
     }
 
     // ---- Admin/Examiner Endpoints ----
+
+    @GetMapping(value = "/task-center/export", produces = "text/csv")
+    @Operation(summary = "Export Task Center coding and debugging tasks as CSV")
+    public ResponseEntity<byte[]> exportTaskCenterCsv() {
+        byte[] csv = problemService.exportTasksCsv().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=task-center.csv")
+                .contentType(MediaType.parseMediaType("text/csv")).body(csv);
+    }
+
+    @PostMapping(value = "/task-center/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Import Task Center coding and debugging tasks from CSV")
+    public ResponseEntity<java.util.Map<String, Integer>> importTaskCenterCsv(@RequestParam("file") MultipartFile file, Authentication authentication) {
+        int imported = problemService.importTasksCsv(file, getUserId(authentication));
+        return ResponseEntity.status(HttpStatus.CREATED).body(java.util.Map.of("imported", imported));
+    }
 
     @PostMapping
     @Operation(summary = "Create a new problem", description = "Admin/Examiner only")

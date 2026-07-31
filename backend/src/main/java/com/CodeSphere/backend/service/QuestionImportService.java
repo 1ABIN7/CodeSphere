@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface QuestionImportService {
 
-    List<Question> importBulkQuestions(MultipartFile file);
+    /** Creates rows without an ID and updates matching IDs when updateExisting is true. */
+    List<Question> importBulkQuestions(MultipartFile file, boolean updateExisting);
 }

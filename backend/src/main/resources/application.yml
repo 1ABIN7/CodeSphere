@@ -99,13 +99,18 @@ judge:
   thread-pool-core-size: 4
   thread-pool-max-size: 8
   queue-capacity: 100
-  use-docker: false
+  use-docker: ${JUDGE_USE_DOCKER:false}
   supported-languages:
     - java
     - python
     - cpp
     - c
     - javascript
+
+# Gemini powers the candidate Coding Help page. Keep the key only in .env.
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-3.6-flash}
 
 # Security Encryption
 security:

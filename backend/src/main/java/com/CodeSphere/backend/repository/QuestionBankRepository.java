@@ -9,6 +9,12 @@ import java.util.List;
 
 public interface QuestionBankRepository extends JpaRepository<Question, Long>, JpaSpecificationExecutor<Question> {
 
+    boolean existsByCodingProblemId(Long codingProblemId);
+
+    boolean existsByTitleIgnoreCase(String title);
+
+    List<Question> findByParentQuestionId(Long parentQuestionId);
+
     // A cross-compatible approach that works in H2 memory tests and PostgreSQL basic runs
     @Query(value = "SELECT * FROM questions WHERE LOWER(title) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR LOWER(content) LIKE LOWER(CONCAT('%', :searchQuery, '%'))", nativeQuery = true)
     List<Question> searchByTsVector(@Param("searchQuery") String searchQuery);

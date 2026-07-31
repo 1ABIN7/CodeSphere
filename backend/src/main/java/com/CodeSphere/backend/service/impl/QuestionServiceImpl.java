@@ -35,7 +35,13 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Question createQuestion(Question question) {
-        return questionRepository.save(question);
+        List<Question> passageQuestions = new java.util.ArrayList<>(question.getSubQuestions());
+        // Save the passage first, then explicitly attach its nested questions. This avoids
+        // relying on a lazy one-to-many join column during JSON request binding.
+        question.setSubQuestions(new java.util.ArrayList<>());
+        Question created = questionRepository.save(question);
+        savePassageQuestions(created.getId(), passageQuestions);
+        return created;
     }
 
     @Override
@@ -61,9 +67,21 @@ public class QuestionServiceImpl implements QuestionService {
         existingQuestion.setMaxWordCount(questionDetails.getMaxWordCount());
         existingQuestion.setPassageText(questionDetails.getPassageText());
         existingQuestion.setReadingDurationSeconds(questionDetails.getReadingDurationSeconds());
-        existingQuestion.setSubQuestions(questionDetails.getSubQuestions());
+        Question updated = questionRepository.save(existingQuestion);
+        if (questionDetails.getSubQuestions() != null && !questionDetails.getSubQuestions().isEmpty()) {
+            questionRepository.findByParentQuestionId(id).forEach(questionRepository::delete);
+            savePassageQuestions(id, questionDetails.getSubQuestions());
+        }
+        return updated;
+    }
 
-        return questionRepository.save(existingQuestion);
+    private void savePassageQuestions(Long parentQuestionId, List<Question> passageQuestions) {
+        for (Question passageQuestion : passageQuestions) {
+            passageQuestion.setId(null);
+            passageQuestion.setParentQuestionId(parentQuestionId);
+            passageQuestion.setSubQuestions(new java.util.ArrayList<>());
+            questionRepository.save(passageQuestion);
+        }
     }
 
     @Override

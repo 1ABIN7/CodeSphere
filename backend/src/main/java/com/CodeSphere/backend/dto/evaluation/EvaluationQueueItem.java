@@ -12,6 +12,7 @@ public class EvaluationQueueItem {
     Long questionId;
     String questionTitle;
     String questionType;
+    String questionContent;
     String candidateName;
     String answerText;
     String fileUrl;
@@ -19,6 +20,8 @@ public class EvaluationQueueItem {
     List<RubricCriterionItem> rubricCriteria;
     int reviewCount;
     int requiredReviewCount;
+    List<Long> assignedEvaluatorIds;
+    List<ReviewItem> reviews;
 
     @Value
     @Builder
@@ -26,4 +29,7 @@ public class EvaluationQueueItem {
         String name;
         Integer maxPoints;
     }
+    @Value
+    @Builder
+    public static class ReviewItem { Long evaluatorId; java.math.BigDecimal score; String feedback; }
 }

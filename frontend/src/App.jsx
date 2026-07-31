@@ -21,11 +21,20 @@ import ReportsDashboard from './pages/admin/ReportsDashboard';
 import AssessmentManagementPage from './pages/admin/AssessmentManagementPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import CategoryManagementPage from './pages/admin/CategoryManagementPage';
+import ProblemBankManagementPage from './pages/admin/ProblemBankManagementPage';
 import SubmissionsPage from './pages/SubmissionsPage';
 import LoginPage from './pages/LoginPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import NotificationsPage from './pages/NotificationsPage';
+import CertificationsPage from './pages/CertificationsPage';
+import CodingHelpPage from './pages/CodingHelpPage';
 import AdminRoute from './components/AdminRoute';
+import AdminAiInsightsPage from './pages/admin/AdminAiInsightsPage';
+import AdminSecurityPage from './pages/admin/AdminSecurityPage';
 
 export default function App() {
   return (
@@ -48,15 +57,24 @@ export default function App() {
               <Route path="/assessments/history" element={<PrivateRoute><AssessmentHistoryPage /></PrivateRoute>} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/admin/questions" element={<AdminRoute><QuestionBankPage /></AdminRoute>} />
+              <Route path="/admin/problems" element={<AdminRoute><ProblemBankManagementPage /></AdminRoute>} />
               <Route path="/admin/assessments" element={<AdminRoute><AssessmentManagementPage /></AdminRoute>} />
               <Route path="/admin/evaluations" element={<AdminRoute><EvaluatorDashboard /></AdminRoute>} />
               <Route path="/admin/reports" element={<AdminRoute><ReportsDashboard /></AdminRoute>} />
               <Route path="/admin/users" element={<AdminRoute><UserManagementPage /></AdminRoute>} />
               <Route path="/admin/categories" element={<AdminRoute><CategoryManagementPage /></AdminRoute>} />
+              <Route path="/admin/ai-insights" element={<AdminRoute><AdminAiInsightsPage /></AdminRoute>} />
+              <Route path="/admin/security" element={<AdminRoute><AdminSecurityPage /></AdminRoute>} />
               <Route path="/submissions" element={<SubmissionsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
+              <Route path="/certifications" element={<PrivateRoute><CertificationsPage /></PrivateRoute>} />
+              <Route path="/coding-help" element={<PrivateRoute><CodingHelpPage /></PrivateRoute>} />
               <Route path="*" element={
                 <div className="container" style={{ paddingTop: 80, textAlign: 'center' }}>
                   <div style={{ fontSize: 80 }}>404</div>

@@ -22,4 +22,7 @@ public interface AssessmentSessionRepository extends JpaRepository<AssessmentSes
 
     List<AssessmentSession> findByAssessmentId(Long assessmentId);
     List<AssessmentSession> findByCandidateIdAndStatusOrderBySubmittedAtDesc(Long candidateId, AssessmentSession.SessionStatus status);
+    List<AssessmentSession> findByCandidateIdAndStatusInOrderBySubmittedAtDesc(Long candidateId, List<AssessmentSession.SessionStatus> statuses);
+    Optional<AssessmentSession> findFirstByAssessmentIdAndCandidateIdAndStatusInOrderBySubmittedAtDesc(Long assessmentId, Long candidateId, List<AssessmentSession.SessionStatus> statuses);
+    boolean existsByAssessmentIdAndCandidateIdAndStatusIn(Long assessmentId, Long candidateId, List<AssessmentSession.SessionStatus> statuses);
 }

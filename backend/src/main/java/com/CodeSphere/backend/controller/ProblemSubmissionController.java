@@ -11,6 +11,7 @@ import com.CodeSphere.backend.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -26,6 +27,7 @@ public class ProblemSubmissionController {
     private final AssessmentSessionRepository assessmentSessionRepository;
 
     @PostMapping("/{id}/submit")
+    @Transactional
     public ResponseEntity<Map<String, Object>> submitCode(
             @PathVariable Long id,
             @RequestParam(required = false) Long userId,

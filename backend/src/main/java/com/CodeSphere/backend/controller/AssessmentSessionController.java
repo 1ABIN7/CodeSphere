@@ -24,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/v1/assessment-sessions")
@@ -121,17 +122,19 @@ public class AssessmentSessionController {
     public record AnswerSaveRequest(Long questionId, String value) {}
 
     @GetMapping("/results")
+    @Transactional(readOnly = true)
     public ResponseEntity<java.util.List<AssessmentHistoryItemDto>> getResultHistory() {
         Long userId = getCurrentUserId();
-        return ResponseEntity.ok(sessionRepository.findByCandidateIdAndStatusOrderBySubmittedAtDesc(userId, AssessmentSession.SessionStatus.SUBMITTED)
+        return ResponseEntity.ok(sessionRepository.findByCandidateIdAndStatusInOrderBySubmittedAtDesc(userId, java.util.List.of(AssessmentSession.SessionStatus.SUBMITTED, AssessmentSession.SessionStatus.TIMED_OUT))
                 .stream().filter(session -> assessmentRepository.findById(session.getAssessmentId()).map(assessment -> assessment.isResultsVisible()).orElse(false))
                 .map(this::toHistoryItem).toList());
     }
 
     @GetMapping("/{assessmentId}/result")
+    @Transactional(readOnly = true)
     public ResponseEntity<AssessmentResultDTO> getResult(@PathVariable Long assessmentId) {
         Long userId = getCurrentUserId();
-        AssessmentSession session = sessionRepository.findByAssessmentIdAndCandidateIdAndStatus(assessmentId, userId, AssessmentSession.SessionStatus.SUBMITTED)
+        AssessmentSession session = sessionRepository.findFirstByAssessmentIdAndCandidateIdAndStatusInOrderBySubmittedAtDesc(assessmentId, userId, java.util.List.of(AssessmentSession.SessionStatus.SUBMITTED, AssessmentSession.SessionStatus.TIMED_OUT))
                 .orElseThrow(() -> new IllegalArgumentException("No submitted result found for this assessment"));
         double autoScore = mcqEvaluationService.evaluateSessionMcqs(session);
         double manualScore = answerRepository.findBySessionId(session.getId()).stream()

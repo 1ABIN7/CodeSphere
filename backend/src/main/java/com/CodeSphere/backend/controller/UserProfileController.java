@@ -12,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.CodeSphere.backend.security.CustomUserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -70,6 +71,7 @@ public class UserProfileController {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("Authentication context is missing or invalid.");
         }
-        return (Long) authentication.getPrincipal();
+        if (authentication.getPrincipal() instanceof CustomUserDetails user) return user.getId();
+        throw new IllegalStateException("Authenticated user details are unavailable.");
     }
 }

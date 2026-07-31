@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -105,7 +106,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "Logout user and invalidate token")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         String token = null;
         Long userId = null;
 
@@ -116,6 +117,13 @@ public class AuthController {
                     break;
                 }
             }
+        }
+
+        // The active frontend sends its JWT through the Authorization header.
+        // Use it when an HttpOnly cookie is not present.
+        if (token == null) {
+            String authorization = request.getHeader("Authorization");
+            if (authorization != null && authorization.startsWith("Bearer ")) token = authorization.substring(7);
         }
 
         if (token != null) {
@@ -133,6 +141,8 @@ public class AuthController {
 
         if (userId != null) {
             auditLogService.logAction(userId, "LOGOUT", "System Auth", request);
+        } else if (authentication != null && authentication.getPrincipal() instanceof com.CodeSphere.backend.security.CustomUserDetails user) {
+            auditLogService.logAction(user.getId(), "LOGOUT", "System Auth", request);
         }
 
         authService.logout();

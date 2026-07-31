@@ -5,10 +5,11 @@ import com.CodeSphere.backend.dto.problem.ProblemRequest;
 import com.CodeSphere.backend.dto.problem.ProblemResponse;
 import com.CodeSphere.backend.model.Difficulty;
 import com.CodeSphere.backend.model.Problem;
-import com.CodeSphere.backend.model.TestCase;
 import com.CodeSphere.backend.repository.ProblemRepository;
+import com.CodeSphere.backend.repository.QuestionBankRepository;
 import com.CodeSphere.backend.repository.SubmissionRepository;
 import com.CodeSphere.backend.repository.TestCaseRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,23 +27,18 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProblemServiceTest {
 
-    @Mock
-    private ProblemRepository problemRepository;
-
-    @Mock
-    private TestCaseRepository testCaseRepository;
-
-    @Mock
-    private SubmissionRepository submissionRepository;
-
-    @InjectMocks
-    private ProblemService problemService;
+    @Mock private ProblemRepository problemRepository;
+    @Mock private TestCaseRepository testCaseRepository;
+    @Mock private SubmissionRepository submissionRepository;
+    @Mock private QuestionBankRepository questionBankRepository;
+    @Mock private ObjectMapper objectMapper;
+    @InjectMocks private ProblemService problemService;
 
     private ProblemRequest request;
     private Problem savedProblem;
@@ -65,10 +61,9 @@ class ProblemServiceTest {
                 .build();
     }
 
-    // ---- createProblem ----
-
     @Test
     void createProblem_Success_WhenTitleIsUnique() {
+        when(questionBankRepository.existsByCodingProblemId(anyLong())).thenReturn(false);
         when(problemRepository.existsByTitle("Two Sum")).thenReturn(false);
         when(problemRepository.save(any(Problem.class))).thenReturn(savedProblem);
         when(testCaseRepository.findByProblemIdOrderByOrderIndexAsc(1L)).thenReturn(List.of());
@@ -79,6 +74,8 @@ class ProblemServiceTest {
         assertEquals("Two Sum", response.getTitle());
         assertEquals("EASY", response.getDifficulty());
         assertFalse(response.getIsPublished());
+        verify(questionBankRepository).existsByCodingProblemId(1L);
+        verify(questionBankRepository).save(any());
 
         ArgumentCaptor<Problem> captor = ArgumentCaptor.forClass(Problem.class);
         verify(problemRepository).save(captor.capture());
@@ -96,8 +93,6 @@ class ProblemServiceTest {
         assertTrue(exception.getMessage().contains("already exists"));
         verify(problemRepository, never()).save(any(Problem.class));
     }
-
-    // ---- updateProblem ----
 
     @Test
     void updateProblem_Success_WhenProblemExists() {
@@ -122,8 +117,6 @@ class ProblemServiceTest {
         verify(problemRepository, never()).save(any(Problem.class));
     }
 
-    // ---- deleteProblem ----
-
     @Test
     void deleteProblem_Success_WhenProblemExists() {
         when(problemRepository.findById(1L)).thenReturn(Optional.of(savedProblem));
@@ -140,8 +133,6 @@ class ProblemServiceTest {
         assertThrows(NoSuchElementException.class, () -> problemService.deleteProblem(99L));
         verify(problemRepository, never()).delete(any(Problem.class));
     }
-
-    // ---- togglePublish (the guard that matters most for the demo) ----
 
     @Test
     void togglePublish_ThrowsException_WhenNoTestCases() {
@@ -176,10 +167,7 @@ class ProblemServiceTest {
         when(testCaseRepository.findByProblemIdOrderByOrderIndexAsc(1L)).thenReturn(List.of());
 
         assertDoesNotThrow(() -> problemService.togglePublish(1L, false));
-
     }
-
-    // ---- listProblems ----
 
     @Test
     void listProblems_ReturnsPagedPublishedProblems_WhenNoFiltersApplied() {

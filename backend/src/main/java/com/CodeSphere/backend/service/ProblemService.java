@@ -4,6 +4,8 @@ import com.CodeSphere.backend.dto.problem.*;
 import com.CodeSphere.backend.dto.common.PageResponse;
 import com.CodeSphere.backend.model.*;
 import com.CodeSphere.backend.repository.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -12,7 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +35,8 @@ public class ProblemService {
     private final ProblemRepository problemRepository;
     private final TestCaseRepository testCaseRepository;
     private final SubmissionRepository submissionRepository;
+    private final QuestionBankRepository questionBankRepository;
+    private final ObjectMapper objectMapper;
 
     // ---- Problem CRUD ----
 
@@ -68,9 +75,91 @@ public class ProblemService {
             addTestCasesToProblem(problem, request.getTestCases());
         }
 
+        createQuestionBankEntry(problem, request.getCategory(), request.getPoints(), request.getNegativeScore());
+
         log.info("[ProblemService] Created problem: {} (ID: {})", problem.getTitle(), problem.getId());
         return mapToResponse(problem, true);
     }
+
+    private void createQuestionBankEntry(Problem problem, String category, Integer points, Integer negativeScore) {
+        if (questionBankRepository.existsByCodingProblemId(problem.getId())) return;
+        boolean debugging = problem.getTags() != null && problem.getTags().stream()
+                .anyMatch(tag -> "debugging".equalsIgnoreCase(tag));
+        Question question = new Question();
+        question.setTitle(problem.getTitle());
+        question.setContent(problem.getDescription());
+        question.setCategory(category == null || category.isBlank() ? (debugging ? "Debugging" : "Coding practice") : category.trim());
+        question.setType(debugging ? "DEBUGGING" : "CODING");
+        question.setQuestionType(debugging ? "DEBUGGING" : "CODING");
+        question.setDifficulty(problem.getDifficulty().name());
+        question.setTags(problem.getTags() == null ? new ArrayList<>() : new ArrayList<>(problem.getTags()));
+        question.setCorrectAnswers("");
+        question.setPoints(points != null && points >= 0 ? points : pointsFor(problem.getDifficulty()));
+        question.setNegativeScore(negativeScore != null && negativeScore >= 0 ? negativeScore : 0);
+        question.setStatus(ApprovalStatus.APPROVED);
+        question.setCodingProblemId(problem.getId());
+        question.setSystemGenerated(true);
+        questionBankRepository.save(question);
+    }
+
+    private int pointsFor(Difficulty difficulty) {
+        return switch (difficulty) {
+            case HARD -> 15;
+            case MEDIUM -> 10;
+            default -> 5;
+        };
+    }
+
+    @Transactional(readOnly = true)
+    public String exportTasksCsv() {
+        StringBuilder csv = new StringBuilder("title,taskType,description,inputFormat,outputFormat,constraints,difficulty,category,tags,points,negativeScore,timeLimit,memoryLimit,testCases\n");
+        for (Problem problem : problemRepository.findAll()) {
+            boolean debugging = problem.getTags() != null && problem.getTags().stream().anyMatch(tag -> "debugging".equalsIgnoreCase(tag));
+            Question linked = questionBankRepository.findAll().stream().filter(question -> problem.getId().equals(question.getCodingProblemId())).findFirst().orElse(null);
+            List<TestCaseRequest> testCases = testCaseRepository.findByProblemIdOrderByOrderIndexAsc(problem.getId()).stream().map(testCase -> TestCaseRequest.builder()
+                    .inputData(testCase.getInputData()).expectedOutput(testCase.getExpectedOutput()).isSample(testCase.getIsSample())
+                    .explanation(testCase.getExplanation()).orderIndex(testCase.getOrderIndex()).timeLimitOverride(testCase.getTimeLimitOverride()).scoreWeight(testCase.getScoreWeight()).build()).toList();
+            try {
+                csv.append(csvRow(problem.getTitle(), debugging ? "DEBUGGING" : "CODING", problem.getDescription(), problem.getInputFormat(), problem.getOutputFormat(), problem.getConstraints(),
+                        problem.getDifficulty().name(), linked == null ? "" : linked.getCategory(), String.join(",", problem.getTags() == null ? List.of() : problem.getTags()),
+                        linked == null ? "" : String.valueOf(linked.getPoints()), linked == null ? "" : String.valueOf(linked.getNegativeScore()), String.valueOf(problem.getTimeLimit()), String.valueOf(problem.getMemoryLimit()), objectMapper.writeValueAsString(testCases))).append('\n');
+            } catch (IOException exception) { throw new IllegalStateException("Unable to export task test cases", exception); }
+        }
+        return csv.toString();
+    }
+
+    @Transactional
+    public int importTasksCsv(MultipartFile file, Long createdBy) {
+        try {
+            List<List<String>> rows = parseCsv(new String(file.getBytes(), StandardCharsets.UTF_8));
+            if (rows.size() < 2) return 0;
+            List<String> headers = rows.get(0);
+            int imported = 0;
+            for (int rowIndex = 1; rowIndex < rows.size(); rowIndex++) {
+                List<String> row = rows.get(rowIndex);
+                String title = value(headers, row, "title");
+                if (title.isBlank()) continue;
+                ProblemRequest request = ProblemRequest.builder()
+                        .title(title).description(value(headers, row, "description")).inputFormat(value(headers, row, "inputFormat"))
+                        .outputFormat(value(headers, row, "outputFormat")).constraints(value(headers, row, "constraints"))
+                        .difficulty(blankDefault(value(headers, row, "difficulty"), "MEDIUM")).category(value(headers, row, "category"))
+                        .tags(splitTags(value(headers, row, "tags"), value(headers, row, "taskType"))).points(integerValue(value(headers, row, "points")))
+                        .negativeScore(integerValue(value(headers, row, "negativeScore"))).timeLimit(integerValue(value(headers, row, "timeLimit")))
+                        .memoryLimit(integerValue(value(headers, row, "memoryLimit"))).testCases(readTestCases(value(headers, row, "testCases"))).build();
+                createProblem(request, createdBy);
+                imported++;
+            }
+            return imported;
+        } catch (IOException exception) { throw new IllegalArgumentException("Unable to read the Task Center CSV", exception); }
+    }
+
+    private List<TestCaseRequest> readTestCases(String json) throws IOException { return json == null || json.isBlank() ? List.of() : objectMapper.readValue(json, new TypeReference<List<TestCaseRequest>>() {}); }
+    private List<String> splitTags(String tags, String taskType) { List<String> values = new ArrayList<>(Arrays.stream(tags.split(",")).map(String::trim).filter(value -> !value.isBlank()).toList()); if ("DEBUGGING".equalsIgnoreCase(taskType) && values.stream().noneMatch(value -> "debugging".equalsIgnoreCase(value))) values.add("debugging"); return values; }
+    private Integer integerValue(String value) { try { return value == null || value.isBlank() ? null : Integer.valueOf(value); } catch (NumberFormatException exception) { return null; } }
+    private String blankDefault(String value, String fallback) { return value == null || value.isBlank() ? fallback : value; }
+    private String value(List<String> headers, List<String> row, String header) { int index = headers.indexOf(header); return index >= 0 && index < row.size() ? row.get(index) : ""; }
+    private String csvRow(String... values) { return Arrays.stream(values).map(value -> '"' + (value == null ? "" : value.replace("\"", "\"\"")) + '"').collect(Collectors.joining(",")); }
+    private List<List<String>> parseCsv(String csv) { List<List<String>> rows = new ArrayList<>(); List<String> row = new ArrayList<>(); StringBuilder cell = new StringBuilder(); boolean quoted = false; for (int index = 0; index < csv.length(); index++) { char character = csv.charAt(index); if (character == '"' && quoted && index + 1 < csv.length() && csv.charAt(index + 1) == '"') { cell.append('"'); index++; } else if (character == '"') quoted = !quoted; else if (character == ',' && !quoted) { row.add(cell.toString()); cell.setLength(0); } else if ((character == '\n' || character == '\r') && !quoted) { if (character == '\r' && index + 1 < csv.length() && csv.charAt(index + 1) == '\n') index++; row.add(cell.toString()); if (row.stream().anyMatch(value -> !value.isBlank())) rows.add(row); row = new ArrayList<>(); cell.setLength(0); } else cell.append(character); } row.add(cell.toString()); if (row.stream().anyMatch(value -> !value.isBlank())) rows.add(row); return rows; }
 
     /**
      * Update an existing problem.

@@ -143,15 +143,21 @@ public class AssessmentSessionServiceImpl implements AssessmentSessionService {
         }
 
         int currentIdx = session.getCurrentSectionIndex();
-        if (targetSectionIndex < currentIdx) {
-            throw new IllegalStateException("A completed section cannot be reopened.");
+        AssessmentSection currentSection = allSections.get(currentIdx);
+        AssessmentSection targetSection = allSections.get(targetSectionIndex);
+        if (targetSectionIndex < currentIdx
+                && targetSection.getNavigationMode() == AssessmentSection.NavigationMode.SEQUENTIAL) {
+            throw new IllegalStateException("This sequential section cannot be reopened.");
         }
-        if (targetSectionIndex > currentIdx + 1) {
+        if (targetSectionIndex > currentIdx + 1
+                && currentSection.getNavigationMode() == AssessmentSection.NavigationMode.SEQUENTIAL) {
             throw new IllegalStateException("Sections must be completed in order.");
         }
         if (targetSectionIndex == currentIdx) return session;
 
-        session.getCompletedSectionIndexes().add(currentIdx);
+        if (targetSectionIndex > currentIdx) {
+            session.getCompletedSectionIndexes().add(currentIdx);
+        }
         session.setCurrentSectionIndex(targetSectionIndex);
         session.setCurrentSectionStartedAt(now);
         return sessionRepository.save(session);

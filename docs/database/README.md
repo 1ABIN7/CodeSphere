@@ -14,6 +14,21 @@ that run automatically on application startup.
 | V2 | V2__question_assessment_schema.sql | Question bank, assessments, sections, assignments |
 | V3 | V3__session_evaluation_schema.sql | Sessions, answers, evaluation reviews, proctoring |
 | V4 | V4__problems_contests_certs.sql | Problems, test cases, submissions, certifications |
+| V5–V10 | Judge, file storage, audit-resource, user alignment, interview, proctoring, password compatibility | Operational and security support tables/columns |
+| V11 | V11__add_sql_assessment_tasks.sql | SQL task setup and automated test-case storage |
+| V12 | V12__add_api_assessment_tasks.sql | API implementation task HTTP test-case storage |
+| V13 | V13__add_evaluator_assignments.sql | Evaluator assignment and review workflow |
+| V14 | V14__notifications_and_certifications.sql | In-app notifications and certification records |
+| V15–V17 | Cascade migration series | Referential-integrity cleanup for session and question deletion |
+| V18–V19 | Coding-question links and curated-task controls | Problem-bank ↔ question-bank linkage |
+| V20 | V20__link_assessments_to_active_questions.sql | Active question-bank links used by assessments |
+| V21 | V21__add_assessment_result_visibility.sql | Admin controls for result and feedback release |
+| V22 | V22__add_debugging_task_starter_code.sql | Repair-code starter templates for debugging tasks |
+| V23–V24 | SQL/API task corrections | Candidate-safe seeded SQL and HTTP test behavior |
+| V25 | V25__align_rubric_storage.sql | Normalized rubric criteria storage for manually evaluated written work |
+| V26 | V26__link_rubrics_to_active_questions.sql | Rubric foreign-key alignment with the active `questions` table |
+| V27 | V27__link_question_versions_to_active_questions.sql | Question-version foreign-key alignment with the active question bank |
+| V28 | V28__add_username_to_audit_logs.sql | Account label attached to audit/security events |
 
 ---
 
@@ -199,5 +214,11 @@ that run automatically on application startup.
 
 ---
 
+## Security and AI-related storage notes
+
+- `audit_logs.ip_address` is encrypted through the application’s JPA converter before persistence. The `username`, action, resource, and timestamp support the admin Security activity view.
+- `proctoring_events` stores candidate integrity signals such as `TAB_SWITCH`, `WINDOW_FOCUS_LOST`, and `FULLSCREEN_EXIT`, plus severity and optional JSON metadata.
+- Gemini API credentials are never stored in the database. `GEMINI_API_KEY` is read from the server environment only.
+
 *Document maintained by P5 — Abin Joseph*
-*Last updated: July 2026*
+*Last updated: July 2026. The authoritative executable schema is the ordered migration set in `backend/src/main/resources/db/migration/`.*

@@ -1,0 +1,3 @@
+package com.CodeSphere.backend.controller;
+import com.CodeSphere.backend.repository.CertificationRepository; import lombok.RequiredArgsConstructor; import org.springframework.http.ResponseEntity; import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/v1/certifications") @RequiredArgsConstructor public class CertificationController { private final CertificationRepository repository; @GetMapping("/verify/{code}") public ResponseEntity<?> verify(@PathVariable String code){return repository.findByVerificationCode(code).<ResponseEntity<?>>map(c->ResponseEntity.ok(java.util.Map.of("valid",true,"title",c.getTitle(),"issuedAt",c.getIssuedAt(),"score",c.getScore()))).orElseGet(()->ResponseEntity.notFound().build());}}

@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ProctoringEventRepository extends JpaRepository<ProctoringEvent, Long> {
     List<ProctoringEvent> findBySessionIdOrderByTimestampDesc(Long sessionId);
+    List<ProctoringEvent> findTop50ByOrderByTimestampDesc();
 }

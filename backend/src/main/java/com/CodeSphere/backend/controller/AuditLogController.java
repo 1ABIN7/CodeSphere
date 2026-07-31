@@ -24,7 +24,7 @@ public class AuditLogController {
     private final AuditLogService auditLogService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORG_ADMIN')")
     public ResponseEntity<Page<AuditLog>> getAuditLogs(
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String action,

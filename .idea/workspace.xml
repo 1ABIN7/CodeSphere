@@ -5,16 +5,61 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="43ecaf0d-f30d-408c-a1bb-e6489e98730a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/.local-assessment-files/session_15_q_520_64de44db.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AdminAiInsightsController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/CodingAssistantController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/admin/CandidateAiInsightResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/admin/CandidateSkillMetricsResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/admin/ProctoringEventSummary.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/ai/CodingAssistantRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/dto/ai/CodingAssistantResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/CodingAssistantService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/GeminiCodingAssistantService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V25__align_rubric_storage.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V26__link_rubrics_to_active_questions.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V27__link_question_versions_to_active_questions.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V28__add_username_to_audit_logs.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/DELIVERABLES.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/DEMO_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/CodingHelpPage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/admin/AdminAiInsightsPage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/admin/AdminSecurityPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSectionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSectionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AssessmentSessionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentSessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/AssessmentSessionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AssessmentSessionServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AuditLogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AuditLogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/EvaluationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/EvaluationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/ProctoringController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/ProctoringController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/QuestionImportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/controller/QuestionImportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/Question.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/Question.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/Rubric.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/model/Rubric.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/ProctoringEventRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/ProctoringEventRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/QuestionBankRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/QuestionBankRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/RubricRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/repository/RubricRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/ProctoringService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/ProctoringService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/QuestionImportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/QuestionImportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AuditLogServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AuditLogServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AuthServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/AuthServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionExportServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionExportServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionImportServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionImportServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/QuestionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/RubricServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service/impl/RubricServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/api/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/api/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/architecture/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/architecture/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/database/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/database/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/deployment/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/deployment/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/testing/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/testing/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AssessmentPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/EvaluatorDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/EvaluatorDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/ProblemBankManagementPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/ProblemBankManagementPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/QuestionBankPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/QuestionBankPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/ReportsDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/ReportsDashboard.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,23 +97,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.550675144473736" />
-      <entry key="MS500" value="5.459806809874663" />
-      <entry key="S2" value="15.454149550883729" />
-      <entry key="S5" value="24.230347077485526" />
-      <entry key="S10" value="31.545787184820608" />
-      <entry key="S30" value="40.38213524975827" />
-      <entry key="S60" value="43.45347369466958" />
-      <entry key="M2" value="45.16221793401829" />
-      <entry key="M5" value="46.25070622946764" />
-      <entry key="M10" value="46.84590027418946" />
-      <entry key="M15" value="47.82659166928609" />
-      <entry key="M30" value="52.07622955589643" />
-      <entry key="H1" value="59.421623200387224" />
-      <entry key="H2" value="79.75898034083038" />
-      <entry key="H4" value="160.19256748035568" />
-      <entry key="D1" value="857.204022357216" />
-      <entry key="W1" value="1306.717956580691" />
+      <entry key="MS100" value="1.4574664241947288" />
+      <entry key="MS500" value="3.294516613705158" />
+      <entry key="S2" value="6.538817985854788" />
+      <entry key="S5" value="8.678734864130796" />
+      <entry key="S10" value="9.720374207597002" />
+      <entry key="S30" value="10.543442997453374" />
+      <entry key="S60" value="10.76772052726122" />
+      <entry key="M2" value="10.88284027560951" />
+      <entry key="M5" value="10.952888739007335" />
+      <entry key="M10" value="10.976403858630729" />
+      <entry key="M15" value="10.98487992325906" />
+      <entry key="M30" value="11.417097315460511" />
+      <entry key="H1" value="22.564454964442913" />
+      <entry key="H2" value="74.87525594581139" />
+      <entry key="H4" value="189.70239325204898" />
+      <entry key="D1" value="972.244587560583" />
+      <entry key="W1" value="1548.707136321392" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -76,37 +121,37 @@
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
-      <entry key="S30" value="5.373206277E-315" />
-      <entry key="S60" value="7.330215735214891E-158" />
-      <entry key="M2" value="2.7074371156528934E-79" />
-      <entry key="M5" value="3.7413085218594517E-32" />
-      <entry key="M10" value="1.9354626459573037E-16" />
-      <entry key="M15" value="3.3691315697397834E-11" />
-      <entry key="M30" value="6.279612449539796E-6" />
-      <entry key="H1" value="0.00317694930567181" />
-      <entry key="H2" value="0.09840778922596935" />
-      <entry key="H4" value="0.9133791676059998" />
-      <entry key="D1" value="14.655439709074582" />
-      <entry key="W1" value="26.993406772399002" />
+      <entry key="S30" value="7.087169060721838E-170" />
+      <entry key="S60" value="2.6621737472828103E-85" />
+      <entry key="M2" value="5.15962571053638E-43" />
+      <entry key="M5" value="1.2163184074007213E-17" />
+      <entry key="M10" value="3.487575672871805E-9" />
+      <entry key="M15" value="2.2997595258413354E-6" />
+      <entry key="M30" value="0.0015164984219638944" />
+      <entry key="H1" value="0.03900706903481643" />
+      <entry key="H2" value="0.21139847638605275" />
+      <entry key="H4" value="0.7894816849416701" />
+      <entry key="D1" value="13.335293396737505" />
+      <entry key="W1" value="27.35619549152123" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.468549744219626" />
-      <entry key="MS500" value="5.402367098818684" />
-      <entry key="S2" value="15.413269455356993" />
-      <entry key="S5" value="24.20280269512964" />
-      <entry key="S10" value="31.52641114742879" />
-      <entry key="S30" value="40.37322821476997" />
-      <entry key="S60" value="43.448580705788515" />
-      <entry key="M2" value="45.159648087616645" />
-      <entry key="M5" value="46.2496467179846" />
-      <entry key="M10" value="46.8453619714194" />
-      <entry key="M15" value="47.82622355819078" />
-      <entry key="M30" value="52.076031819932865" />
-      <entry key="H1" value="59.42468113968941" />
-      <entry key="H2" value="79.85729825051985" />
-      <entry key="H4" value="161.1058001277206" />
-      <entry key="D1" value="871.8591585260403" />
-      <entry key="W1" value="1333.711285092855" />
+      <entry key="MS100" value="1.3954800633597568" />
+      <entry key="MS500" value="3.2588418062461355" />
+      <entry key="S2" value="6.507181206885007" />
+      <entry key="S5" value="8.658845384874923" />
+      <entry key="S10" value="9.70866471464709" />
+      <entry key="S30" value="10.539077382993469" />
+      <entry key="S60" value="10.765474942538223" />
+      <entry key="M2" value="10.881701392094278" />
+      <entry key="M5" value="10.952429271882204" />
+      <entry key="M10" value="10.97617347188978" />
+      <entry key="M15" value="10.98472847687485" />
+      <entry key="M30" value="11.418534704177267" />
+      <entry key="H1" value="22.603394464747186" />
+      <entry key="H2" value="75.08655489870179" />
+      <entry key="H4" value="190.49173407737274" />
+      <entry key="D1" value="985.5795964020724" />
+      <entry key="W1" value="1576.063251130256" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -123,45 +168,45 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.BackendApplication.executor": "Run",
-    "Docker.docker-compose.yml: Compose Deployment.executor": "Run",
-    "Maven.backend [clean].executor": "Run",
-    "Maven.backend [package].executor": "Run",
-    "Maven.backend [test].executor": "Run",
-    "Maven.backend [validate].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Spring Boot.BackendApplication.executor": "Run",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "MoreFrontEndFeatures",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "diff.base",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.docker-compose.yml: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [package].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [test].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [validate].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;MoreFrontEndFeatures&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;diff.base&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql",
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;,
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/backend/src/main/java/com/CodeSphere/backend/service" />

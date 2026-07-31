@@ -57,7 +57,6 @@ public class QuestionBankServiceImpl implements QuestionBankService {
     @Override
     public Question updateQuestion(Long id, Question questionDetails) {
         Question existingQuestion = getQuestionById(id);
-
         versionService.createVersionSnapshot(existingQuestion);
 
         existingQuestion.setTitle(questionDetails.getTitle());
@@ -66,6 +65,15 @@ public class QuestionBankServiceImpl implements QuestionBankService {
         existingQuestion.setType(questionDetails.getType());
         existingQuestion.setDifficulty(questionDetails.getDifficulty());
         existingQuestion.setTags(questionDetails.getTags());
+        existingQuestion.setOptions(questionDetails.getOptions());
+        existingQuestion.setCorrectAnswers(questionDetails.getCorrectAnswers());
+        existingQuestion.setPoints(questionDetails.getPoints());
+        existingQuestion.setNegativeScore(questionDetails.getNegativeScore());
+        existingQuestion.setQuestionType(questionDetails.getQuestionType());
+        existingQuestion.setCodingProblemId(questionDetails.getCodingProblemId());
+        existingQuestion.setSqlSetup(questionDetails.getSqlSetup());
+        existingQuestion.setSqlTestCases(questionDetails.getSqlTestCases());
+        existingQuestion.setApiTestCases(questionDetails.getApiTestCases());
 
         return questionBankRepository.save(existingQuestion);
     }
@@ -73,6 +81,9 @@ public class QuestionBankServiceImpl implements QuestionBankService {
     @Override
     public void deleteQuestion(Long id) {
         Question question = getQuestionById(id);
+        if (question.isSystemGenerated()) {
+            throw new IllegalStateException("Curated coding questions cannot be deleted from the Question Bank.");
+        }
         questionBankRepository.delete(question);
     }
 }

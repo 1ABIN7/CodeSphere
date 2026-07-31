@@ -25,6 +25,8 @@ export default function AssessmentDashboard() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   const [assessments, setAssessments] = useState([]);
+  const [availableIds, setAvailableIds] = useState(new Set());
+  const [releasedResults, setReleasedResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -39,8 +41,13 @@ export default function AssessmentDashboard() {
       setLoading(true);
       setError('');
       try {
-        const res = await assessmentAPI.listAvailable();
-        if (active) setAssessments(res.data || []);
+        const [assessmentRes, assignedRes, resultRes] = await Promise.allSettled([assessmentAPI.listAvailable(), assessmentAPI.listAssigned(), assessmentAPI.getResultHistory()]);
+        if (assignedRes.status !== 'fulfilled') throw assignedRes.reason;
+        if (active) {
+          setAssessments(assignedRes.value.data || []);
+          setAvailableIds(new Set(assessmentRes.status === 'fulfilled' ? (assessmentRes.value.data || []).map((assessment) => assessment.id) : []));
+          setReleasedResults(resultRes.status === 'fulfilled' ? (resultRes.value.data ?? []) : []);
+        }
       } catch (err) {
         if (active) {
           setError('The assessment catalog could not be loaded right now.');
@@ -60,8 +67,12 @@ export default function AssessmentDashboard() {
   const cards = assessments.map((assessment) => {
     const key = String(assessment.id);
     const saved = progress[key];
-    const status = saved?.completed ? 'Completed' : saved?.started ? 'Resume' : 'Not started';
-    return { ...assessment, status };
+    const now = new Date();
+    const start = assessment.startTime ? new Date(assessment.startTime) : null;
+    const end = assessment.endTime ? new Date(assessment.endTime) : null;
+    const unavailableReason = start && start > now ? `Opens ${formatDate(assessment.startTime)}` : end && end < now ? 'The assessment window has closed' : 'This assessment is being prepared';
+    const status = saved?.completed ? 'Completed' : !availableIds.has(assessment.id) ? unavailableReason : saved?.started ? 'Resume' : 'Not started';
+    return { ...assessment, status, unavailable: !availableIds.has(assessment.id) };
   });
 
   return (
@@ -69,8 +80,10 @@ export default function AssessmentDashboard() {
       <div className="page-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><h1 className="page-title">Candidate assessments</h1>
         <p className="page-subtitle">Start or resume your live exam session from here.</p>
-        </div><button className="btn btn-secondary btn-sm" onClick={() => navigate('/assessments/history')}>View history</button></div>
+        </div><div style={{display:'flex',gap:8}}><button className="btn btn-secondary btn-sm" onClick={() => navigate('/notifications')}>Notifications</button><button className="btn btn-secondary btn-sm" onClick={() => navigate('/certifications')}>Certifications</button><button className="btn btn-secondary btn-sm" onClick={() => navigate('/assessments/history')}>View history</button></div></div>
       </div>
+
+      {releasedResults.length > 0 && <section className="card" style={{ padding: 20, marginBottom: 24 }}><div className="card-header"><div><div className="card-title">Final results</div><div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>Scores released by your administrator.</div></div><button className="btn btn-ghost btn-sm" onClick={() => navigate('/assessments/history')}>View all</button></div><div className="question-stack" style={{ marginTop: 12 }}>{releasedResults.slice(0, 3).map((result) => <div className="choice-option" key={result.assessmentId} style={{ justifyContent: 'space-between', gap: 14 }}><div><strong>{result.title}</strong><div className="text-secondary" style={{ marginTop: 4 }}>{result.status === 'PENDING_EVALUATION' ? 'Evaluation in progress' : `Final score: ${result.score} / ${result.totalScore}`}</div></div><button className="btn btn-primary btn-sm" onClick={() => navigate(`/assessments/${result.assessmentId}/result`)}>View result</button></div>)}</div></section>}
 
       {loading ? (
         <div className="card" style={{ padding: 24 }}>
@@ -119,8 +132,8 @@ export default function AssessmentDashboard() {
               </div>
 
               <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <button className="btn btn-primary" onClick={() => navigate(`/assessments/${assessment.id}/session`)}>
-                  {assessment.status === 'Resume' ? 'Resume' : 'Start'}
+                <button className="btn btn-primary" disabled={assessment.unavailable} onClick={() => navigate(`/assessments/${assessment.id}/session`)}>
+                  {assessment.unavailable ? 'Not available' : assessment.status === 'Resume' ? 'Resume' : 'Start'}
                 </button>
               </div>
             </div>

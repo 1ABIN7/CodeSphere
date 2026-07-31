@@ -2,6 +2,7 @@ package com.CodeSphere.backend.service.impl;
 
 import com.CodeSphere.backend.model.AuditLog;
 import com.CodeSphere.backend.repository.AuditLogRepository;
+import com.CodeSphere.backend.repository.UserRepository;
 import com.CodeSphere.backend.repository.specification.AuditLogSpecification;
 import com.CodeSphere.backend.service.AuditLogService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import java.time.ZoneId;
 public class AuditLogServiceImpl implements AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -29,10 +31,15 @@ public class AuditLogServiceImpl implements AuditLogService {
         String ipAddress = request.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getRemoteAddr();
+        } else {
+            ipAddress = ipAddress.split(",")[0].trim();
         }
 
         AuditLog log = AuditLog.builder()
                 .userId(userId)
+                // Store the account name with the event so the admin security
+                // view can identify who performed an action without exposing email.
+                .username(userId == null ? null : userRepository.findById(userId).map(user -> user.getUsername()).orElse(null))
                 .action(action)
                 .resource(resource)
                 .resourceType("AUTH") // Fills required DB column

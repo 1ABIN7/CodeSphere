@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { adminAPI, assessmentAPI, questionBankAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -22,6 +22,15 @@ const INITIAL_QUESTION = {
   points: 1,
   negativeScore: 0,
 };
+
+const QUICK_ACTIONS = [
+  { to: '/admin/assessments', icon: '🧪', title: 'Assessments', description: 'Create, assign, and manage assessments.', tone: 'primary' },
+  { to: '/admin/questions', icon: '🗂️', title: 'Question bank', description: 'Build and organize reusable questions.', tone: 'violet' },
+  { to: '/admin/evaluations', icon: '✓', title: 'Review work', description: 'Grade candidate responses and files.', tone: 'amber' },
+  { to: '/admin/reports', icon: '↗', title: 'Reports', description: 'See completion, scores, and trends.', tone: 'green' },
+  { to: '/admin/users', icon: '👥', title: 'People', description: 'Manage candidates and access.', tone: 'blue' },
+  { to: '/admin/categories', icon: '🏷️', title: 'Categories', description: 'Keep the question bank organized.', tone: 'slate' },
+];
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -119,46 +128,66 @@ export default function AdminDashboard() {
     return 'Admin';
   }, [user]);
 
+  if (user?.role === 'ROLE_EXAMINER') return <Navigate to="/admin/evaluations" replace />;
+
   return (
-    <div className="container fade-in">
-      <div className="page-header">
-        <h1 className="page-title">Admin dashboard</h1>
-        <p className="page-subtitle">{roleLabel} overview for assessment and question management.</p>
-      </div>
+    <div className="container fade-in admin-dashboard">
+      <section className="admin-hero">
+        <div>
+          <div className="admin-eyebrow">{roleLabel} control center</div>
+          <h1>Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}.</h1>
+          <p>Manage assessments, question content, reviewers, and candidate progress from one place.</p>
+        </div>
+        <div className="admin-hero-actions">
+          <Link className="btn btn-secondary" to="/admin/questions">Question bank</Link>
+          <Link className="btn btn-primary" to="/admin/assessments">Manage assessments</Link>
+        </div>
+      </section>
 
-      <div className="dashboard-grid">
-        {[
-          { label: 'Total assessments', value: stats.totalAssessments, icon: '🧪' },
-          { label: 'Pending review', value: stats.pendingReviews, icon: '⏳' },
-          { label: 'Active sessions', value: stats.activeSessions, icon: '⚡' },
-          { label: 'Published questions', value: stats.publishedQuestions, icon: '🗂️' },
-        ].map((item) => (
-          <div key={item.label} className="card stat-card">
-            <div className="stat-card-icon">{item.icon}</div>
-            <div className="stat-card-value" style={{ fontSize: 24 }}>{item.value}</div>
-            <div className="stat-card-label">{item.label}</div>
+      <section className="admin-overview-section" aria-label="Platform overview">
+        <div className="admin-section-heading">
+          <div>
+            <h2>At a glance</h2>
+            <p>Live information from your assessment workspace.</p>
           </div>
-        ))}
-      </div>
+          {loading && <span className="admin-loading-label"><span className="spinner" /> Updating</span>}
+        </div>
+        <div className="admin-stat-grid">
+          {[
+            { label: 'Assessments', value: stats.totalAssessments, icon: '🧪', description: 'In your catalog' },
+            { label: 'Awaiting review', value: stats.pendingReviews, icon: '⏳', description: 'Need evaluator attention' },
+            { label: 'Live sessions', value: stats.activeSessions, icon: '⚡', description: 'Candidates working now' },
+            { label: 'Question Bank', value: stats.publishedQuestions, icon: '🗂️', description: 'Available assessment questions' },
+          ].map((item) => (
+            <div key={item.label} className="admin-stat-card">
+              <div className="admin-stat-icon">{item.icon}</div>
+              <div>
+                <div className="admin-stat-value">{item.value}</div>
+                <div className="admin-stat-label">{item.label}</div>
+                <div className="admin-stat-description">{item.description}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
-        <Link className="btn btn-secondary btn-sm" to="/problems">View problems</Link>
-        <Link className="btn btn-primary btn-sm" to="/admin/assessments">Manage assessments</Link>
-        <Link className="btn btn-primary btn-sm" to="/admin/questions">Manage question bank</Link>
-        <Link className="btn btn-secondary btn-sm" to="/admin/categories">Manage categories</Link>
-        <Link className="btn btn-secondary btn-sm" to="/admin/evaluations">Evaluate submissions</Link>
-        <Link className="btn btn-secondary btn-sm" to="/admin/reports">View reports</Link>
-        <Link className="btn btn-secondary btn-sm" to="/admin/users">Manage users</Link>
-      </div>
+      <section className="admin-overview-section">
+        <div className="admin-section-heading">
+          <div>
+            <h2>Workspace activity</h2>
+            <p>Recent content and candidate activity in one view.</p>
+          </div>
+        </div>
+      </section>
 
-      <div style={{ display: 'grid', gap: 24, gridTemplateColumns: '1.1fr 0.9fr' }}>
-        <div className="card">
+      <div className="admin-workspace-grid">
+        <div className="card admin-panel-card">
           <div className="card-header">
             <div>
               <div className="card-title">Recent assessments</div>
               <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>From the current assessment catalog.</div>
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/assessments')}>Open catalog</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/assessments')}>Manage</button>
           </div>
 
           {loading ? (
@@ -166,8 +195,9 @@ export default function AdminDashboard() {
           ) : assessments.length === 0 ? (
             <div className="empty-state" style={{ padding: 24 }}>
               <div className="empty-icon">🧪</div>
-              <div className="empty-title">No assessments surfaced</div>
-              <div className="empty-subtitle">The backend did not return any assessment items for this role yet.</div>
+              <div className="empty-title">No assessments yet</div>
+              <div className="empty-subtitle">Create your first assessment to begin assigning candidates.</div>
+              <button className="btn btn-primary btn-sm" style={{ marginTop: 16 }} onClick={() => navigate('/admin/assessments')}>Create assessment</button>
             </div>
           ) : (
             <div className="question-stack">
@@ -186,12 +216,13 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        <div className="card">
+        <div className="card admin-panel-card">
           <div className="card-header">
             <div>
               <div className="card-title">Recent activity</div>
               <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>Latest submissions across all candidates.</div>
             </div>
+            <Link className="btn btn-ghost btn-sm" to="/admin/reports">Reports</Link>
           </div>
 
           {loading ? (
@@ -199,8 +230,8 @@ export default function AdminDashboard() {
           ) : activity.length === 0 ? (
             <div className="empty-state" style={{ padding: 24 }}>
               <div className="empty-icon">📬</div>
-              <div className="empty-title">No recent activity</div>
-              <div className="empty-subtitle">Submissions will appear here once the backend exposes them.</div>
+              <div className="empty-title">Nothing new yet</div>
+              <div className="empty-subtitle">Candidate submissions will show up here when activity begins.</div>
             </div>
           ) : (
             <div className="question-stack">
@@ -218,38 +249,6 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
-      </div>
-
-      <div className="card" style={{ marginTop: 24 }}>
-        <div className="card-header">
-          <div>
-            <div className="card-title">Question bank</div>
-            <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>Your 10 most recently created questions.</div>
-          </div>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setIsQuestionModalOpen(true)}>+ Add question</button>
-        </div>
-
-        {loading ? (
-          <div className="loading-center"><div className="spinner" /></div>
-        ) : questions.length === 0 ? (
-          <div className="empty-state" style={{ padding: 24 }}>
-            <div className="empty-icon">🗂️</div>
-            <div className="empty-title">No questions yet</div>
-            <div className="empty-subtitle">Create the first question for your assessment bank.</div>
-          </div>
-        ) : (
-          <div className="question-stack">
-            {questions.map((question) => (
-              <div key={question.id} className="choice-option" style={{ justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontWeight: 700 }}>{question.title || `Question #${question.id}`}</div>
-                  <div className="text-secondary" style={{ fontSize: 13, marginTop: 4 }}>{question.content || 'Question available in the bank.'}</div>
-                </div>
-                <span className="badge badge-tag">{question.questionType || question.type || question.difficulty || 'Question'}</span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {isQuestionModalOpen && (

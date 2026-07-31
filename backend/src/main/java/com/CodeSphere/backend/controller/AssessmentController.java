@@ -14,6 +14,7 @@ import com.CodeSphere.backend.repository.UserRepository;
 import com.CodeSphere.backend.repository.AssessmentSessionRepository;
 import com.CodeSphere.backend.repository.CandidateGroupRepository;
 import com.CodeSphere.backend.model.AssessmentSession;
+import com.CodeSphere.backend.service.NotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -41,6 +42,7 @@ public class AssessmentController {
     private final UserRepository userRepository;
     private final AssessmentSessionRepository assessmentSessionRepository;
     private final CandidateGroupRepository candidateGroupRepository;
+    private final NotificationService notificationService;
 
     // --- Read Operations ---
 
@@ -84,8 +86,24 @@ public class AssessmentController {
                 .filter(assessment -> assessment != null && assessment.isPublished())
                 .filter(assessment -> assessment.getStartTime() == null || !assessment.getStartTime().isAfter(now))
                 .filter(assessment -> assessment.getEndTime() == null || !assessment.getEndTime().isBefore(now))
+                .filter(assessment -> !assessmentSessionRepository.existsByAssessmentIdAndCandidateIdAndStatusIn(
+                        assessment.getId(), userId, java.util.List.of(AssessmentSession.SessionStatus.SUBMITTED, AssessmentSession.SessionStatus.TIMED_OUT)))
                 .filter(assessment -> sectionRepository.findByAssessmentIdOrderBySectionOrderAsc(assessment.getId()).stream()
                         .anyMatch(section -> !assessmentQuestionRepository.findBySectionIdOrderByOrderIndexAsc(section.getId()).isEmpty()))
+                .toList();
+        return ResponseEntity.ok(assessments);
+    }
+
+    /** Shows a candidate every published assessment assigned to them, including
+     * ones that are not yet startable because of a schedule or setup rule. */
+    @GetMapping("/assigned")
+    public ResponseEntity<List<Assessment>> getMyAssignedAssessments() {
+        Long userId = getCurrentUserId();
+        List<Assessment> assessments = assignmentRepository.findByUserId(userId).stream()
+                .map(assignment -> assessmentRepository.findById(assignment.getAssessmentId()).orElse(null))
+                .filter(assessment -> assessment != null && assessment.isPublished())
+                .filter(assessment -> !assessmentSessionRepository.existsByAssessmentIdAndCandidateIdAndStatusIn(
+                        assessment.getId(), userId, java.util.List.of(AssessmentSession.SessionStatus.SUBMITTED, AssessmentSession.SessionStatus.TIMED_OUT)))
                 .toList();
         return ResponseEntity.ok(assessments);
     }
@@ -139,13 +157,29 @@ public class AssessmentController {
         return ResponseEntity.ok(assessmentService.unpublishAssessment(id));
     }
 
+    @PostMapping("/{id}/send-final-scores")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
+    public ResponseEntity<Assessment> sendFinalScores(@PathVariable Long id) {
+        Assessment assessment = assessmentService.getAssessmentById(id);
+        assessment.setResultsVisible(true);
+        Assessment saved = assessmentRepository.save(assessment);
+        assignmentRepository.findByAssessmentId(id).stream()
+                .map(AssessmentAssignment::getUserId).distinct()
+                .forEach(userId -> notificationService.notify(userId, "Final score available",
+                        "Your final score for \"" + saved.getTitle() + "\" is now available."));
+        return ResponseEntity.ok(saved);
+    }
+
     @PostMapping("/{id}/assign")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'ORG_ADMIN', 'EXAMINER', 'INSTRUCTOR')")
     public ResponseEntity<AssessmentAssignment> assignAssessment(
             @PathVariable Long id,
             @RequestParam Long userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime deadline) {
-        return ResponseEntity.ok(assessmentService.assignAssessment(id, userId, deadline));
+        AssessmentAssignment assignment = assessmentService.assignAssessment(id, userId, deadline);
+        String title = assessmentRepository.findById(id).map(Assessment::getTitle).orElse("Assessment");
+        notificationService.notify(userId, "New assessment assigned", "You have been assigned \"" + title + "\".");
+        return ResponseEntity.ok(assignment);
     }
 
     @PostMapping("/{id}/assign-group")
@@ -156,6 +190,8 @@ public class AssessmentController {
         List<AssessmentAssignment> created = group.getMemberUserIds().stream()
                 .filter(userId -> !assignmentRepository.existsByAssessmentIdAndUserId(id, userId))
                 .map(userId -> assessmentService.assignAssessment(id, userId, deadline)).toList();
+        String title = assessmentRepository.findById(id).map(Assessment::getTitle).orElse("Assessment");
+        created.forEach(assignment -> notificationService.notify(assignment.getUserId(), "New assessment assigned", "You have been assigned \"" + title + "\"."));
         return ResponseEntity.ok(created);
     }
 

@@ -26,7 +26,7 @@ public class RubricServiceImpl implements RubricService {
                 .orElseThrow(() -> new IllegalArgumentException("Question not found with id: " + questionId));
 
         // If a rubric already exists for this question, overwrite/update it cleanly
-        Rubric rubric = rubricRepository.findById(questionId).orElse(new Rubric());
+        Rubric rubric = rubricRepository.findByQuestionId(questionId).orElse(new Rubric());
         rubric.setQuestion(question);
         rubric.getCriteria().clear();
 
@@ -43,7 +43,7 @@ public class RubricServiceImpl implements RubricService {
         if (!questionRepository.existsById(questionId)) {
             throw new IllegalArgumentException("Question not found with id: " + questionId);
         }
-        return rubricRepository.findById(questionId)
+        return rubricRepository.findByQuestionId(questionId)
                 .orElseThrow(() -> new IllegalArgumentException("No rubric defined for question id: " + questionId));
     }
 }

@@ -13,4 +13,6 @@ public class CertificationDTO {
     private String title;
     private String certificateUrl;
     private Instant issuedAt;
+    private String verificationCode;
+    private Double score;
 }
